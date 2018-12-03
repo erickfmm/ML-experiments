@@ -1,5 +1,5 @@
 import random
-class PerceptronRandom:
+class Perceptron:
 
     @staticmethod
     def NegativeOrPositive(S):
