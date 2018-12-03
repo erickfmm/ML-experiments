@@ -1,6 +1,8 @@
 from load_data.ILoadSupervised import ILoadSupervised
 
-class LoadAndTable(ILoadSupervised):
+__all__ = ["LoadXorTable",]
+
+class LoadXorTable(ILoadSupervised):
     def __init__(self):
         self.Xs = [
             [0, 0],
@@ -8,7 +10,7 @@ class LoadAndTable(ILoadSupervised):
             [1, 0],
             [1, 1]
         ]
-        self.Ys = [0, 0, 0, 1]
+        self.Ys = [1, 0, 0, 1]
 
     def get_default(self):
         return self.Xs, self.Ys

@@ -2,6 +2,8 @@ import csv
 from load_data.ILoadSupervised import ILoadSupervised
 import utils
 
+__all__ = ["LoadTitanic",]
+
 class LoadTitanic(ILoadSupervised):
     def __init__(self):
         _, self.XTrain, self.YTrain = self.read_titanicfile("train_data/shared/titanic/train.csv")

@@ -1,9 +1,11 @@
-from keras.datasets import cifar10
+from keras.datasets import mnist
 from load_data.ILoadSupervised import ILoadSupervised
 
-class LoadCifar10(ILoadSupervised):
+__all__ = ["LoadMnist",]
+
+class LoadMnist(ILoadSupervised):
     def __init__(self):
-        (self.XTrain,self.YTrain),(self.XTest,self.YTest)=cifar10.load_data()
+        (self.XTrain,self.YTrain),(self.XTest,self.YTest)=mnist.load_data()
 
     def get_default(self):
         return self.XTrain, self.YTrain

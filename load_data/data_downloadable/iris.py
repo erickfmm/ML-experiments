@@ -1,6 +1,8 @@
 from sklearn.datasets import load_iris
 from load_data.ILoadSupervised import ILoadSupervised
 
+__all__ = ["LoadIris",]
+
 class LoadIris(ILoadSupervised):
     def __init__(self):
         self.iris = load_iris()
