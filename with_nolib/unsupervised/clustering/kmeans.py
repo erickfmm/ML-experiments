@@ -1,7 +1,8 @@
 import random
 import math
+from with_nolib.unsupervised.clustering.ICluster import ICluster
 
-class KMeans:
+class KMeans(ICluster):
     def __init__(self, data):
         self.X = data
         self.assign = []
@@ -9,13 +10,6 @@ class KMeans:
         self.distances = []
         #for i in range(len(data)):
         #    self.assign.append(-1)
-    
-    def initial_assignment(self, num_clusters):
-        for i in range(len(self.X)):
-            self.assign.append(random.randint(0, num_clusters-1))
-            self.distances.append([])
-            for i_centroid in range(num_clusters):
-                self.distances[i].append(0)
 
     def create_centroids(self, num_clusters):
         for i_centroid in range(num_clusters):
@@ -59,15 +53,22 @@ class KMeans:
 
     def cluster(self, num_clusters, max_iterations=100):
         self.create_centroids(num_clusters)
-        self.initial_assignment(num_clusters)
-        for it in range(max_iterations):
-            self.iterations = it
+        self.assign = self.initial_assignment(self.X, num_clusters)
+        for i in range(len(self.X)):
+            self.distances.append([])
+            for i_centroid in range(num_clusters):
+                self.distances[i].append(0)
+        self.iterations = 0
+        while True:
             #clone list
             last_assignment = list(self.assign)
             self.compute_centroids()
             self.reassign()
             if last_assignment == self.assign:
                 break
+            if max_iterations > 0 and self.iterations >= max_iterations:
+                break
+            self.iterations += 1
         return self.assign
 
 

@@ -1,2 +1,4 @@
 train_data/not_shared/*
 **/__pycache__/*
+**/Thumbs.db
+**/thumbs.db
