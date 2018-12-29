@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from with_nolib.unsupervised.util.initial_assignments import *
+from with_nolib.unsupervised.clustering.initial_assignments import *
 
 class ICluster:
     __metaclass__ = ABCMeta

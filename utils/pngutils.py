@@ -1,7 +1,7 @@
 import png
 from os.path import join
 
-__all__ ["save_as_png", "save_all_images",]
+__all__ = ["save_as_png", "save_all_images",]
 
 def save_as_png(folder, filename, data, isgray):
     f = open(join(folder, filename), 'wb')      # binary mode is important

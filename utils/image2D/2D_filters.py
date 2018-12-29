@@ -2,7 +2,7 @@ import numpy as np
 from scipy import signal
 from scipy import ndimage
 
-from utils.preprocess_2D import *
+from utils.image2D.preprocess_2D import *
 
 def fl_linear(data, kernel):
     return signal.convolve2d(data, kernel, 'same')

@@ -68,7 +68,7 @@ class Perceptron:
         return it
 
 
-    def train(self, Xs, Ys, threshold, maxIterations, minValue, maxValue, learning_rate=0.2):
+    def train(self, Xs, Ys, threshold=1, maxIterations=100, minValue=-1, maxValue=1, learning_rate=0.05):
         its = self.trainFunction(Xs, Ys, threshold, maxIterations, minValue, maxValue, learning_rate)
         its = its if its is not None else maxIterations
         print("trained in "+str(its)+" iterations")

@@ -1,5 +1,19 @@
-from tests import perceptron
-from load_data.data_inside.shared import *
+from with_nolib.supervised.perceptron import Perceptron
+
+### Load data
+## data shared
+from load_data.data_inside.shared.andtable import LoadAndTable
+from load_data.data_inside.shared.xortable import LoadXorTable
+from load_data.data_inside.shared.titanic import LoadTitanic
+
+from load_data.data_inside.not_shared.mnist_file import LoadMnist
+from load_data.data_inside.not_shared.recognition_human_actions_video import LoadRecognitionHumanActions
+
+
+from load_data.data_downloadable.mnist_keras import LoadMnist
+from load_data.data_downloadable.iris import LoadIris
+from load_data.data_downloadable.cifar10_keras import LoadCifar10
+
 from with_nolib.unsupervised.clustering.kmeans import KMeans
 from with_nolib.unsupervised.clustering.monte_carlo import montecarlo_clustering
 import numpy as np
@@ -8,7 +22,10 @@ import numpy as np
 #data = LoadXorTable()
 data = LoadTitanic()
 X, Y = data.get_default()
-#perceptron.train(X, Y)
+
+#pr = Perceptron()
+#performance = pr.train(X, Y)
+#print(performance)
 
 #X = []
 #for i in range(200):
