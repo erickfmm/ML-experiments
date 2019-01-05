@@ -24,3 +24,9 @@ def list_to_str(array_var, separator):
 	for i in array_var:
 		s += str(i)+separator
 	return s[:-1]
+
+def categorical_to_int(Ys):
+    target_names = list(set(Ys))
+    for iY in range(len(Ys)):
+        Ys[iY] = target_names.index(Ys[iY])
+    return Ys

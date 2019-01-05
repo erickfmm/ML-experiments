@@ -1,13 +1,14 @@
 import csv
 from load_data.ILoadSupervised import ILoadSupervised
 import utils
+from os.path import join
 
 __all__ = ["LoadTitanic",]
 
 class LoadTitanic(ILoadSupervised):
-    def __init__(self):
-        _, self.XTrain, self.YTrain = self.read_titanicfile("train_data/shared/titanic/train.csv")
-        _, self.XTest, _ = self.read_titanicfile("train_data/shared/titanic/test.csv")
+    def __init__(self, folderPath="train_data/shared/titanic/"):
+        _, self.XTrain, self.YTrain = self.read_titanicfile(join(folderPath, "train.csv"))
+        _, self.XTest, _ = self.read_titanicfile(join(folderPath, "test.csv"))
 
     def get_default(self):
         return self.XTrain, self.YTrain
