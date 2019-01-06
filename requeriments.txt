@@ -1,5 +1,11 @@
 numpy
-keras
-sklearn
 scipy
+sklearn
+
+keras
+tensorflow
+
 librosa
+
+pyedflib
+PyWavelets

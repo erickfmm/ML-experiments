@@ -24,6 +24,6 @@ class LoadRandom(ILoadSupervised):
         Xs = (np.random.random(self.num_instances * self.num_dimensions) * self.max_value) + self.min_value
         Xs = Xs.reshape(self.num_instances, self.num_dimensions)
         Ys = []
-        for i in self.num_instances:
+        for i in range(self.num_instances):
             Ys.append(self.fn(Xs[i]))
         return Xs, Ys
