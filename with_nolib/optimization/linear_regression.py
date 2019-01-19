@@ -40,3 +40,6 @@ def r_correlation(Xs, Ys):
     r_denominator = ( (n * X_squared_sum) - (X_sum**2) ) * ( (n * Y_squared_sum) - (Y_sum ** 2) )
     r_denominator = pow(r_denominator, 0.5)
     return float(r_numerator) / float(r_denominator)
+
+def r2_correlation(Xs, Ys):
+    return pow(r_correlation(Xs, Ys), 2)

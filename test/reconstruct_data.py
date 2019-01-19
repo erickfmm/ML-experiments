@@ -11,6 +11,8 @@ from load_data.data_inside.shared.segment import LoadSegment
 from load_data.data_inside.shared.titanic import LoadTitanic
 from load_data.data_inside.shared.vehicle import LoadVehicle
 
+#from load_data.data_inside.not_shared.recognition_human_actions_video import LoadRecognitionHumanActions
+
 def calc_differences(real_data, reconstructed_data):
     difs = np.abs(real_data - reconstructed_data)
     difs_percentage = difs / real_data

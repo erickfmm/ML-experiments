@@ -4,7 +4,7 @@ from load_data.ILoadSupervised import ILoadSupervised
 __all__ = ["LoadMnist",]
 
 class LoadMnist(ILoadSupervised):
-    #fashion: mnist_path='train_data\\not_shared\\FromKaggle\\fashionmnist'
+    #fashion: mnist_path='train_data\\not_shared\\Folder_FromKaggle\\fashionmnist'
     def __init__(self, mnist_path='train_data\\not_shared\\mnist'):
         self.mndata = MNIST(mnist_path)
         self.XTrain, self.YTrain = self.mndata.load_training()

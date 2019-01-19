@@ -15,19 +15,20 @@ class LoadIris(ILoadSupervised):
         return None
     
     def get_all(self):
-        data_iris_csv = csv.reader(open(join(self.folder_path,'iris.data')))
         Xs = []
         Ys = []
         i = 0
-        for row in data_iris_csv:
-            if len(row) > 0:
-                Xs.append([])
-                iField = 0
-                for field in row:
-                    if iField < len(row)-1:
-                        Xs[i].append(float(field))
-                    else:
-                        Ys.append(field)
-                    iField += 1
-            i += 1
+        with open(join(self.folder_path,'iris.data')) as data_iris_file:
+            data_iris_csv = csv.reader(data_iris_file)
+            for row in data_iris_csv:
+                if len(row) > 0:
+                    Xs.append([])
+                    iField = 0
+                    for field in row:
+                        if iField < len(row)-1:
+                            Xs[i].append(float(field))
+                        else:
+                            Ys.append(field)
+                        iField += 1
+                i += 1
         return Xs, Ys

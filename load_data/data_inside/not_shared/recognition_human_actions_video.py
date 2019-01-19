@@ -40,41 +40,42 @@ class LoadRecognitionHumanActions(ILoadSupervised):
                     self.Ys.append([])
                     for i_frame in frame_set:
                         #print(i_frame, end=", ")
-                        self.Xs[i_set].append(v[i_frame])
+                        self.Xs[i_set].append(v[i_frame][:, :, 0]) #slicing because its only black and white
                         self.Ys[i_set].append(video_dict["tag"])
                     i_set += 1
                     #print()
         return self.Xs, self.Ys
     
     def get_frames(self, filePath="00sequences.txt"):
-        sequences_file = open(os.path.join(self.folderPath, filePath), "r")
         i = 0
         self.video_metadata_dict = []
-        for line in sequences_file:
-            i += 1
-            if i >= 22:
-                if line.find("person") == 0 and line.find("frames") > 0:
-                    name = line[0:line.find("\t")]
-                    frame_string = "frames\t"
-                    frames = line[line.find(frame_string)+len(frame_string):line.find("\n")]
-                    frames = frames.split(", ")
-                    fs_limits = []
-                    fs = []
-                    n_person = name.split("_")[0]
-                    n_person = n_person[n_person.find("person")+len("person"):]
-                    n_person = int(n_person, 10)
-                    for i_frame_set in range(len(frames)):
-                        sp = frames[i_frame_set].split("-")
-                        start_frame = int(sp[0], 10)-1
-                        end_frame = int(sp[1], 10)-1
-                        fs_limits.append((start_frame, end_frame))
-                        fs.append([])
-                        for i_frame in range(start_frame, end_frame+1):
-                            fs[i_frame_set].append(i_frame)
-                    self.video_metadata_dict.append({
-                        "name": name,
-                        "n_person": n_person,
-                        "tag":name.split("_")[1] ,
-                        "frame_limits": fs_limits,
-                        "frames": fs
-                        })
+        with open(os.path.join(self.folderPath, filePath), "r") as sequences_file:
+            #sequences_file = open(os.path.join(self.folderPath, filePath), "r")
+            for line in sequences_file:
+                i += 1
+                if i >= 22:
+                    if line.find("person") == 0 and line.find("frames") > 0:
+                        name = line[0:line.find("\t")]
+                        frame_string = "frames\t"
+                        frames = line[line.find(frame_string)+len(frame_string):line.find("\n")]
+                        frames = frames.split(", ")
+                        fs_limits = []
+                        fs = []
+                        n_person = name.split("_")[0]
+                        n_person = n_person[n_person.find("person")+len("person"):]
+                        n_person = int(n_person, 10)
+                        for i_frame_set in range(len(frames)):
+                            sp = frames[i_frame_set].split("-")
+                            start_frame = int(sp[0], 10)-1
+                            end_frame = int(sp[1], 10)-1
+                            fs_limits.append((start_frame, end_frame))
+                            fs.append([])
+                            for i_frame in range(start_frame, end_frame+1):
+                                fs[i_frame_set].append(i_frame)
+                        self.video_metadata_dict.append({
+                            "name": name,
+                            "n_person": n_person,
+                            "tag":name.split("_")[1] ,
+                            "frame_limits": fs_limits,
+                            "frames": fs
+                            })

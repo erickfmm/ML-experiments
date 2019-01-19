@@ -16,15 +16,24 @@ class LoadVehicle(ILoadSupervised):
     
     def get_all(self):
         data_vs = []
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xaa.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xab.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xac.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xad.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xae.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xaf.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xag.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xah.dat')), delimiter=' '))
-        data_vs.append(csv.reader(open(join(self.folder_path, 'xai.dat')), delimiter=' '))
+        file_a = open(join(self.folder_path, 'xab.dat'))
+        file_b = open(join(self.folder_path, 'xaa.dat'))
+        file_c = open(join(self.folder_path, 'xac.dat'))
+        file_d = open(join(self.folder_path, 'xad.dat'))
+        file_e = open(join(self.folder_path, 'xae.dat'))
+        file_f = open(join(self.folder_path, 'xaf.dat'))
+        file_g = open(join(self.folder_path, 'xag.dat'))
+        file_h = open(join(self.folder_path, 'xah.dat'))
+        file_i = open(join(self.folder_path, 'xai.dat'))
+        data_vs.append(csv.reader(file_a, delimiter=' '))
+        data_vs.append(csv.reader(file_b, delimiter=' '))
+        data_vs.append(csv.reader(file_c, delimiter=' '))
+        data_vs.append(csv.reader(file_d, delimiter=' '))
+        data_vs.append(csv.reader(file_e, delimiter=' '))
+        data_vs.append(csv.reader(file_f, delimiter=' '))
+        data_vs.append(csv.reader(file_g, delimiter=' '))
+        data_vs.append(csv.reader(file_h, delimiter=' '))
+        data_vs.append(csv.reader(file_i, delimiter=' '))
         Xs = []
         Ys = []
         i = 0
@@ -39,4 +48,13 @@ class LoadVehicle(ILoadSupervised):
                         Ys.append(field)
                     iField += 1
                 i += 1
+        file_a.close()
+        file_b.close()
+        file_c.close()
+        file_d.close()
+        file_e.close()
+        file_f.close()
+        file_g.close()
+        file_h.close()
+        file_i.close()
         return Xs, Ys

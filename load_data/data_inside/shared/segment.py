@@ -12,8 +12,10 @@ class LoadSegment(ILoadSupervised):
         return self.get_splited()
 
     def get_splited(self):
-        data_segment_csv = csv.reader(open(join(self.folder_path, 'segmentation.data')))
-        data_segment_test_csv = csv.reader(open(join(self.folder_path, 'segmentation.test')))
+        segment_data_file = open(join(self.folder_path, 'segmentation.data'))
+        data_segment_csv = csv.reader(segment_data_file)
+        segment_test_file = open(join(self.folder_path, 'segmentation.test'))
+        data_segment_test_csv = csv.reader(segment_test_file)
         X_train = []
         Y_train = []
         i = 0
@@ -46,11 +48,15 @@ class LoadSegment(ILoadSupervised):
                 #print(row)
                 i += 1
             i2 += 1
+        segment_data_file.close()
+        segment_test_file.close()
         return (X_train, Y_train), (X_test, Y_test)
     
     def get_all(self):
-        data_segment_csv = csv.reader(open(join(self.folder_path, 'segmentation.data')))
-        data_segment_test_csv = csv.reader(open(join(self.folder_path, 'segmentation.test')))
+        segment_data_file = open(join(self.folder_path, 'segmentation.data'))
+        data_segment_csv = csv.reader(segment_data_file)
+        segment_test_file = open(join(self.folder_path, 'segmentation.test'))
+        data_segment_test_csv = csv.reader(segment_test_file)
         Xs = []
         Ys = []
         i = 0
@@ -79,4 +85,6 @@ class LoadSegment(ILoadSupervised):
                     iField += 1
                 i += 1
             i2 += 1
+        segment_data_file.close()
+        segment_test_file.close()
         return Xs, Ys

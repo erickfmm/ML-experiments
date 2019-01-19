@@ -8,7 +8,7 @@ def correlation_matrix(data):
     for idim1 in range(len(dataXs)):
         correlations.append([])
         for idim2 in range(len(dataXs)):
-            correlation = lreg.r_correlation(dataXs[idim1], dataXs[idim2])
+            correlation = lreg.r2_correlation(dataXs[idim1], dataXs[idim2])
             correlations[idim1].append(correlation)
     return correlations
 
