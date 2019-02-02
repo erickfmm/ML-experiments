@@ -1,5 +1,5 @@
 import csv
-from load_data.ILoadSupervised import ILoadSupervised
+from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import utils
 from os.path import join
 
@@ -7,8 +7,10 @@ __all__ = ["LoadTitanic",]
 
 class LoadTitanic(ILoadSupervised):
     def __init__(self, folderPath="train_data/shared/titanic/"):
-        _, self.XTrain, self.YTrain = self.read_titanicfile(join(folderPath, "train.csv"))
-        _, self.XTest, _ = self.read_titanicfile(join(folderPath, "test.csv"))
+        self.TYPE = SupervisedType.Classification
+        _, self.XTrain, self.YTrain, self.headers = self.read_titanicfile(join(folderPath, "train.csv"))
+        _, self.XTest, _, self.headers = self.read_titanicfile(join(folderPath, "test.csv"))
+        self.classes = ["Not survived", "Survived"]
 
     def get_default(self):
         return self.XTrain, self.YTrain
@@ -19,13 +21,21 @@ class LoadTitanic(ILoadSupervised):
     def get_all(self):
         return self.XTrain, self.YTrain
     
+    def get_classes(self):
+        return self.classes
+    
+    def get_headers(self):
+        return self.headers
+
     @staticmethod
     def read_titanicfile(filepath):
         titanic = []
         features = []
         targets = []
+        headers = []
         with open(filepath, 'r') as t_file:
             t_csv = csv.DictReader(t_file)
+            headers = t_csv.fieldnames
             for row in t_csv:
                 titanic.append(row)
             for j in range(len(titanic)):
@@ -55,4 +65,4 @@ class LoadTitanic(ILoadSupervised):
                     titanic[j]['Fare'], 
                     titanic[j]['Embarked']
                     ])
-        return titanic, features, targets
+        return titanic, features, targets, headers

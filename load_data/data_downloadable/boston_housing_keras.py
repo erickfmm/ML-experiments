@@ -1,15 +1,15 @@
-from keras.datasets import cifar10
+from keras.datasets import boston_housing
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import numpy as np
 
-__all__ = ["LoadCifar10",]
+__all__ = ["LoadBostonHousing",]
 
-class LoadCifar10(ILoadSupervised):
+class LoadBostonHousing(ILoadSupervised):
     def __init__(self):
         self.TYPE = SupervisedType.Classification
-        (self.XTrain,self.YTrain),(self.XTest,self.YTest)=cifar10.load_data()
-        self.headers = ["pixels"]
-        self.classes = []
+        (self.XTrain,self.YTrain),(self.XTest,self.YTest)=boston_housing.load_data()
+        self.headers = [str(i) for i in range(len(self.XTest[0]))]
+        self.classes = [str(i) for i in range(10)]
     
     def get_classes(self):
         return self.classes

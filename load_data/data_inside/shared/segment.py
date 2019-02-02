@@ -1,4 +1,4 @@
-from load_data.ILoadSupervised import ILoadSupervised
+from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 from os.path import join
 
@@ -6,7 +6,21 @@ __all__ = ["LoadSegment",]
 
 class LoadSegment(ILoadSupervised):
     def __init__(self, folderpath="train_data/shared/segment/"):
+        self.TYPE = SupervisedType.Classification
         self.folder_path = folderpath
+        self.headers = ["REGION-CENTROID-ROW", "REGION-PIXEL-COUNT",
+        "SHORT-LINE-DENSITY-5", "SHORT-LINE-DENSITY-2",
+        "VEDGE-MEAN", "VEDGE-SD", "HEDGE-MEAN", "HEDGE-SD",
+        "INTENSITY-MEAN", "RAWRED-MEAN", "RAWBLUE-MEAN",
+        "RAWGREEN-MEAN", "EXRED-MEAN", "EXBLUE-MEAN", "EXGREEN-MEAN",
+        "VALUE-MEAN", "SATURATION-MEAN", "HUE-MEAN"]
+        self.classes = ["brickface", "sky", "foliage", "cement", "window", "path", "grass"]
+    
+    def get_classes(self):
+        return self.classes
+    
+    def get_headers(self):
+        return self.headers
 
     def get_default(self):
         return self.get_splited()

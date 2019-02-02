@@ -1,4 +1,4 @@
-from load_data.ILoadSupervised import ILoadSupervised
+from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import os
 import pims
 
@@ -6,7 +6,16 @@ __all__ = ["LoadRecognitionHumanActions",]
 
 class LoadRecognitionHumanActions(ILoadSupervised):
     def __init__(self, folderPath="train_data/not_shared/Recognition of human actions/"):
+        self.TYPE = SupervisedType.Classification
         self.folderPath = folderPath
+        self.headers = ["pixels"]
+        self.classes = ["boxing", "handclapping", "handwaving", "jogging", "running", "walking"]
+    
+    def get_classes(self):
+        return self.classes
+    
+    def get_headers(self):
+        return self.headers
 
     def get_default(self):
         return self.get_all()

@@ -1,4 +1,4 @@
-from load_data.ILoadSupervised import ILoadSupervised
+from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import numpy as np
 
 __all__ = ["LoadRandom",]
@@ -8,11 +8,20 @@ def unitary_function(X):
 
 class LoadRandom(ILoadSupervised):
     def __init__(self, num_instances, num_dimensions, fn, min_value=0, max_value=1):
+        TYPE = SupervisedType.Unknown
         self.num_instances = num_instances
         self.num_dimensions = num_dimensions
         self.fn = fn if fn is not None else unitary_function
         self.min_value = min_value
-        self.max_value = max_value 
+        self.max_value = max_value
+        self.headers = [str(i) for i in range(num_dimensions)]
+        self.classes = []
+    
+    def get_classes(self):
+        return self.classes
+    
+    def get_headers(self):
+        return self.headers
 
     def get_default(self):
         return self.get_all()

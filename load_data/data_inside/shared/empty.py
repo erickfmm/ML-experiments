@@ -14,3 +14,9 @@ class LoadEmpty(ILoadSupervised):
     
     def get_all(self):
         return None
+    
+    def get_classes(self):
+        return None #self.classes
+    
+    def get_headers(self):
+        return None #self.headers

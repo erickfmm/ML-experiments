@@ -1,4 +1,4 @@
-from load_data.ILoadSupervised import ILoadSupervised
+from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 from os.path import join
 
@@ -6,7 +6,28 @@ __all__ = ["LoadVehicle",]
 
 class LoadVehicle(ILoadSupervised):
     def __init__(self, folderpath="train_data/shared/vehicle/"):
+        self.TYPE = SupervisedType.Classification
         self.folder_path = folderpath
+        self.headers = ["COMPACTNESS", "CIRCULARITY",
+            "DISTANCE CIRCULARITY", "RADIUS RATIO",
+            "PR.AXIS ASPECT RATIO", "MAX.LENGTH ASPECT RATIO",
+            "SCATTER RATIO", "ELONGATEDNESS", "RECTANGULARITY",
+            "MAX.LENGTH RECTANGULARITY",
+            "SCALED VARIANCE ALONG MAJOR AXIS",
+            "SCALED VARIANCE ALONG MINOR AXIS ",
+            "SCALED RADIUS OF GYRATION",
+            "SKEWNESS ABOUT MAJOR AXIS",
+            "SKEWNESS ABOUT MINOR AXIS",
+            "KURTOSIS ABOUT MINOR AXIS",
+            "KURTOSIS ABOUT MAJOR AXIS",
+            "HOLLOWS RATIO"]
+        self.classes = ["OPEL", "SAAB", "BUS", "VAN"]
+    
+    def get_classes(self):
+        return self.classes
+    
+    def get_headers(self):
+        return self.headers
 
     def get_default(self):
         return None

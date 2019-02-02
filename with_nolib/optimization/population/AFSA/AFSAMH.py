@@ -1,4 +1,5 @@
-import with_nolib.optimization.population.utils as utils
+#import with_nolib.optimization.population.utils as utils
+import utils.points_utils as utils
 from with_nolib.optimization.population.IMetaheuristic import IMetaheuristic
 from with_nolib.optimization.population.AFSA.Fish import Fish
 import numpy as np
