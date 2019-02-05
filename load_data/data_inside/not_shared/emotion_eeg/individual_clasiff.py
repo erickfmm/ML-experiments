@@ -7,8 +7,9 @@ import os
 __all__ = ["LoadEEGIndividualEmotions",]
 
 class LoadEEGIndividualEmotions(ILoadSupervised):
-    def __init__(self):
+    def __init__(self, channels=None):
         self.fs = 1024
+        self.channels = channels if isinstance(channels, list) else None
         self._path = "train_data/not_shared/Folder_EEGEmotion/Dataset Individual Classification of Emotions Using EEG/"
         self.tags = {
             '01': DiscreteEmotion.Sad.name,
@@ -23,17 +24,27 @@ class LoadEEGIndividualEmotions(ILoadSupervised):
     def get_splited(self):
         return None
     
-    def get_all(self):
+    def get_all(self, verbose=False):
         self.X = []
         self.Y = []
-        for filename in os.listdir(self._path):
+        files = os.listdir(self._path)
+        i_file = 0
+        for filename in files:
+            if len(filename) != 8:
+                continue
+            i_file += 1
+            if verbose:
+                print("to process ", i_file, " of ", len(files), ": ", round(i_file/float(len(files))*100, 2), "%, file: ", filename)
             tag = self.tags[filename[2:4]]
             file_obj = open(os.path.join(self._path, filename), "r")
             data_of_file = []
+            i_channel = 0
             for line in file_obj:
-                data_line = line.split("\t")
-                data_line = [float(element) for element in data_line]
-                data_of_file.append(data_line)
+                if self.channels is not None and i_channel in self.channels:
+                    data_line = line.split("\t")
+                    data_line = [float(element) for element in data_line]
+                    data_of_file.append(data_line)
+                i_channel += 1
             self.X.append(data_of_file)
             self.Y.append(tag)
         return (self.X, self.Y)

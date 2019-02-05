@@ -18,8 +18,8 @@ class EEGEmotionDataset(Enum):
     Mahnob = 3
 
 class LoadEEGEmotionExtracted(ILoadSupervised):
-    def __init__(self, segtype, dataset):
-        self.fs = 128
+    def __init__(self, segtype=EEGEmotionSegmentions.Paper, dataset=EEGEmotionDataset.Deap):
+        self.fs = -1
         self.segmentation_type = segtype if isinstance(segtype, EEGEmotionSegmentions) else EEGEmotionSegmentions.Paper
         self.dataset_type = dataset if isinstance(dataset, EEGEmotionDataset) else EEGEmotionDataset.Deap
         self.basepath = "train_data/not_shared/Folder_EEGEmotion/datasetseegemo (extraido)/"
@@ -61,19 +61,27 @@ class LoadEEGEmotionExtracted(ILoadSupervised):
         #self.Y = []
         self.YSession = []
         isession = -1
+        max_fs = 0
         for filename in os.listdir(self.path):
             conn = sqlite3.connect(os.path.join(self.path, filename))
             last_session = None
             for row in conn.execute("SELECT * from data"):
                 if row[5] != last_session:
                     isession += 1
-                    self.X.append([])
+                    self.X.append([ [], [] ])
                     #self.Y.append([])
                     self.YSession.append(filename.replace(".db", ""))
-                if row[1] <= 8:
-                    self.X[isession].append([row[3], row[4]])
-                    #self.Y[isession].append(filename)
+                if row[2] > max_fs: #row[2] it the iteration in sec
+                    max_fs = row[2]
+                elif 9*(max_fs+1) == len(self.X[isession][0]):
+                    continue
+                #if row[1] <= 8:
+                #self.X[isession].append([row[3], row[4]])
+                self.X[isession][0].append(row[3])
+                self.X[isession][1].append(row[4])
+                #self.Y[isession].append(filename)
                 last_session = row[5]
+        self.fs = max_fs+1
         return (self.X, self.YSession)
     
     def get_classes(self):

@@ -1,13 +1,15 @@
 import random
 import math
 from with_nolib.unsupervised.clustering.ICluster import ICluster
+from with_nolib.unsupervised.clustering.initial_assignments import random_assignment
 
 class KMeans(ICluster):
-    def __init__(self, data):
+    def __init__(self, data, initial_assignmentfun = random_assignment):
         self.X = data
         self.assign = []
         self.centroids = []
         self.distances = []
+        self.initial_assignment = initial_assignmentfun
         #for i in range(len(data)):
         #    self.assign.append(-1)
 
