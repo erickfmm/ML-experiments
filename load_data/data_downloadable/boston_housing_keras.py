@@ -6,7 +6,7 @@ __all__ = ["LoadBostonHousing",]
 
 class LoadBostonHousing(ILoadSupervised):
     def __init__(self):
-        self.TYPE = SupervisedType.Classification
+        self.TYPE = SupervisedType.Regression
         (self.XTrain,self.YTrain),(self.XTest,self.YTest)=boston_housing.load_data()
         self.headers = ["CRIM     per capita crime rate by town",
             "ZN       proportion of residential land zoned for lots over 25,000 sq.ft.",
