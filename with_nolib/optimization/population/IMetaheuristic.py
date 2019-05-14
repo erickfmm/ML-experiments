@@ -22,7 +22,12 @@ class IMetaheuristic(ABC):
         "The total population number"
         return self._population
     
-    @property.setter
+    @N.deleter
+    def N(self):
+        print("deleter of x called")
+        del self.__population
+
+    @N.setter
     def N(self, value):
         self._population = value
 
@@ -31,7 +36,7 @@ class IMetaheuristic(ABC):
         "The total number of iterations"
         return self._iterations
     
-    @property.setter
+    @iterations.setter
     def iterations(self, value):
         self._iterations = value """
     
@@ -67,7 +72,7 @@ class IMetaheuristic(ABC):
                 best = sol
             if best_fitness is None:
                 best_fitness = sol.fitness
-            if self._to_max and fitness > best_fitness:
+            if self._to_max and sol.fitness > best_fitness:
                 best = sol
                 best_fitness = sol.fitness
             if not self._to_max and sol.fitness < best_fitness:

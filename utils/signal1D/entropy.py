@@ -1,8 +1,8 @@
 import numpy as np
-
+import sys
 
 #(double[] data, int numSamples/*N*/, int wlen/*m*/, double r/*r*/, int shift)
-def CalcSampleEntropy(data, numSamples, wlen, r, shift):
+def CalcSampleEntropy(data, numSamples : int, wlen : int, r : float, shift : int):
 	A = 0
 	B = 0
 

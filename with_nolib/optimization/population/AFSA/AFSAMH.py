@@ -1,7 +1,7 @@
 #import with_nolib.optimization.population.utils as utils
 import utils.points_utils as utils
 from with_nolib.optimization.population.IMetaheuristic import IMetaheuristic
-from with_nolib.optimization.population.AFSA.Fish import Fish
+from with_nolib.optimization.population.ISolution import SolutionWithId
 import numpy as np
 from numpy.random import RandomState
 from typing import List, Callable
@@ -95,12 +95,12 @@ class AFSA(IMetaheuristic):
     def initialize_population(self, population: int):
         for fishIndex in range(0, population):
             point, fitness = self.generate_random_point()
-            fish = Fish(fishIndex, point, fitness)
+            fish = SolutionWithId(fishIndex, point, fitness)
             self._swarm.append(fish)
 
 
 
-    def AF_Move(self, fish: Fish): #move randomly in visual distance
+    def AF_Move(self, fish: SolutionWithId): #move randomly in visual distance
         self.veces_movimiento["move"] += 1
         points = []
         for _ in range(self.n_points_to_choose):
@@ -108,7 +108,7 @@ class AFSA(IMetaheuristic):
             points.append(point)
         return self.find_best_point(points)
 
-    def AF_Swarm(self, fish: Fish, neighborhood: List[Fish]): #move to center of neighborhood
+    def AF_Swarm(self, fish: SolutionWithId, neighborhood: List[SolutionWithId]): #move to center of neighborhood
         self.veces_movimiento["swarm"] += 1
         central_point = self.get_central_point(neighborhood)
         if self.is_point_valid(central_point) \
@@ -117,7 +117,7 @@ class AFSA(IMetaheuristic):
         else:
             return self.AF_Follow(fish, neighborhood)
 
-    def AF_Prey(self, fish: Fish, neighborhood: List[Fish]): #move to best neighbour
+    def AF_Prey(self, fish: SolutionWithId, neighborhood: List[SolutionWithId]): #move to best neighbour
         self.veces_movimiento["prey"] +=1
         # neigh_fishes, neigh_points = self.get_neighborhood(fish)
         best_neighbour = self.find_best_solution(neighborhood)
@@ -126,7 +126,7 @@ class AFSA(IMetaheuristic):
         else:
             return self.AF_Follow(fish, neighborhood)
 
-    def AF_Follow(self, fish: Fish, neighborhood: List[Fish]): #move to any neighbour
+    def AF_Follow(self, fish: SolutionWithId, neighborhood: List[SolutionWithId]): #move to any neighbour
         self.veces_movimiento["follow"] += 1
         # neighFishes, neighPoints = self.get_neighborhood(fish)
         points = []
@@ -147,7 +147,7 @@ class AFSA(IMetaheuristic):
             self._swarm[fish_index].move_to(gen_point, gen_fitness)
 
 
-    def get_neighborhood(self, fish: Fish):
+    def get_neighborhood(self, fish: SolutionWithId):
         neighborhood = []
         points_neighborhood = []
         for f in self._swarm:
@@ -158,7 +158,7 @@ class AFSA(IMetaheuristic):
                     points_neighborhood.append(f.point)
         return neighborhood, points_neighborhood
 
-    def get_central_point(self, neighborhood: List[Fish]):
+    def get_central_point(self, neighborhood: List[SolutionWithId]):
         media_dim = []
         for i in range(0, self._ndims):
             media_dim.append(0)
@@ -171,7 +171,7 @@ class AFSA(IMetaheuristic):
             media_dim[i] /= len(neighborhood)
         return self.repair_or_not(media_dim)[0]
 
-    def is_in_visual(self, fish: Fish, point: List[float]):
+    def is_in_visual(self, fish: SolutionWithId, point: List[float]):
         distance = utils.distance(fish.point, point)
         if distance <= self._visual_distance:
             return True
