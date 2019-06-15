@@ -47,7 +47,7 @@ class IMetaheuristic(ABC):
         else:
             return True
 
-    def find_best_point(self, points): #all points are valid
+    def find_best_point(self, points: list) -> list: #all points are valid
         best = None
         best_fitness = None
         for point in points:

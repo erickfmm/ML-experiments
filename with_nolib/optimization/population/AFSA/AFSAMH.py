@@ -10,10 +10,10 @@ class AFSA(IMetaheuristic):
     def __init__(self, min_value: float, max_value: float, ndims: int, to_max: bool,
      objective_function: Callable[[List[float]], float],
       repair_function: Callable[[List[float]], List[float]],
-      preprocess_function: Callable[[List[float]], List[float]] = None, seed: int = None):
+      preprocess_function: Callable[[List[float]], List[float]] = None):
         self._swarm = []
-        self._random_generator = RandomState(seed)
-        self._seed = seed
+        self._random_generator : RandomState = None
+        
         self._min = min_value
         self._max = max_value
         self._ndims = ndims
@@ -31,12 +31,14 @@ class AFSA(IMetaheuristic):
     def run(self, iterations: int = 100, population: int =30,
      stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5, \
       velocity_percentage: float =0.3, n_points_to_choose: int =1, crowded_percentage: float =0.9,\
-       visual_distance_percentage: float =0.1):
+       visual_distance_percentage: float =0.1, seed: int = None):
         self._iterations = iterations
         self._population = population
+        self._seed = seed
         self._visual_distance = np.sqrt(pow(self._max, 2) * self._ndims) * visual_distance_percentage
         self.n_points_to_choose = n_points_to_choose
         self._velocity_percentage = velocity_percentage
+        self._random_generator = RandomState(seed)
 
         self.initialize_population(population)
         iteration = 1
@@ -64,7 +66,9 @@ class AFSA(IMetaheuristic):
                 # print("fitness del fish: ",fish.fish_id," es: ",fish.fitness)
             if iteration == tau * its_stagnation:
                 fitness_mejor_actual = self.find_best_solution(self._swarm).fitness
-                variation = np.abs(fitness_anterior_estancado - fitness_mejor_actual) / fitness_anterior_estancado
+                variation = 0
+                if fitness_anterior_estancado != 0: #to avoid dividing by zero
+                    variation = np.abs(fitness_anterior_estancado - fitness_mejor_actual) / fitness_anterior_estancado
                 # print("variación: ", variation)
                 if variation < stagnation_variation:
                     self.AF_Leap(leap_percentage)

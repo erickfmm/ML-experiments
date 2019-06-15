@@ -17,3 +17,5 @@ class SolutionWithId(SolutionBasic):
     
     def set_id(self, _id):
         self._id = _id
+    def get_id(self):
+        return self._id

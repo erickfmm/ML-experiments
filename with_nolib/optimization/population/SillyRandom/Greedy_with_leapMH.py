@@ -9,10 +9,9 @@ class GreedyMH(IMetaheuristic):
     def __init__(self, min_value: float, max_value: float, ndims: int, to_max: bool,
      objective_function: Callable[[List[float]], float],
       repair_function: Callable[[List[float]], List[float]],
-      preprocess_function: Callable[[List[float]], List[float]] = None, seed: int = None):
+      preprocess_function: Callable[[List[float]], List[float]] = None):
         self._group = []
-        self._random_generator = RandomState(seed)
-        self._seed = seed
+        self._random_generator : RandomState = None
         self._min = min_value
         self._max = max_value
         self._ndims = ndims
@@ -26,10 +25,12 @@ class GreedyMH(IMetaheuristic):
 
 
     
-    def run(self, iterations: int = 100, population: int =30,
+    def run(self, iterations: int = 100, population: int =30, seed: int = None,
      stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5):
         self._iterations = iterations
         self._population = population
+        self._seed = seed
+        self._random_generator = RandomState(seed)
 
         self.initialize_population(population)
         iteration = 1

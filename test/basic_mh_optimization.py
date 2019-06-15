@@ -96,18 +96,18 @@ def preproc_partition(point):
     return point2
 
 print("create afsa")
-#mh = AFSA(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition, 113)
-#mh = AFSA(min_x, max_x, ndim, False, subsetsum_problem_obj, repair_partition, preproc_partition, None)
+mh = AFSA(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+#mh = AFSA(min_x, max_x, ndim, False, subsetsum_problem_obj, repair_partition, preproc_partition)
 print("to run afsa")
-#fit, pt = mh.run(visual_distance_percentage=0.5, velocity_percentage=0.5, n_points_to_choose=3, crowded_percentage=0.7, its_stagnation=4, leap_percentage=0.3, stagnation_variation=0.4)
+fit, pt = mh.run(visual_distance_percentage=0.5, velocity_percentage=0.5, n_points_to_choose=3, crowded_percentage=0.7, its_stagnation=4, leap_percentage=0.3, stagnation_variation=0.4, seed=115)
 #print(fit)
 #print(pt)
 
 
 print("create Greedy")
-mh = GreedyMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition, 115)
+#mh = GreedyMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
 print("to run greedy")
-fit, pt = mh.run(iterations=100, population=30, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8)
+#fit, pt = mh.run(iterations=100, population=30, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8, seed=115)
 print(fit)
 print(pt)
 
