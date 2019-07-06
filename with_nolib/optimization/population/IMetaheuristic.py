@@ -79,3 +79,15 @@ class IMetaheuristic(ABC):
                 best = sol
                 best_fitness = sol.fitness
         return best
+    
+    @staticmethod
+    def cut_mod_point(point, min_x, max_x):
+        newpoint = []
+        for x in point:
+            if x < min_x:
+                newpoint.append(x % min_x)
+            elif x > max_x:
+                newpoint.append(x % max_x)
+            else:
+                newpoint.append(x)
+        return newpoint

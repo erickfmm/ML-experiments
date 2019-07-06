@@ -28,7 +28,7 @@ class AFSA(IMetaheuristic):
 
 
     
-    def run(self, iterations: int = 100, population: int =30,
+    def run(self, iterations: int = 100, population: int =30, verbose:bool=False,
      stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5, \
       velocity_percentage: float =0.3, n_points_to_choose: int =1, crowded_percentage: float =0.9,\
        visual_distance_percentage: float =0.1, seed: int = None):
@@ -48,7 +48,8 @@ class AFSA(IMetaheuristic):
         best_point_historical = np.copy(best_solution_historical.point)
         fitness_anterior_estancado = best_fitness_historical
         while iteration <= iterations:
-            print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
+            if verbose:
+                print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
             for fish in self._swarm:
                 neighborhood, neigh_points = self.get_neighborhood(fish)
                 if len(neigh_points) == 0:
@@ -197,6 +198,7 @@ class AFSA(IMetaheuristic):
         return self.repair_or_not(cartesian_point)
     
     def repair_or_not(self, cartesian_point: List[float]):
+        cartesian_point = IMetaheuristic.cut_mod_point(cartesian_point, self._min, self._max)
         fitness = self.objective_function(self.preprocess_function(cartesian_point))
         if not fitness:
             new_point = self.repair_function(cartesian_point)

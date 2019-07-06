@@ -1,11 +1,11 @@
 import utils.points_utils as utils
 from with_nolib.optimization.population.IMetaheuristic import IMetaheuristic
-from with_nolib.optimization.population.ISolution import SolutionWithId
+from with_nolib.optimization.population.PSO.Particle import SolutionParticle
 import numpy as np
 from numpy.random import RandomState
 from typing import List, Callable
 
-class GreedyMH(IMetaheuristic):
+class PSOMH(IMetaheuristic):
     def __init__(self, min_value: float, max_value: float, ndims: int, to_max: bool,
      objective_function: Callable[[List[float]], float],
       repair_function: Callable[[List[float]], List[float]],
@@ -25,12 +25,17 @@ class GreedyMH(IMetaheuristic):
 
 
     
-    def run(self, iterations: int = 100, population: int =30, seed: int = None, verbose:bool=False,
-     stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5):
+    def run(self, iterations: int = 100, population: int =30, seed: int = None,
+        omega: float=0.5, phi_p: float=1, phi_g: float=1, verbose:bool=False,
+     stagnation_variation: float =0.2, its_stagnation: int =None, leap_percentage: float =0.5):
         self._iterations = iterations
         self._population = population
         self._seed = seed
         self._random_generator = RandomState(seed)
+
+        self.omega = omega
+        self.phi_p = phi_p
+        self.phi_g = phi_g
 
         self.initialize_population(population)
         iteration = 1
@@ -43,8 +48,19 @@ class GreedyMH(IMetaheuristic):
             if verbose:
                 print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
             for individual in self._group:
+                #update the velocity
+                for idim in range(len(individual.point)):
+                    rp = self._random_generator.uniform()
+                    rg = self._random_generator.uniform()
+                    individual.velocity[idim] = omega * individual.velocity[idim] + \
+                        phi_p*rp * (individual.best_point[idim] - individual.point[idim]) +\
+                            phi_g*rg * (best_point_historical[idim] - individual.point[idim])
                 result_point, fitness = self.Move(individual)
                 individual.move_to(result_point, fitness)# self.objective_function(self.preprocess_function(result_point)))
+                if self._to_max and individual.fitness > individual.best_fitness:
+                    individual.set_best_point(result_point, fitness)
+                if not self._to_max and individual.fitness < individual.best_fitness:
+                    individual.set_best_point(result_point, fitness)
                 # print("fitness del fish: ",fish.fish_id," es: ",fish.fitness)
             if its_stagnation is not None and iteration == tau * its_stagnation:
                 fitness_mejor_actual = self.find_best_solution(self._group).fitness
@@ -72,16 +88,17 @@ class GreedyMH(IMetaheuristic):
     def initialize_population(self, population: int):
         for indivIndex in range(0, population):
             point, fitness = self.generate_random_point()
-            individual = SolutionWithId(indivIndex, point, fitness)
+            velocity = self._random_generator.uniform(-(self._max - self._min),
+                                                        (self._max - self._min),
+                                                        self._ndims)
+            individual = SolutionParticle(indivIndex, point, fitness, velocity)
             self._group.append(individual)
     
 
     def Move(self, individual): #get closer
         origin_point = np.copy(individual.point)
-        dest_point = self.find_best_solution(self._group)
-        dest_point = dest_point.point
         for idim in range(len(origin_point)):
-            origin_point[idim] += self._random_generator.uniform() * (origin_point[idim] - dest_point[idim])
+            origin_point[idim] += individual.velocity[idim]
         return self.repair_or_not(origin_point)
     
     def Move_random(self, leap_percentage): #escape
@@ -91,7 +108,11 @@ class GreedyMH(IMetaheuristic):
         index_to_leap = index_to_leap[0:num_to_leap]
         for sol_index in index_to_leap:
             gen_point, gen_fitness = self.generate_random_point()
+            velocity = self._random_generator.uniform(-(self._max - self._min),
+                                                        (self._max - self._min),
+                                                        self._ndims)
             self._group[sol_index].move_to(gen_point, gen_fitness)
+            self._group[sol_index].set_velocity(velocity)
 
 
 
@@ -111,3 +132,5 @@ class GreedyMH(IMetaheuristic):
             return new_point, fitness
         else:
             return cartesian_point, fitness
+    
+    

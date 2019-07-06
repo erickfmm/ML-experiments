@@ -55,13 +55,13 @@ class GeneticMHCategorical(IMetaheuristic):
         fitness_anterior_estancado = best_fitness_historical
         while iteration <= iterations:
             if verbose:
-                print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
+                print("it: ", iteration, " best historical fitness: ", best_fitness_historical)
             elite = self.select_elite(elitist_percentage)
             self.recombination(elite)
             if not self._mutation_in_parents:
                 for individual in self._group:
                     individual = self.mutate_individual(individual.point)
-            if its_stagnation is not None and its_stagnation > 0 and  iteration == tau * its_stagnation:
+            if its_stagnation is not None and  iteration == tau * its_stagnation:
                 fitness_mejor_actual = self.find_best_solution(self._group).fitness
                 variation = np.abs(fitness_anterior_estancado - fitness_mejor_actual) / fitness_anterior_estancado
                 # print("variación: ", variation)

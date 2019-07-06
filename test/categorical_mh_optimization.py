@@ -82,7 +82,7 @@ def knapsack_repair(point):
     return point
 
 mh = GeneticMHCategorical(categorics=categories_all_elements, ndims=total_posible_elements, to_max=True, objective_function=knapsack_obj, repair_function=knapsack_repair)
-fit, pt = mh.run()
+fit, pt = mh.run(verbose=True)
 print("fitness:")
 print(fit)
 print("point:")

@@ -1,5 +1,6 @@
 from with_nolib.optimization.population.AFSA.AFSAMH import AFSA
 from with_nolib.optimization.population.SillyRandom.Greedy_with_leapMH import GreedyMH
+from with_nolib.optimization.population.PSO.PSOMH import PSOMH
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def partition_problem_obj(point):
     s1 = point[0]
     s2 = point[1]
     s1 = int(s1/float(s1+s2)*len(mydata))
-    s1 = s1 if s1 > 0 and s1 < len(mydata) else 1
+    s1 = s1 if s1 >= 0 and s1 < len(mydata) else 0# s1 if s1 > 0 and s1 < len(mydata) else 1
     s2 = len(mydata)-s1
     sum1 = 0
     sum2 = 0
@@ -95,21 +96,33 @@ def preproc_partition(point):
         point2[i] = int(point2[i])
     return point2
 
-print("create afsa")
-mh = AFSA(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
-#mh = AFSA(min_x, max_x, ndim, False, subsetsum_problem_obj, repair_partition, preproc_partition)
-print("to run afsa")
-fit, pt = mh.run(visual_distance_percentage=0.5, velocity_percentage=0.5, n_points_to_choose=3, crowded_percentage=0.7, its_stagnation=4, leap_percentage=0.3, stagnation_variation=0.4, seed=115)
-#print(fit)
-#print(pt)
+to_use = "PSO"
 
+if to_use == "AFSA":
+    print("create afsa")
+    mh = AFSA(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    #mh = AFSA(min_x, max_x, ndim, False, subsetsum_problem_obj, repair_partition, preproc_partition)
+    print("to run afsa")
+    fit, pt = mh.run(verbose=True, visual_distance_percentage=0.5, velocity_percentage=0.5, n_points_to_choose=3, crowded_percentage=0.7, its_stagnation=4, leap_percentage=0.3, stagnation_variation=0.4, seed=115)
+    print(fit)
+    print(pt)
 
-print("create Greedy")
-#mh = GreedyMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
-print("to run greedy")
-#fit, pt = mh.run(iterations=100, population=30, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8, seed=115)
-print(fit)
-print(pt)
+if to_use == "Greedy":
+    print("create Greedy")
+    mh = GreedyMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    print("to run greedy")
+    fit, pt = mh.run(verbose=True, iterations=100, population=30, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8, seed=115)
+    print(fit)
+    print(pt)
+
+if to_use == "PSO":
+    print("create PSO")
+    mh = PSOMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    print("to run PSO")
+    fit, pt = mh.run(verbose=True, iterations=100, population=30, omega=0.8, phi_g=1, phi_p=0.5 ,seed=115)
+    print(fit)
+    print(pt)
+
 
 s1 = pt[0]
 s2 = pt[1]
