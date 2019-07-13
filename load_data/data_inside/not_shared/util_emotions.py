@@ -11,7 +11,8 @@ class DiscreteEmotion(Enum):
     Surprise = 6
     Amusement = 7
     Disgust = 8
-    Anxiety = 9 #only for gsr data
+    Boredom = 9
+    Anxiety = 10 #only for gsr data
 
 class QuadrantEmotion(Enum):
     HAHV = 1
