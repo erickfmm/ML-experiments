@@ -1,4 +1,4 @@
-from mnist import MNIST
+import mnist
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 
 __all__ = ["LoadMnist",]
@@ -10,7 +10,7 @@ class LoadMnist(ILoadSupervised):
     #fashion: mnist_path='train_data\\not_shared\\Folder_FromKaggle\\fashionmnist'
     def __init__(self, mnist_path='train_data\\not_shared\\mnist'):
         self.TYPE = SupervisedType.Classification
-        self.mndata = MNIST(mnist_path)
+        self.mndata = mnist.parse_idx(mnist_path)
         self.XTrain, self.YTrain = self.mndata.load_training()
         self.XTest, self.YTest = self.mndata.load_testing()
         #print(mndata.display(images[index]))

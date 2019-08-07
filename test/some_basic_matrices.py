@@ -1,11 +1,17 @@
+import os
+import sys
+from os.path import dirname, join, abspath
+sys.path.append(abspath(join(dirname(__file__), '..')))
+######################################################
+
 from load_data.data_inside.shared.random_of_function import LoadRandom
 
-import with_nolib.unsupervised.distance as distance
-import with_nolib.unsupervised.correlation_matrix as correlation_matrix
-import with_nolib.supervised.confusion_matrix as confusion_matrix
+import unsupervised.distance as distance
+import unsupervised.correlation_matrix as correlation_matrix
+import supervised.utils.confusion_matrix as confusion_matrix
 
-from with_nolib.supervised.perceptron import Perceptron
-import with_lib.supervised.learning_model as learning_model
+from supervised.perceptron import Perceptron
+import supervised.learning_models_sklearn as learning_model
 
 import random
 import math

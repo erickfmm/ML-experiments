@@ -1,6 +1,6 @@
 import csv
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
-import utils
+import preprocessing.change_types as change_types
 from os.path import join
 
 __all__ = ["LoadTitanic",]
@@ -42,10 +42,10 @@ class LoadTitanic(ILoadSupervised):
                 titanic[j]['PassengerId'] = int(titanic[j]['PassengerId'])
                 titanic[j]['Sex'] = 0 if titanic[j]['Sex'] == 'male' else 1
                 titanic[j]['Pclass'] = int(titanic[j]['Pclass'])
-                titanic[j]['Age'] = utils.change_types.to_int(titanic[j]['Age'], -1)
+                titanic[j]['Age'] = change_types.to_int(titanic[j]['Age'], -1)
                 titanic[j]['SibSp'] = int(titanic[j]['SibSp'])
                 titanic[j]['Parch'] = int(titanic[j]['Parch'])
-                titanic[j]['Fare'] = utils.change_types.to_float(titanic[j]['Fare'], 0.0)
+                titanic[j]['Fare'] = change_types.to_float(titanic[j]['Fare'], 0.0)
                 if titanic[j]['Embarked'] == '':
                     titanic[j]['Embarked'] = 0
                 elif titanic[j]['Embarked'] == 'S':

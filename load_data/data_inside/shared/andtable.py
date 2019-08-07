@@ -3,8 +3,8 @@ from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 __all__ = ["LoadAndTable",]
 
 class LoadAndTable(ILoadSupervised):
-        self.TYPE = SupervisedType.Classification
     def __init__(self):
+        self.TYPE = SupervisedType.Classification
         self.Xs = [
             [0, 0],
             [0, 1],

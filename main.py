@@ -1,4 +1,4 @@
-from with_nolib.supervised.perceptron import Perceptron
+from supervised.perceptron import Perceptron
 
 ### Load data
 ## data shared
@@ -11,11 +11,11 @@ from load_data.data_inside.not_shared.recognition_human_actions_video import Loa
 
 
 from load_data.data_downloadable.mnist_keras import LoadMnist
-from load_data.data_downloadable.iris import LoadIris
+from load_data.data_downloadable.iris_sklearn import LoadIris
 from load_data.data_downloadable.cifar10_keras import LoadCifar10
 
-from with_nolib.unsupervised.clustering.kmeans import KMeans
-from with_nolib.unsupervised.clustering.monte_carlo import montecarlo_clustering
+from unsupervised.clustering.kmeans import KMeans
+from unsupervised.clustering.utils.monte_carlo import montecarlo_clustering
 import numpy as np
 
 #data = LoadAndTable()
