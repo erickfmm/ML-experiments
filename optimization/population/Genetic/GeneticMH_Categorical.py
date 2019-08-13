@@ -4,7 +4,7 @@ import numpy as np
 from numpy.random import RandomState
 from typing import List, Callable
 
-class GeneticMHCategorical(IMetaheuristic):
+class GeneticMH_Categorical(IMetaheuristic):
     def __init__(self, categorics: list, ndims: int, to_max: bool,
      objective_function: Callable[[list], float],
       repair_function: Callable[[list], list],
@@ -26,8 +26,7 @@ class GeneticMHCategorical(IMetaheuristic):
     
     def run(self, iterations: int = 100, population: int =30,
         elitist_percentage: float = 0.3, mutability: float = 0.1, fidelity: bool = True,
-        mutation_in_parents: bool = True, seed: int = None, verbose: bool = False,
-        stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5,):
+        mutation_in_parents: bool = True, seed: int = None, verbose: bool = False):
         self._iterations = iterations
         self._population = population
         self._seed: int = seed
@@ -48,11 +47,9 @@ class GeneticMHCategorical(IMetaheuristic):
 
         self.initialize_population(population)
         iteration = 1
-        tau = 1
         best_solution_historical = self.find_best_solution(self._group)
         best_fitness_historical = best_solution_historical.fitness
         best_point_historical = np.copy(best_solution_historical.point)
-        fitness_anterior_estancado = best_fitness_historical
         while iteration <= iterations:
             if verbose:
                 print("it: ", iteration, " best historical fitness: ", best_fitness_historical)
@@ -61,14 +58,6 @@ class GeneticMHCategorical(IMetaheuristic):
             if not self._mutation_in_parents:
                 for individual in self._group:
                     individual = self.mutate_individual(individual.point)
-            if its_stagnation is not None and  iteration == tau * its_stagnation:
-                fitness_mejor_actual = self.find_best_solution(self._group).fitness
-                variation = np.abs(fitness_anterior_estancado - fitness_mejor_actual) / fitness_anterior_estancado
-                # print("variación: ", variation)
-                if variation < stagnation_variation:
-                    self.Move_random(leap_percentage)
-                fitness_anterior_estancado = fitness_mejor_actual
-                tau += 1
             iteration += 1
             # print("seteando historicoooooooooooooooooooooooo")
             best_solution_it = self.find_best_solution(self._group)
@@ -186,19 +175,6 @@ class GeneticMHCategorical(IMetaheuristic):
                      [self._random_generator.randint(0, len(self._categorics[index_to_shuffle]))]
         point, fitness = self.repair_or_not(individual.point)
         return SolutionWithId(individual.get_id(), point, fitness)
-
-
-    def Move_random(self, leap_percentage: float):
-        self.movements["random"] +=1
-        indexes:List[int] = [i for i in range(len(self._group))]
-        self._random_generator.shuffle(indexes)
-        indexes = indexes[:int(len(indexes)*leap_percentage)]
-        for i in indexes:
-            del self._group[i]
-            point, fitness = self.generate_random_point()
-            individual = SolutionWithId(i, point, fitness)
-            self._group.append(individual)
-
 
     def generate_random_point(self):
         point = [self._categorics[i][self._random_generator.randint(0, len(self._categorics[i]))]\

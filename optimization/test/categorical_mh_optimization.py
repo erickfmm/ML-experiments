@@ -5,7 +5,8 @@ sys.path.append(abspath(join(dirname(__file__), '../..')))
 ######################################################
 
 #import test.categorical_mh_optimization
-from optimization.population.Genetic.GeneticMHCategorical import GeneticMHCategorical
+from optimization.population.Genetic.GeneticMH_Categorical import GeneticMH_Categorical
+from optimization.population.Genetic.GeneticMH_Categorical_WithLeap import GeneticMH_Categorical_WithLeap
 
 #import numpy as np
 from numpy.random import RandomState
@@ -90,7 +91,25 @@ def knapsack_repair(point):
                 times_founded +=1
     return point
 
-mh = GeneticMHCategorical(categorics=categories_all_elements, ndims=total_posible_elements, to_max=True, objective_function=knapsack_obj, repair_function=knapsack_repair)
+
+print("Genetic")
+print("#"*40)
+print("#"*40)
+mh = GeneticMH_Categorical(categorics=categories_all_elements, ndims=total_posible_elements, to_max=True, objective_function=knapsack_obj, repair_function=knapsack_repair)
+fit, pt = mh.run(verbose=True)
+print("fitness:")
+print(fit)
+print("point:")
+print(pt)
+print("movements:")
+print(mh.movements)
+
+get_values_in(pt, True)
+
+print("#"*40)
+print("#"*40)
+print("Genetic with leap")
+mh = GeneticMH_Categorical_WithLeap(categorics=categories_all_elements, ndims=total_posible_elements, to_max=True, objective_function=knapsack_obj, repair_function=knapsack_repair)
 fit, pt = mh.run(verbose=True)
 print("fitness:")
 print(fit)

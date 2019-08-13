@@ -4,9 +4,11 @@ from os.path import dirname, join, abspath
 sys.path.append(abspath(join(dirname(__file__), '../..')))
 ######################################################
 
-from optimization.population.AFSA.AFSAMH import AFSA
-from optimization.population.SillyRandom.Greedy_with_leapMH import GreedyMH
-from optimization.population.PSO.PSOMH import PSOMH
+from optimization.population.AFSA.AFSAMH_Real import AFSAMH_Real
+from optimization.population.SillyRandom.GreedyMH_Real import GreedyMH_Real
+from optimization.population.SillyRandom.GreedyMH_Real_WithLeap import GreedyMH_Real_WithLeap
+from optimization.population.PSO.PSOMH_Real import PSOMH_Real
+from optimization.population.PSO.PSOMH_Real_WithLeap import PSOMH_Real_WithLeap
 
 import numpy as np
 
@@ -102,49 +104,79 @@ def preproc_partition(point):
         point2[i] = int(point2[i])
     return point2
 
-to_use = "PSO"
 
-if to_use == "AFSA":
+
+def print_difference_subsets(point, data):
+    s1 = point[0]
+    s2 = point[1]
+    s1 = int(s1/float(s1+s2)*len(data))
+    s1 = s1 if s1 >= 0 and s1 < len(data) else 0
+    s2 = len(data)-s1
+    sum1 = 0
+    sum2 = 0
+    sub1 = []
+    sub2 = []
+    for i in range(2, s1+2, 1):
+        sum1 += data[int(point[i])]
+        sub1.append(data[int(point[i])])
+    for i in range(s1+2, len(point), 1):
+        sum2 += data[int(point[i])]
+        sub2.append(data[int(point[i])])
+
+    print("sum1:", sum1)
+    print("sum2:", sum2)
+
+to_use = [
+    "AFSA",
+    "Greedy",
+    "GreedyWL",
+    "PSO",
+    "PSOWL"
+    ]
+
+if "AFSA" in to_use:
     print("create afsa")
-    mh = AFSA(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    mh = AFSAMH_Real(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
     #mh = AFSA(min_x, max_x, ndim, False, subsetsum_problem_obj, repair_partition, preproc_partition)
     print("to run afsa")
     fit, pt = mh.run(verbose=True, visual_distance_percentage=0.5, velocity_percentage=0.5, n_points_to_choose=3, crowded_percentage=0.7, its_stagnation=4, leap_percentage=0.3, stagnation_variation=0.4, seed=115)
     print(fit)
     print(pt)
+    print_difference_subsets(pt, mydata)
 
-if to_use == "Greedy":
+if "GreedyWL" in to_use:
     print("create Greedy")
-    mh = GreedyMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    mh = GreedyMH_Real_WithLeap(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
     print("to run greedy")
     fit, pt = mh.run(verbose=True, iterations=100, population=30, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8, seed=115)
     print(fit)
     print(pt)
+    print_difference_subsets(pt, mydata)
 
-if to_use == "PSO":
+if "Greedy" in to_use:
+    print("create Greedy")
+    mh = GreedyMH_Real(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    print("to run greedy")
+    fit, pt = mh.run(verbose=True, iterations=100, population=30, seed=115)
+    print(fit)
+    print(pt)
+    print_difference_subsets(pt, mydata)
+
+if "PSO" in to_use:
     print("create PSO")
-    mh = PSOMH(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    mh = PSOMH_Real(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
     print("to run PSO")
     fit, pt = mh.run(verbose=True, iterations=100, population=30, omega=0.8, phi_g=1, phi_p=0.5 ,seed=115)
     print(fit)
     print(pt)
+    print_difference_subsets(pt, mydata)
 
-
-s1 = pt[0]
-s2 = pt[1]
-s1 = int(s1/float(s1+s2)*len(mydata))
-s1 = s1 if s1 >= 0 and s1 < len(mydata) else 0
-s2 = len(mydata)-s1
-sum1 = 0
-sum2 = 0
-sub1 = []
-sub2 = []
-for i in range(2, s1+2, 1):
-    sum1 += mydata[int(pt[i])]
-    sub1.append(mydata[int(pt[i])])
-for i in range(s1+2, len(pt), 1):
-    sum2 += mydata[int(pt[i])]
-    sub2.append(mydata[int(pt[i])])
-
-print("sum1:", sum1)
-print("sum2:", sum2)
+if "PSOWL" in to_use:
+    print("create PSO")
+    mh = PSOMH_Real_WithLeap(min_x, max_x, ndim, False, partition_problem_obj, repair_partition, preproc_partition)
+    print("to run PSO")
+    fit, pt = mh.run(verbose=True, iterations=100, population=30, omega=0.8, phi_g=1, phi_p=0.5 ,seed=115, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8)
+    print(fit)
+    print(pt)
+    print_difference_subsets(pt, mydata)
+    

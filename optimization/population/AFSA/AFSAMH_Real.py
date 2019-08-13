@@ -6,7 +6,7 @@ import numpy as np
 from numpy.random import RandomState
 from typing import List, Callable
 
-class AFSA(IMetaheuristic):
+class AFSAMH_Real(IMetaheuristic):
     def __init__(self, min_value: float, max_value: float, ndims: int, to_max: bool,
      objective_function: Callable[[List[float]], float],
       repair_function: Callable[[List[float]], List[float]],

@@ -63,9 +63,11 @@ if False:
     r2 = eval_random(cls_2s, 2)
 
 
-from optimization.population.AFSA.AFSAMH import AFSA
-from optimization.population.SillyRandom.Greedy_with_leapMH import GreedyMH
-from optimization.population.PSO.PSOMH import PSOMH
+from optimization.population.AFSA.AFSAMH_Real import AFSAMH_Real
+from optimization.population.SillyRandom.GreedyMH_Real import GreedyMH_Real
+from optimization.population.SillyRandom.GreedyMH_Real_WithLeap import GreedyMH_Real_WithLeap
+from optimization.population.PSO.PSOMH_Real import PSOMH_Real
+from optimization.population.PSO.PSOMH_Real_WithLeap import PSOMH_Real_WithLeap
 
 def eval_mh(cls_list, n, mh_to_use, verbose=False):
     rs = {}
@@ -78,14 +80,20 @@ def eval_mh(cls_list, n, mh_to_use, verbose=False):
             print("skipping ", str(cls_type))
             continue
         if mh_to_use == "AFSA":
-            mh = AFSA(min_x, max_x, n, False, cls_type.func, None, None)
+            mh = AFSAMH_Real(min_x, max_x, n, False, cls_type.func, None, None)
             fit, pt = mh.run(verbose=verbose, visual_distance_percentage=0.5, velocity_percentage=0.5, n_points_to_choose=3, crowded_percentage=0.7, its_stagnation=4, leap_percentage=0.3, stagnation_variation=0.4, seed=115)
         if mh_to_use == "Greedy":
-            mh = GreedyMH(min_x, max_x, n, False, cls_type.func, None, None)
+            mh = GreedyMH_Real(min_x, max_x, n, False, cls_type.func, None, None)
+            fit, pt = mh.run(verbose=verbose, iterations=100, population=30, seed=115)
+        if mh_to_use == "GreedyWL":
+            mh = GreedyMH_Real_WithLeap(min_x, max_x, n, False, cls_type.func, None, None)
             fit, pt = mh.run(verbose=verbose, iterations=100, population=30, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8, seed=115)
         if mh_to_use == "PSO":
-            mh = PSOMH(min_x, max_x, n, False, cls_type.func, None, None)
+            mh = PSOMH_Real(min_x, max_x, n, False, cls_type.func, None, None)
             fit, pt = mh.run(verbose=verbose, iterations=100, population=30, omega=0.8, phi_g=0.5, phi_p=0.5 ,seed=115)
+        if mh_to_use == "PSOWL":
+            mh = PSOMH_Real_WithLeap(min_x, max_x, n, False, cls_type.func, None, None)
+            fit, pt = mh.run(verbose=verbose, iterations=100, population=30, omega=0.8, phi_g=0.5, phi_p=0.5 ,seed=115, stagnation_variation=0.4, its_stagnation=5, leap_percentage=0.8)
         #vect = make_random_vector(cls_type, n)
         #val = cls_type.func(vect)
         print(str(cls_type))
@@ -101,7 +109,7 @@ def eval_mh(cls_list, n, mh_to_use, verbose=False):
 if True:
     print("#"*80)
     print("ns with 20 length vector")
-    mh_to_use = "PSO"
+    mh_to_use = "AFSA"
     mh_rn = eval_mh(cls_ns, 30, mh_to_use)
     print("#"*80)
     print("1s")
