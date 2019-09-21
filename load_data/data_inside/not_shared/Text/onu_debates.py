@@ -12,7 +12,7 @@ class LoadOnuDebates(ILoadUnsupervised):
         self.country_codes_csv = country_codes_csv
 
     def get_headers(self):
-        return []
+        return ["year", "country", "session", "text"]
 
     def get_default(self):
         return self.read_file()

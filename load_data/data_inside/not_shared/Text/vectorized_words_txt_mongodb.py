@@ -1,9 +1,10 @@
 import pymongo
+#
 
-class WikiVectorizedWordsMongoDB:
-    def __init__(self):
+class VectorizedWordsTxtMongoDB:
+    def __init__(self, dbname): #dbname="wikivec"
         self.mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
-        self.db = self.mongo_client["wikivec"]
+        self.db = self.mongo_client[dbname]
         #mycol = mydb["customers"]
     
     def closeConnection(self):
@@ -20,7 +21,7 @@ class WikiVectorizedWordsMongoDB:
         with open(vecFile, "r", encoding='utf-8') as filevec:
             iline = 0
             for line in filevec:
-                if iline % verbose_mod == 0:
+                if verbose_mod is not None and iline % verbose_mod == 0:
                     print("already inserted: ", iline)
                 if iline > 0:
                     array_data = line.strip().split(" ")
