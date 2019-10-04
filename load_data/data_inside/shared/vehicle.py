@@ -28,14 +28,16 @@ class LoadVehicle(ILoadSupervised):
     
     def get_headers(self):
         return self.headers
-
-    def get_default(self):
-        return None
-
-    def get_splited(self):
-        return None
     
     def get_all(self):
+        Xs = []
+        Ys = []
+        for x, y in self.get_all_yielded():
+            Xs.append(x)
+            Ys.append(y)
+        return Xs, Ys
+
+    def get_all_yielded(self):
         data_vs = []
         file_a = open(join(self.folder_path, 'xab.dat'))
         file_b = open(join(self.folder_path, 'xaa.dat'))
@@ -55,20 +57,20 @@ class LoadVehicle(ILoadSupervised):
         data_vs.append(csv.reader(file_g, delimiter=' '))
         data_vs.append(csv.reader(file_h, delimiter=' '))
         data_vs.append(csv.reader(file_i, delimiter=' '))
-        Xs = []
-        Ys = []
         i = 0
         for csv_reader in data_vs:
             for row in csv_reader:
-                Xs.append([])
+                X = []
+                Y = None
                 iField = 0
                 for field in row:
                     if iField < len(row) -1:
-                        Xs[i].append(int(field))
+                        X.append(int(field))
                     else:
-                        Ys.append(field)
+                        Y = field
                     iField += 1
                 i += 1
+                yield X, Y
         file_a.close()
         file_b.close()
         file_c.close()
@@ -78,4 +80,4 @@ class LoadVehicle(ILoadSupervised):
         file_g.close()
         file_h.close()
         file_i.close()
-        return Xs, Ys
+

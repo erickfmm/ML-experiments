@@ -20,12 +20,10 @@ class LoadXorTable(ILoadSupervised):
     
     def get_headers(self):
         return self.headers
-
-    def get_default(self):
-        return self.Xs, self.Ys
-
-    def get_splited(self):
-        return None
     
     def get_all(self):
         return self.Xs, self.Ys
+    
+    def get_all_yielded(self):
+        for i in range(len(self.Xs)):
+            yield self.Xs[i], self.Ys[i]

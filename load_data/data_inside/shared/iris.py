@@ -13,12 +13,6 @@ class LoadIris(ILoadSupervised):
         "petal length in cm",
         "petal width in cm"]
         self.classes = ["Iris Setosa", "Iris Versicolour", "Iris Virginica"]
-
-    def get_default(self):
-        return self.get_all()
-
-    def get_splited(self):
-        return None
     
     def get_classes(self):
         return self.classes
@@ -29,18 +23,24 @@ class LoadIris(ILoadSupervised):
     def get_all(self):
         Xs = []
         Ys = []
+        for x, y in self.get_all_yielded():
+            Xs.append(x)
+            Ys.append(y)
+        return Xs, Ys
+    
+    def get_all_yielded(self):
         i = 0
         with open(join(self.folder_path,'iris.data')) as data_iris_file:
             data_iris_csv = csv.reader(data_iris_file)
             for row in data_iris_csv:
                 if len(row) > 0:
-                    Xs.append([])
+                    x = []
                     iField = 0
                     for field in row:
                         if iField < len(row)-1:
-                            Xs[i].append(float(field))
+                            x.append(float(field))
                         else:
-                            Ys.append(field)
+                            y = field
                         iField += 1
+                    yield x, y
                 i += 1
-        return Xs, Ys

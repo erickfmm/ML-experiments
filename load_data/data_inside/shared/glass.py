@@ -26,17 +26,23 @@ class LoadGlass(ILoadSupervised):
     def get_all(self):
         Xs = []
         Ys = []
+        for x, y in self.get_all_yielded():
+            Xs.append(x)
+            Ys.append(y)
+        return Xs, Ys
+
+    def get_all_yielded(self):
         i = 0
         with open(join(self.folder_path, 'glass.data')) as data_glass_file:
             data_glass_csv = csv.reader(data_glass_file)
             for el in data_glass_csv:
                 iField = 0
-                Xs.append([])
+                x = []
                 for field in el:
                     if iField > 0 and iField < len(el)-2:
-                        Xs[i].append(float(field))
+                        x.append(float(field))
                     elif iField > len(el) - 2:
-                        Ys.append(int(field))
+                        y = int(field)
                     iField += 1
+                yield x, y
                 i += 1
-        return Xs, Ys

@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, ABC
 
 from enum import Enum
 class SupervisedType(Enum):
@@ -7,26 +7,38 @@ class SupervisedType(Enum):
     Regression = 2
     Both = 3
 
-class ILoadSupervised:
+class ILoadSupervised(ABC):
     __metaclass__ = ABCMeta
     TYPE: SupervisedType = SupervisedType.Unknown
-    #headers = []
-    #classes = []
-
-    @classmethod
-    def version(self): return "1.0"
+    
+    #@classmethod
+    #def version(self): return "1.0"
     
     @abstractmethod
-    def get_default(self): raise NotImplementedError
-
-    @abstractmethod
-    def get_splited(self): raise NotImplementedError
-
-    @abstractmethod
     def get_all(self): raise NotImplementedError
+    
+    #@abstractmethod
+    def get_all_yielded(self): raise NotImplementedError
     
     @abstractmethod
     def get_classes(self): raise NotImplementedError
     
     @abstractmethod
     def get_headers(self): raise NotImplementedError
+
+
+class ISplitted(ABC):
+    @abstractmethod
+    def get_splited(self): raise NotImplementedError
+
+    #@abstractmethod
+    def get_train_yielded(self): raise NotImplementedError
+
+    #@abstractmethod
+    def get_test_yielded(self): raise NotImplementedError
+
+    #@abstractmethod
+    def get_train(self): raise NotImplementedError
+
+    #@abstractmethod
+    def get_test(self): raise NotImplementedError
