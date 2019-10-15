@@ -37,7 +37,7 @@ class LoadOnuDebates(ILoadUnsupervised):
         for row in file_reader:
             #if row["country"] not in country_names:
             #    print("not found: ", row["country"])
-            text = text if row["text"][0] != "\ufeff" else row["text"][1:]
+            text = row["text"] if row["text"][0] != "\ufeff" else row["text"][1:]
             data.append([
                 int(row["year"]),
                 row["country"],

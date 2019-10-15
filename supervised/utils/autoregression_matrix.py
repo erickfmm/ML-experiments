@@ -15,17 +15,18 @@ def predict_serie(Xs, coefficients: list, is_intercept_first: bool = True):
     for x in Xs:
         pred_value = 0
         i_coeff = 0
-        if is_intercept_first:
+        if is_intercept_first: #intercept is the first in coeffs array
             pred_value = coefficients[i_coeff]
             i_coeff += 1
         for value in x:
             pred_value += value * coefficients[i_coeff]
             i_coeff += 1
-        if not is_intercept_first:
+        if not is_intercept_first:#intercept is the last value in coeffs array
             pred_value += value * coefficients[i_coeff]
         Ys_pred.append(pred_value)
     return Ys_pred
 
+#the same as above but using matrix multiplication instead of for
 def predict_serie_array(Xs, coefficients: list, is_intercept_first: bool = True):
     import numpy as np
     if is_intercept_first:

@@ -4,7 +4,7 @@ import re
 import json
 
 #"train_data\\not_shared\\SARC2.0\\main\\comments.json"
-def readbyparts_yielded(filename="train_data\\not_shared\\SARC2.0\\pol\\comments.json", step=500):
+def readbyparts_yielded(filename="train_data\\not_shared\\Folder_NLPEnglish_Dialogs\\SARC2.0\\pol\\comments.json", step=500):
     regex_str = '\"[a-zA-Z0-9]+\":\ \{[^\{]+\}'
     fileobj = open(filename, "r")
     #readed
