@@ -11,6 +11,8 @@ class Tictac:
         #row
         player1 = 0
         player2 = 0
+        ns1 = []
+        ns2 = []
         #rows
         for row in self.state:
             n_1 = 0
@@ -18,6 +20,8 @@ class Tictac:
             for d in row:
                 n_1 = n_1+1 if d==1 else n_1
                 n_2 = n_2+1 if d==2 else n_2
+            ns1.append(n_1)
+            ns2.append(n_2)
             if n_1 == 3:
                 player1 += 1
             if n_2== 3:
@@ -30,6 +34,8 @@ class Tictac:
                 d = row[icol]
                 n_1 = n_1+1 if d==1 else n_1
                 n_2 = n_2+1 if d==2 else n_2
+            ns1.append(n_1)
+            ns2.append(n_2)
             if n_1 == 3:
                 player1 += 1
             if n_2 == 3:
@@ -43,14 +49,16 @@ class Tictac:
                 d = self.state[pair_index[0]][pair_index[1]]
                 n_1 = n_1+1 if d==1 else n_1
                 n_2 = n_2+1 if d==2 else n_2
+            ns1.append(n_1)
+            ns2.append(n_2)
             if n_1 == 3:
                 player1 += 1
             if n_2 == 3:
                 player2 += 1
-        return player1, player2
+        return player1, player2, max(ns1), max(ns2)
     
     def test_win(self):
-        p1, p2 = self.score()
+        p1, p2, _, _ = self.score()
         if p1 > 0:
             return 1
         if p2 > 0:
