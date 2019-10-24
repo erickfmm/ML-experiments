@@ -2,8 +2,8 @@ import pymongo
 #
 
 class VectorizedWordsTxtMongoDB:
-    def __init__(self, dbname): #dbname="wikivec"
-        self.mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
+    def __init__(self, dbname, server_ip="localhost", server_port=27017): #dbname="wikivec"
+        self.mongo_client = pymongo.MongoClient("mongodb://"+server_ip+":"+str(server_port))
         self.db = self.mongo_client[dbname]
         #mycol = mydb["customers"]
     
@@ -12,8 +12,10 @@ class VectorizedWordsTxtMongoDB:
     
     #loadIntoMongoDB("train_data\\not_shared\\wikivec\\wiki-news-300d-1M.vec", "withoutsubwords")
     #loadIntoMongoDB("train_data\\not_shared\\wikivec\\wiki-news-300d-1M-subword.vec", "withsubwords")
-    def loadIntoMongoDB(self, vecFile, collectionName, verbose_mod=10000):
+    def loadIntoMongoDB(self, vecFile, collectionName, verbose_mod=10000, n_insert=100):
         collist = self.db.list_collection_names()
+        n_to_insert=0
+        to_insert=[]
         if collectionName in collist:
             print("The collection exists.")
             return -1
@@ -27,8 +29,19 @@ class VectorizedWordsTxtMongoDB:
                     array_data = line.strip().split(" ")
                     name = array_data[0]
                     array_data = [float(array_data[i]) for i in range(1, len(array_data))]
-                    collection.insert_one({"_id": name, "value": array_data})
+                    #collection.insert_one({"_id": name, "value": array_data})
+                    if n_to_insert == n_insert:
+                        collection.insert_many(to_insert)
+                        to_insert = []
+                        n_to_insert = 0
+                    else:
+                        to_insert.append({"_id": name, "value": array_data})
+                        n_to_insert +=1
                 iline += 1
+            if n_to_insert > 0:
+                collection.insert_many(to_insert) #remain
+                to_insert = []
+                n_to_insert = 0
         print("done")
         return 0
     
