@@ -197,6 +197,29 @@ class LoadRedditComments:
         print("pairs done")
         self.logobj.write("pairs done\n")
 
+    def write_pairs_into_mongo_col(self, verbose_mod=10000):
+        self.logobj.write("\n\n\n\n")
+        self.logobj.write("#"*40+"\n")
+        self.logobj.write("#"*40+"\n")
+        self.logobj.write("to write pairs into mongodb full comments using pairs collection\n")
+        collection_pairs_full = self.db["full_pairs"]
+        iwrite=0
+        collection_pairs_meta = self.db["pairs_meta"]
+        collection_comments = self.db["comments"]
+        for pair in collection_pairs_meta.find():
+            parent_comment = collection_comments.find_one({"_id": pair["_id"]})
+            comment = collection_comments.find_one({"_id": pair["best_response"]})
+            collection_pairs_full.insert_one({
+                    "_id": pair["_id"],
+                    "from": parent_comment["body"],
+                    "to": comment["body"]
+                    })
+            if iwrite % verbose_mod == 0:
+                print("writen: ", iwrite)
+                self.logobj.write("written in mongo: "+str(iwrite)+"\n")
+                self.logobj.flush()
+            iwrite += 1
+
     def write_pairs_into_files(self\
                                ,folder_pairs="train_data\\not_shared\\Folder_NLPEnglish_Dialogs\\Reddit comments\\result"
                               , n_write=100

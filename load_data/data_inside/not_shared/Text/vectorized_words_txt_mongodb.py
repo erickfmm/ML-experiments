@@ -1,5 +1,5 @@
 import pymongo
-#
+#from load_data.data_inside.not_shared.Text.vectorized_words_txt_mongodb import VectorizedWordsTxtMongoDB
 
 class VectorizedWordsTxtMongoDB:
     def __init__(self, dbname, server_ip="localhost", server_port=27017): #dbname="wikivec"
@@ -10,8 +10,9 @@ class VectorizedWordsTxtMongoDB:
     def closeConnection(self):
         self.mongo_client.close()
     
-    #loadIntoMongoDB("train_data\\not_shared\\wikivec\\wiki-news-300d-1M.vec", "withoutsubwords")
-    #loadIntoMongoDB("train_data\\not_shared\\wikivec\\wiki-news-300d-1M-subword.vec", "withsubwords")
+    #loadIntoMongoDB("train_data\\not_shared\\Folder_FromKaggle\\wikivec\\wiki-news-300d-1M.vec", "withoutsubwords")
+    #loadIntoMongoDB("train_data\\not_shared\\Folder_FromKaggle\\wikivec\\wiki-news-300d-1M-subword.vec", "withsubwords")
+    #loadIntoMongoDB("train_data\\not_shared\\Folder_NLPEspañol\\SBW-vectors-300-min5.txt", "vectors")
     def loadIntoMongoDB(self, vecFile, collectionName, verbose_mod=10000, n_insert=100):
         collist = self.db.list_collection_names()
         n_to_insert=0
