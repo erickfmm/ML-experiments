@@ -26,10 +26,10 @@ class LoadArtImageStyle(ILoadSupervised):
         return None
 
     def get_splited(self):
-        self.XTrain = []
-        self.XTest = []
-        self.YTrain = []
-        self.YTest = []
+        XTrain = []
+        XTest = []
+        YTrain = []
+        YTest = []
         train_folder = join(self.folderpath, self.datasetpath, "training_set")
         validation_folder = join(self.folderpath, self.datasetpath, "validation_set")
         for cl in self.classes:
@@ -38,8 +38,8 @@ class LoadArtImageStyle(ILoadSupervised):
                     fullname = join(train_folder, cl, filename)
                     try:
                         im = pims.ImageReader(fullname)
-                        self.XTrain.append(im.get_frame(0))
-                        self.YTrain.append(cl)
+                        XTrain.append(im.get_frame(0))
+                        YTrain.append(cl)
                     except:
                         print("Error in: ", fullname)
             for filename in listdir(join(validation_folder, cl)):
@@ -47,15 +47,15 @@ class LoadArtImageStyle(ILoadSupervised):
                     fullname = join(validation_folder, cl, filename)
                     try:
                         im = pims.ImageReader(fullname)
-                        self.XTest.append(im.get_frame(0))
-                        self.YTest.append(cl)
+                        XTest.append(im.get_frame(0))
+                        YTest.append(cl)
                     except:
                         print("Error in: ", fullname)
-        return (self.XTrain, self.YTrain), (self.XTest, self.YTest)
+        return (XTrain, YTrain), (XTest, YTest)
     
     def get_all(self):
-        self.X = []
-        self.Y = []
+        X = []
+        Y = []
         train_folder = join(self.folderpath, self.datasetpath, "training_set")
         validation_folder = join(self.folderpath, self.datasetpath, "validation_set")
         for cl in self.classes:
@@ -64,8 +64,8 @@ class LoadArtImageStyle(ILoadSupervised):
                     fullname = join(train_folder, cl, filename)
                     try:
                         im = pims.ImageReader(fullname)
-                        self.X.append(im.get_frame(0))
-                        self.Y.append(cl)
+                        X.append(im.get_frame(0))
+                        Y.append(cl)
                     except:
                         print("Error in: ", fullname)
             for filename in listdir(join(validation_folder, cl)):
@@ -73,11 +73,11 @@ class LoadArtImageStyle(ILoadSupervised):
                     fullname = join(validation_folder, cl, filename)
                     try:
                         im = pims.ImageReader(fullname)
-                        self.X.append(im.get_frame(0))
-                        self.Y.append(cl)
+                        X.append(im.get_frame(0))
+                        Y.append(cl)
                     except:
                         print("Error in: ", fullname)
-        return self.X, self.Y
+        return X, Y
     
     def get_classes(self):
         return self.classes

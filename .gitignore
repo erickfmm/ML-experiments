@@ -1,4 +1,5 @@
 train_data/not_shared/*
+train_data/created_models/*
 appJar/*
 **/Thumbs.db
 **/thumbs.db

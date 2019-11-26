@@ -13,6 +13,7 @@ class DiscreteEmotion(Enum):
     Disgust = 8
     Boredom = 9
     Anxiety = 10 #only for gsr data
+    Calm = 11 #only for ravdess, it has both neutral and calm
 
 class QuadrantEmotion(Enum):
     HAHV = 1
