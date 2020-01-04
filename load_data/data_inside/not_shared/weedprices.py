@@ -16,9 +16,6 @@ class LoadWeedPrices(ILoadUnsupervised):
     def get_headers(self):
         return ["year", "country", "session", "text"]
 
-    def get_default(self):
-        return self.read_file()
-
     def get_all(self):
         data = []
         dates = []

@@ -41,7 +41,7 @@ class LoadOASISImageEmotion(ILoadSupervised):
             for row in csv_reader:
                 image_path = join(self.folderpath, "images", row["Theme"].strip()+".jpg")
                 im = pims.ImageReader(image_path)
-                self.X.append(im.get_frame(0))
+                self.X.append(im.get_frame(0)) #500x400
                 self.Y.append([float(row["Valence_mean"]), float(row["Arousal_mean"])])
                 self.Metadata.append([
                     row["Category"],

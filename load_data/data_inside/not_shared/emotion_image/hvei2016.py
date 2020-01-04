@@ -69,7 +69,7 @@ class LoadHVEI2016ImageEmotion(ILoadSupervised):
             for row in csv_reader:
                 image_path = join(self.folderpath, row["image"]+".jpg")
                 im = pims.ImageReader(image_path)
-                self.X.append(im.get_frame(0))
+                self.X.append(im.get_frame(0)) #640x640
                 if self.target_type == "circumplex":
                     self.Y.append([float(row["v_score_mean"]), float(row["a_score_mean"])])
                     self.Metadata.append([
