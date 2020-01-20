@@ -28,7 +28,7 @@ subset_problem = Subset_Real(seed=0, num_dims=200)
 problem_to_solve = "partition sum"
 #problem_to_solve = "subset sum"
 
-to_verbose = False
+to_verbose = True
 
 if "AFSA" in to_use:
     print("create afsa")

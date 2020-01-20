@@ -28,7 +28,7 @@ class AFSAMH_Real(IMetaheuristic):
 
 
     
-    def run(self, iterations: int = 100, population: int =30, verbose:bool=False,
+    def run_yielded(self, iterations: int = 100, population: int =30, verbose:bool=False,
      stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5, \
       velocity_percentage: float =0.3, n_points_to_choose: int =1, crowded_percentage: float =0.9,\
        visual_distance_percentage: float =0.1, seed: int = None):
@@ -47,6 +47,11 @@ class AFSAMH_Real(IMetaheuristic):
         best_fitness_historical = best_solution_historical.fitness
         best_point_historical = np.copy(best_solution_historical.point)
         fitness_anterior_estancado = best_fitness_historical
+        #yield
+        points = [e.point for e in self._swarm]
+        fts = [e.fitness for e in self._swarm]
+        bin_point = self.preprocess_function(best_point_historical)
+        yield iteration, best_fitness_historical, bin_point, points, fts
         while iteration <= iterations:
             if verbose:
                 print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
@@ -86,15 +91,28 @@ class AFSAMH_Real(IMetaheuristic):
             if not self._to_max and best_fitness_it < best_fitness_historical:
                 best_fitness_historical = best_fitness_it
                 best_point_historical = best_point_it
-            # self.historical_best_fitness[1] = self.best_point_fun([self.historical_best_fitness[1],
-            #                                                        self.get_iteration_best_fitness()[1]])
-            # self.historical_best_fitness[0] = self.objective_function(self.historical_best_fitness[1])
-            # print("mejorcito: "+str(self.objective_function(self.historical_best_fitness[1])))
-
+            #yield
+            points = [e.point for e in self._swarm]
+            fts = [e.fitness for e in self._swarm]
+            bin_point = self.preprocess_function(best_point_historical)
+            yield iteration, best_fitness_historical, bin_point, points, fts
         # print("veces por movimiento: ", self.veces_movimiento)
         # print("terminó: ", mejor_fitness_historico)
+        #yield
+        points = [e.point for e in self._swarm]
+        fts = [e.fitness for e in self._swarm]
         bin_point = self.preprocess_function(best_point_historical)
-        # print("suma de 1s: ", np.sum(bin_point))
+        yield iteration, best_fitness_historical, bin_point, points, fts
+
+    def run(self, iterations: int = 100, population: int =30, verbose:bool=False,
+     stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5, \
+      velocity_percentage: float =0.3, n_points_to_choose: int =1, crowded_percentage: float =0.9,\
+       visual_distance_percentage: float =0.1, seed: int = None):
+        for _, best_fitness_historical, bin_point, _, _ in self.run_yielded(
+            iterations, population, verbose, stagnation_variation, its_stagnation,
+            leap_percentage, velocity_percentage, n_points_to_choose, crowded_percentage,
+            visual_distance_percentage, seed):
+            continue
         return best_fitness_historical, bin_point
     
     def initialize_population(self, population: int):

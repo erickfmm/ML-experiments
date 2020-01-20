@@ -25,7 +25,7 @@ class PSOMH_Real(IMetaheuristic):
 
 
     
-    def run(self, iterations: int = 100, population: int =30, seed: int = None,
+    def run_yielded(self, iterations: int = 100, population: int =30, seed: int = None,
         omega: float=0.5, phi_p: float=1, phi_g: float=1, verbose:bool=False):
         self._iterations = iterations
         self._population = population
@@ -41,6 +41,11 @@ class PSOMH_Real(IMetaheuristic):
         best_solution_historical = self.find_best_solution(self._group)
         best_fitness_historical = best_solution_historical.fitness
         best_point_historical = np.copy(best_solution_historical.point)
+        #yield
+        points = [e.point for e in self._group]
+        fts = [e.fitness for e in self._group]
+        bin_point = self.preprocess_function(best_point_historical)
+        yield iteration, best_fitness_historical, bin_point, points, fts
         while iteration <= iterations:
             if verbose:
                 print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
@@ -70,10 +75,26 @@ class PSOMH_Real(IMetaheuristic):
             if not self._to_max and best_fitness_it < best_fitness_historical:
                 best_fitness_historical = best_fitness_it
                 best_point_historical = best_point_it
+            #yield
+            points = [e.point for e in self._group]
+            fts = [e.fitness for e in self._group]
+            bin_point = self.preprocess_function(best_point_historical)
+            yield iteration, best_fitness_historical, bin_point, points, fts
         bin_point = self.preprocess_function(best_point_historical)
         # print("suma de 1s: ", np.sum(bin_point))
-        return best_fitness_historical, bin_point
+        #return best_fitness_historical, bin_point
+        #yield
+        points = [e.point for e in self._group]
+        fts = [e.fitness for e in self._group]
+        yield iteration, best_fitness_historical, bin_point, points, fts
     
+    def run(self, iterations: int = 100, population: int =30, seed: int = None,
+        omega: float=0.5, phi_p: float=1, phi_g: float=1, verbose:bool=False):
+        for _, best_fitness_historical, bin_point, _, _ in self.run_yielded(
+            iterations, population, seed, omega, phi_p, phi_g, verbose):
+            continue
+        return best_fitness_historical, bin_point
+
     def initialize_population(self, population: int):
         for indivIndex in range(0, population):
             point, fitness = self.generate_random_point()

@@ -22,12 +22,10 @@ class PSOMH_Real_WithLeap(IMetaheuristic):
          preprocess_function if preprocess_function is not None else lambda p: p
         self.repair_function = \
          repair_function if repair_function is not None else lambda p: p
-
-
     
-    def run(self, iterations: int = 100, population: int =30, seed: int = None,
+    def run_yielded(self, iterations: int = 100, population: int =30, seed: int = None,
         omega: float=0.5, phi_p: float=1, phi_g: float=1, verbose:bool=False,
-     stagnation_variation: float =0.2, its_stagnation: int =None, leap_percentage: float =0.5):
+        stagnation_variation: float =0.2, its_stagnation: int =None, leap_percentage: float =0.5):
         self._iterations = iterations
         self._population = population
         self._seed = seed
@@ -44,6 +42,11 @@ class PSOMH_Real_WithLeap(IMetaheuristic):
         best_fitness_historical = best_solution_historical.fitness
         best_point_historical = np.copy(best_solution_historical.point)
         fitness_anterior_estancado = best_fitness_historical
+        #yield
+        points = [e.point for e in self._group]
+        fts = [e.fitness for e in self._group]
+        bin_point = self.preprocess_function(best_point_historical)
+        yield iteration, best_fitness_historical, bin_point, points, fts
         while iteration <= iterations:
             if verbose:
                 print("it: ", iteration, " fitness mejor: ", best_fitness_historical)
@@ -81,8 +84,26 @@ class PSOMH_Real_WithLeap(IMetaheuristic):
             if not self._to_max and best_fitness_it < best_fitness_historical:
                 best_fitness_historical = best_fitness_it
                 best_point_historical = best_point_it
+            #yield
+            points = [e.point for e in self._group]
+            fts = [e.fitness for e in self._group]
+            bin_point = self.preprocess_function(best_point_historical)
+            yield iteration, best_fitness_historical, bin_point, points, fts
         bin_point = self.preprocess_function(best_point_historical)
         # print("suma de 1s: ", np.sum(bin_point))
+        #return best_fitness_historical, bin_point
+        #yield
+        points = [e.point for e in self._group]
+        fts = [e.fitness for e in self._group]
+        yield iteration, best_fitness_historical, bin_point, points, fts
+
+    def run(self, iterations: int = 100, population: int =30, seed: int = None,
+        omega: float=0.5, phi_p: float=1, phi_g: float=1, verbose:bool=False,
+        stagnation_variation: float =0.2, its_stagnation: int =None, leap_percentage: float =0.5):
+        for _, best_fitness_historical, bin_point, _, _ in self.run_yielded(
+            iterations, population, seed, omega, phi_p, phi_g, verbose, 
+            stagnation_variation, its_stagnation, leap_percentage):
+            continue
         return best_fitness_historical, bin_point
     
     def initialize_population(self, population: int):

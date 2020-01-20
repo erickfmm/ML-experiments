@@ -22,9 +22,7 @@ class GeneticMH_Categorical_WithLeap(IMetaheuristic):
         self.repair_function = \
          repair_function if repair_function is not None else lambda p: p
 
-
-    
-    def run(self, iterations: int = 100, population: int =30,
+    def run_yielded(self, iterations: int = 100, population: int =30,
         elitist_percentage: float = 0.3, mutability: float = 0.1, fidelity: bool = True,
         mutation_in_parents: bool = True, seed: int = None, verbose: bool = False,
         stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5):
@@ -53,6 +51,11 @@ class GeneticMH_Categorical_WithLeap(IMetaheuristic):
         best_fitness_historical = best_solution_historical.fitness
         best_point_historical = np.copy(best_solution_historical.point)
         fitness_anterior_estancado = best_fitness_historical
+        #yield
+        points = [e.point for e in self._group]
+        fts = [e.fitness for e in self._group]
+        bin_point = self.preprocess_function(best_point_historical)
+        yield iteration, best_fitness_historical, bin_point, points, fts
         while iteration <= iterations:
             if verbose:
                 print("it: ", iteration, " best historical fitness: ", best_fitness_historical)
@@ -80,8 +83,28 @@ class GeneticMH_Categorical_WithLeap(IMetaheuristic):
             if not self._to_max and best_fitness_it < best_fitness_historical:
                 best_fitness_historical = best_fitness_it
                 best_point_historical = best_point_it
+            #yield
+            points = [e.point for e in self._group]
+            fts = [e.fitness for e in self._group]
+            bin_point = self.preprocess_function(best_point_historical)
+            yield iteration, best_fitness_historical, bin_point, points, fts
         bin_point = self.preprocess_function(best_point_historical)
         # print("suma de 1s: ", np.sum(bin_point))
+        #return best_fitness_historical, bin_point
+        #yield
+        points = [e.point for e in self._group]
+        fts = [e.fitness for e in self._group]
+        yield iteration, best_fitness_historical, bin_point, points, fts
+
+    def run(self, iterations: int = 100, population: int =30,
+        elitist_percentage: float = 0.3, mutability: float = 0.1, fidelity: bool = True,
+        mutation_in_parents: bool = True, seed: int = None, verbose: bool = False,
+        stagnation_variation: float =0.2, its_stagnation: int =5, leap_percentage: float =0.5):
+        for _, best_fitness_historical, bin_point, _, _ in self.run_yielded(
+            iterations, population, elitist_percentage, mutability, fidelity, 
+            mutation_in_parents, seed, verbose, stagnation_variation, 
+            its_stagnation, leap_percentage):
+            continue
         return best_fitness_historical, bin_point
     
     def initialize_population(self, population: int):
