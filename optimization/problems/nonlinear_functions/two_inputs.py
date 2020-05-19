@@ -52,7 +52,15 @@ class Goldsteinprice:
 class Pshubert1:
     @staticmethod
     def func_simple(x: float, y:float) -> float:
-        return None
+        res1 = 0
+        for i in range(1, 6):#1, 2, 3, 4, 5
+            res1 += float(i)*np.cos( (i+1.0)*x + i )
+        res2 = 0
+        for i in range(1, 6):#1,2,3,4,5
+            res2 += float(i)*np.cos( (i+1.0)*y + i )
+        result = (0.5*( (x+1.42513)**2 + (y+0.80032)**2 ) )
+        result = (res1*res2) + result
+        return result
 
     @staticmethod
     def func(x_array: list) -> float:
@@ -73,7 +81,15 @@ class Pshubert1:
 class Pshubert2:
     @staticmethod
     def func_simple(x: float, y:float) -> float:
-        return None
+        res1 = 0
+        for i in range(1, 6):#1, 2, 3, 4, 5
+            res1 += float(i)*np.cos( (i+1.0)*x + i )
+        res2 = 0
+        for i in range(1, 6):#1,2,3,4,5
+            res2 += float(i)*np.cos( (i+1.0)*y + i )
+        result = (x+1.42513)**2 + (y+0.80032)**2
+        result = (res1*res2) + result
+        return result
 
     @staticmethod
     def func(x_array: list) -> float:
@@ -94,7 +110,13 @@ class Pshubert2:
 class Shubert:
     @staticmethod
     def func_simple(x: float, y:float) -> float:
-        return None
+        res1 = 0
+        for i in range(1, 6):#1, 2, 3, 4, 5
+            res1 += float(i)*np.cos( (i+1.0)*x + i )
+        res2 = 0
+        for i in range(1, 6):#1,2,3,4,5
+            res2 += float(i)*np.cos( (i+1.0)*y + i )
+        return res1*res2
 
     @staticmethod
     def func(x_array: list) -> float:
@@ -115,7 +137,7 @@ class Shubert:
 class Quartic:
     @staticmethod
     def func_simple(x: float, y:float) -> float:
-        return None
+        return (x**4/float(4)) - (x**2/float(2)) + (x/float(10)) + (y**2/float(2))
 
     @staticmethod
     def func(x_array: list) -> float:

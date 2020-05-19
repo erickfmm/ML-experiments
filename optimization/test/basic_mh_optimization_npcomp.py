@@ -82,7 +82,7 @@ if "PSO" in to_use:
     if problem_to_solve == "subset sum":
         mh = PSOMH_Real(subset_problem.min_x, subset_problem.max_x, subset_problem.ndim, False, subset_problem.objective_function, subset_problem.repair_function, subset_problem.preprocess_function)
     print("to run PSO")
-    fit, pt = mh.run(verbose=to_verbose, iterations=100, population=30, omega=0.8, phi_g=1, phi_p=0.5 ,seed=115)
+    fit, pt = mh.run(verbose=to_verbose, iterations=100, population=30, omega=0.8, phi_g=1, phi_p=0.5,seed=115)
     print(fit)
     print(pt)
     if problem_to_solve == "partition sum":
