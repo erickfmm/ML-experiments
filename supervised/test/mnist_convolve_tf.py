@@ -4,9 +4,9 @@ from os.path import dirname, join, abspath
 sys.path.append(abspath(join(dirname(__file__), '../..')))
 ######################################################
 
-from load_data.data_downloadable.mnist_keras import LoadMnist
-from load_data.data_downloadable.cifar10_keras import LoadCifar10
-from load_data.data_inside.not_shared.mnist_file import LoadMnist as LoadMnistFile
+from load_data.loader.downloadable.mnist_keras import LoadMnist
+from load_data.loader.downloadable.cifar10_keras import LoadCifar10
+from load_data.loader.basic.mnist_file import LoadMnist as LoadMnistFile
 
 import numpy as np
 from keras.models import Sequential
@@ -28,7 +28,7 @@ if dataset_to_use == "mnist":
     (Xtrain, Ytrain), (Xtest, Ytest) = l_mnist.get_splited()
 
 if dataset_to_use == "fashion":
-    l_fashion = LoadMnistFile(mnist_path='train_data\\not_shared\\FromKaggle\\fashionmnist')
+    l_fashion = LoadMnistFile(mnist_path='train_data/Folder_Images_Supervised/fashionmnist')
     (Xtrain, Ytrain), (Xtest, Ytest) = l_fashion.get_splited()
     Xtrain = np.asarray(Xtrain)
     Xtest = np.asarray(Xtest)

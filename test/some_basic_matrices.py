@@ -4,7 +4,7 @@ from os.path import dirname, join, abspath
 sys.path.append(abspath(join(dirname(__file__), '..')))
 ######################################################
 
-from load_data.data_inside.shared.random_of_function import LoadRandom
+from load_data.loader.basic.random_of_function import LoadRandom
 
 import unsupervised.distance as distance
 import unsupervised.correlation_matrix as correlation_matrix

@@ -117,7 +117,7 @@ def train(random_dim, random_gen, x_train, epochs=1, batch_size=128):
     return generator, discriminator, gan
 
 
-from load_data.data_downloadable.mnist_keras import LoadMnist
+from load_data.loader.downloadable.mnist_keras import LoadMnist
 from utils.keras_persistence.all_inside import save, load
 import os
 import shutil

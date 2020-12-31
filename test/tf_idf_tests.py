@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+import os
+import sys
+from os.path import dirname, join, abspath
+sys.path.append(abspath(join(dirname(__file__), '..')))
+######################################################
+
 
 import utils.text.tf_idf.term_frequency as tf
 import utils.text.tf_idf.inverse_document_frequency as idf

@@ -11,13 +11,13 @@ from sklearn.model_selection import train_test_split
 
 from unsupervised.autoencoder_tf import reconstruct_data
 
-from load_data.data_inside.shared.iris import LoadIris
-from load_data.data_inside.shared.glass import LoadGlass
-from load_data.data_inside.shared.segment import LoadSegment
-from load_data.data_inside.shared.titanic import LoadTitanic
-from load_data.data_inside.shared.vehicle import LoadVehicle
+from load_data.loader.basic.iris import LoadIris
+from load_data.loader.basic.glass import LoadGlass
+from load_data.loader.basic.segment import LoadSegment
+from load_data.loader.basic.titanic import LoadTitanic
+from load_data.loader.basic.vehicle import LoadVehicle
 
-#from load_data.data_inside.not_shared.recognition_human_actions_video import LoadRecognitionHumanActions
+print("all imported")
 
 def calc_differences(real_data, reconstructed_data):
     difs = np.abs(real_data - reconstructed_data)

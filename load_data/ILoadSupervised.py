@@ -17,8 +17,8 @@ class ILoadSupervised(ABC):
     @abstractmethod
     def get_all(self): raise NotImplementedError
     
-    #@abstractmethod
-    def get_all_yielded(self): raise NotImplementedError
+#    #@abstractmethod
+#    def get_all_yielded(self): raise NotImplementedError
     
     @abstractmethod
     def get_classes(self): raise NotImplementedError
