@@ -1,5 +1,6 @@
 train_data/*
 created_models/*
+gui_web/static/vendor/*
 
 **/Thumbs.db
 **/thumbs.db
