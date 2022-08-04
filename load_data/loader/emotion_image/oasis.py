@@ -3,7 +3,7 @@
 #train_data\\Folder_ImageEmotion\\oasis\\OASIS.csv
 
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
-import pims
+from PIL import Image
 from os.path import join, splitext
 from os import listdir
 import csv
@@ -40,8 +40,8 @@ class LoadOASISImageEmotion(ILoadSupervised):
             csv_reader = csv.DictReader(csv_obj)
             for row in csv_reader:
                 image_path = join(self.folderpath, "images", row["Theme"].strip()+".jpg")
-                im = pims.ImageReader(image_path)
-                self.X.append(im.get_frame(0)) #500x400
+                im: Image = Image.open(image_path)
+                self.X.append(im) #500x400
                 self.Y.append([float(row["Valence_mean"]), float(row["Arousal_mean"])])
                 self.Metadata.append([
                     row["Category"],

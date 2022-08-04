@@ -1,18 +1,22 @@
+import sys
+from os.path import dirname, join, abspath
+sys.path.append(abspath(join(dirname(__file__), '..')))
+
 from supervised.perceptron import Perceptron
 
 ### Load data
 ## data shared
-from load_data.data_inside.shared.andtable import LoadAndTable
-from load_data.data_inside.shared.xortable import LoadXorTable
-from load_data.data_inside.shared.titanic import LoadTitanic
+from load_data.loader.basic.andtable import LoadAndTable
+from load_data.loader.basic.xortable import LoadXorTable
+from load_data.loader.basic.titanic import LoadTitanic
 
-from load_data.data_inside.not_shared.mnist_file import LoadMnist
-from load_data.data_inside.not_shared.recognition_human_actions_video import LoadRecognitionHumanActions
+from load_data.loader.basic.mnist_file import LoadMnist
+from load_data.loader.recognition_human_actions_video import LoadRecognitionHumanActions
 
 
-from load_data.data_downloadable.mnist_keras import LoadMnist
-from load_data.data_downloadable.iris_sklearn import LoadIris
-from load_data.data_downloadable.cifar10_keras import LoadCifar10
+from load_data.loader.downloadable.mnist_keras import LoadMnist
+from load_data.loader.downloadable.iris_sklearn import LoadIris
+from load_data.loader.downloadable.cifar100_keras import LoadCifar10
 
 from unsupervised.clustering.kmeans import KMeans
 from unsupervised.clustering.utils.monte_carlo import montecarlo_clustering

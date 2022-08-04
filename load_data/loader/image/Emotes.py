@@ -3,7 +3,7 @@
 from load_data.ILoadUnsupervised import ILoadUnsupervised
 from os.path import join, splitext
 from os import listdir
-import pims
+from PIL import Image
 
 class LoadTwitchEmotes(ILoadUnsupervised):
 
@@ -17,12 +17,8 @@ class LoadTwitchEmotes(ILoadUnsupervised):
     def get_all_yielded(self, image_shape=(28,28,4)):
         for filename in listdir(self.datapath):
             if splitext(filename)[1].lower() == ".jpg":
-                im = pims.ImageReader(join(self.datapath, filename))
-                frame = im.get_frame(0) #28x28x4
-                if image_shape is None:
-                    yield frame
-                elif frame.shape == image_shape:
-                    yield frame
+                im = Image.open(join(self.datapath, filename))
+                yield im
 
     def get_all(self):
         data = []

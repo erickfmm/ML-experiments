@@ -4,8 +4,8 @@
 #train_data\Folder_ImageEmotion\Affective Image Classification Using Features inspired by Psychology and Art Theory\testImages_abstract
 #ABSTRACT_groundTruth.csv
 from load_data.ILoadSupervised import ILoadSupervised
-from load_data.data_inside.not_shared.util_emotions import DiscreteEmotion
-import pims
+from load_data.loader.util_emotions import DiscreteEmotion
+from PIL import Image
 from os.path import join, splitext
 from os import listdir
 import csv
@@ -64,8 +64,8 @@ class LoadACMM10ImageEmotion(ILoadSupervised):
             if splitext(filename)[1].lower() == ".jpg":
                 segments_name = filename.split("_")
                 fullname = join(self.folderpath, self.dataset, filename)
-                im = pims.ImageReader(fullname)
-                self.X.append(im.get_frame(0))
+                im = Image.open(fullname)
+                self.X.append(im)
                 self.Y.append(segments_name[0])
                 if segments_name[0] not in self.classes:
                     self.classes.append(segments_name[0])
@@ -89,8 +89,8 @@ class LoadACMM10ImageEmotion(ILoadSupervised):
             s = sum(values)
             if self.use_probability:
                 values = [e/float(s) for e in values]
-            im = pims.ImageReader(fullname)
-            self.X.append(im.get_frame(0))
+            im = Image.open(fullname)
+            self.X.append(im)
             self.Y.append(values)
             self.Metadata.append(s)
         return self.X, self.Y

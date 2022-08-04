@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pims import ImageReader
+#from pims import ImageReader
+from PIL import Image
 from load_data.ILoadSupervised import ILoadSupervised
 from os.path import join, exists
 import csv
@@ -19,8 +20,8 @@ class LoadPokemon(ILoadSupervised):
             for row in csv_reader:
                 imagename = join(self.path, "images", row["Name"]+".png")
                 if exists(imagename):
-                    im = ImageReader(imagename)
-                    X.append(im.get_frame(0))
+                    im = Image.open(imagename)
+                    X.append(im)
                     self.classes.add(row["Type1"])
                     actual_ys = []
                     actual_ys.append(row["Type1"])

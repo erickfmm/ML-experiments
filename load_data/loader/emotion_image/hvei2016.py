@@ -2,7 +2,7 @@
 #ground_truth_each_image.csv
 
 from load_data.ILoadSupervised import ILoadSupervised
-import pims
+from PIL import Image
 from os.path import join, splitext
 from os import listdir
 import csv
@@ -68,8 +68,8 @@ class LoadHVEI2016ImageEmotion(ILoadSupervised):
             csv_reader = csv.DictReader(csv_obj)
             for row in csv_reader:
                 image_path = join(self.folderpath, row["image"]+".jpg")
-                im = pims.ImageReader(image_path)
-                self.X.append(im.get_frame(0)) #640x640
+                im = Image.open(image_path)
+                self.X.append(im) #640x640
                 if self.target_type == "circumplex":
                     self.Y.append([float(row["v_score_mean"]), float(row["a_score_mean"])])
                     self.Metadata.append([

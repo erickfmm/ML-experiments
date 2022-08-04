@@ -2,6 +2,7 @@
 #https://medium.com/sigmoid/a-brief-introduction-to-gans-and-how-to-code-them-2620ee465c30
 #https://github.com/sarvasvkulpati/intro_to_gans/blob/master/intro_to_gans.ipynb
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm #progress bar

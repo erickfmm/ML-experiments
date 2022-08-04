@@ -1,5 +1,5 @@
 from load_data.ILoadSupervised import ILoadSupervised
-import pims
+from PIL import Image
 from os.path import join, splitext
 from os import listdir
 
@@ -37,8 +37,8 @@ class LoadArtImageStyle(ILoadSupervised):
                 if splitext(filename)[1].lower() == ".jpg":
                     fullname = join(train_folder, cl, filename)
                     try:
-                        im = pims.ImageReader(fullname)
-                        XTrain.append(im.get_frame(0))
+                        im = Image.open(fullname)
+                        XTrain.append(im)
                         YTrain.append(cl)
                     except:
                         print("Error in: ", fullname)
@@ -46,8 +46,8 @@ class LoadArtImageStyle(ILoadSupervised):
                 if splitext(filename)[1].lower() == ".jpg":
                     fullname = join(validation_folder, cl, filename)
                     try:
-                        im = pims.ImageReader(fullname)
-                        XTest.append(im.get_frame(0))
+                        im = Image.open(fullname)
+                        XTest.append(im)
                         YTest.append(cl)
                     except:
                         print("Error in: ", fullname)
@@ -63,8 +63,8 @@ class LoadArtImageStyle(ILoadSupervised):
                 if splitext(filename)[1].lower() == ".jpg":
                     fullname = join(train_folder, cl, filename)
                     try:
-                        im = pims.ImageReader(fullname)
-                        X.append(im.get_frame(0))
+                        im = Image.open(fullname)
+                        X.append(im)
                         Y.append(cl)
                     except:
                         print("Error in: ", fullname)
@@ -72,8 +72,8 @@ class LoadArtImageStyle(ILoadSupervised):
                 if splitext(filename)[1].lower() == ".jpg":
                     fullname = join(validation_folder, cl, filename)
                     try:
-                        im = pims.ImageReader(fullname)
-                        X.append(im.get_frame(0))
+                        im = Image.open(fullname)
+                        X.append(im)
                         Y.append(cl)
                     except:
                         print("Error in: ", fullname)

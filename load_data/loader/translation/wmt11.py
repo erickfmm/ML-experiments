@@ -7,17 +7,17 @@ class LoadWMT11(ILoadUnsupervised):
     #datapath="train_data/Folder_NLPEspañol_Translation/WMT13 [ES-EN]/training"
     def __init__(self, datapath="train_data/Folder_NLPEspañol_Translation/WMT11_Translation/training", \
                  dataset="news-commentary-v6"):
-    """
-    nombre + ".es-en.en" y ".es-en.es"
-    wmt11:
-        - europarl-v6
-        - news-commentary-v6
-    wmt13:
-        - commoncrawl.es-en
-        - europarl-v7.es-en
-        - news-commentary-v8.es-en
-        - undoc.2000.es-en
-    """
+        """
+        nombre + ".es-en.en" y ".es-en.es"
+        wmt11:
+            - europarl-v6
+            - news-commentary-v6
+        wmt13:
+            - commoncrawl.es-en
+            - europarl-v7.es-en
+            - news-commentary-v8.es-en
+            - undoc.2000.es-en
+        """
         self.datapath = datapath
         #self.filename_eng = "europarl-v6.es-en.en" if dataset == "europarl" else "news-commentary-v6.es-en.en"
         #self.filename_es = "europarl-v6.es-en.es" if dataset == "europarl" else "news-commentary-v6.es-en.es"

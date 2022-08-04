@@ -19,7 +19,7 @@ class LoadAfricaFabric(ILoadUnsupervised):
         for filename in listdir(self.datapath):
             if splitext(filename)[1].lower() == ".jpg":
                 im = Image.open(join(self.datapath, filename))
-                yield im.get_frame(0) #64x64x3
+                yield im #64x64x3
 
     def get_all(self):
         data = []
