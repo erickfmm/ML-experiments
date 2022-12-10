@@ -1,7 +1,8 @@
-#taken from:
-#https://en.wikipedia.org/wiki/Sone
+# taken from:
+# https://en.wikipedia.org/wiki/Sone
 
 import math
+
 
 def sone(loudness_level: float) -> float:
     """

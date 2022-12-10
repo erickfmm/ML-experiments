@@ -1,5 +1,6 @@
 import math
 
+
 def LC_lowpass(input: list, sample_rate: int, frequency: float, Q: float):
     O : float = float(2.0 * math.pi * frequency) / float(sample_rate)
     C : float = Q / O

@@ -1,6 +1,7 @@
 import random
 
-def split_percentage(data, labels, percentage, to_permute=True):
+
+def split_percentage(data: list, labels: list, percentage: float, to_permute: bool = True):
     if len(data) != len(labels):
         raise ValueError("length of data and labels are not equal")
     data_len = len(data)
@@ -14,7 +15,8 @@ def split_percentage(data, labels, percentage, to_permute=True):
     labels_test = [labels[idx] for idx in indexes[max_idx:data_len]]
     return data_train, labels_train, data_test, labels_test
 
-def permute(data, labels):
+
+def permute(data: list, labels: list):
     if len(data) != len(labels):
         raise ValueError("length of data and labels are not equal")
     data_len = len(data)
@@ -24,7 +26,8 @@ def permute(data, labels):
     perm_labels = [labels[i] for i in indexes]
     return perm_data, perm_labels
 
-def k_split(data, labels, k, to_permute=True):
+
+def k_split(data: list, labels: list, k: int, to_permute: bool = True):
     if len(data) != len(labels):
         raise ValueError("length of data and labels are not equal")
     if to_permute:
@@ -37,7 +40,8 @@ def k_split(data, labels, k, to_permute=True):
         klabels.append([labels[i] for i in range(int(data_len_k*i_k), int(data_len_k*(i_k+1)))])
     return datas, klabels
 
-def k_split_equally(data, labels, k, to_permute=True):
+
+def k_split_equally(data: list, labels: list, k: int, to_permute: bool = True):
     if len(data) != len(labels):
         raise ValueError("length of data and labels are not equal")
     if to_permute:

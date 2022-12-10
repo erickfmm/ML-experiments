@@ -4,8 +4,8 @@ sys.path.append(abspath(join(dirname(__file__), '..')))
 
 from supervised.perceptron import Perceptron
 
-### Load data
-## data shared
+# Load data
+# data shared
 from load_data.loader.basic.andtable import LoadAndTable
 from load_data.loader.basic.xortable import LoadXorTable
 from load_data.loader.basic.titanic import LoadTitanic
@@ -42,9 +42,9 @@ f, a, ms = montecarlo_clustering(KMeans, X, 10, 3, 30)
 #km = KMeans(X)
 #km.cluster(2, 0)
 #print("centroids: ", km.centroids)
-print("assign 0: ", np.sum(np.isin(f,0)))
-print("assign 1: ", np.sum(np.isin(f,1)))
-print("assign 2: ", np.sum(np.isin(f,2)))
+print("assign 0: ", np.sum(np.isin(f, 0)))
+print("assign 1: ", np.sum(np.isin(f, 1)))
+print("assign 2: ", np.sum(np.isin(f, 2)))
 #print("assign 3: ", np.sum(np.isin(km.assign,3)))
 for m in ms:
     print("its: ", m.iterations)

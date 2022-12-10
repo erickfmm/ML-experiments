@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import sys
 from os.path import dirname, join, abspath
@@ -11,7 +10,7 @@ import utils.text.tf_idf.inverse_document_frequency as idf
 import utils.text.tf_idf.tf_idf_document as tf_idf_doc_funcs
 import utils.text.tf_idf.tf_idf_query as tf_idf_query_funcs
 
-#text taken from sanish newsparlament dataset from wmt11, first 10 lines
+# text taken from sanish newsparlament dataset from wmt11, first 10 lines
 ss = []
 ss.append("Musharraf's Last Act?")
 ss.append("Desperate to hold onto power, Pervez Musharraf has discarded Pakistan's constitutional framework and declared a state of emergency.")
@@ -87,25 +86,25 @@ for w in words:
     idf_point["max"].append(idf.idf_max(w, docs))
     idf_point["prob"].append(idf.idf_probabilistic(w, docs))
 
-#import pprint
-#pp = pprint.PrettyPrinter(indent=4)
-#pp.pprint(tf_points["bin"])
+# import pprint
+# pp = pprint.PrettyPrinter(indent=4)
+# pp.pprint(tf_points["bin"])
 
 
-plot_tf = True#False
+plot_tf = True  # False
 plot_tf_idf_doc = False
 plot_tf_idf_query = False
-plot_idf = False#True
+plot_idf = False  # True
 
-mode_plot = "."#"-"
+mode_plot = "."  # "-"
 
 if plot_tf:
     fig = plt.figure()
     plt.title("Term Frequency")
-    #fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
-    #ax = fig.add_subplot(2, 2, 1)
-    #for i in range(len(docs)):
+    # ax = fig.add_subplot(2, 2, 1)
+    # for i in range(len(docs)):
     #    ax.plot(tf_points["bin"][i])
 
     ax = fig.add_subplot(2, 2, 1)
@@ -122,7 +121,7 @@ if plot_tf:
     ax.title.set_text("log norm")
     for i in range(len(docs)):
         ax.plot(tf_points["log"][i], mode_plot)
-    #plt.show()
+    # plt.show()
 
     ax = fig.add_subplot(2, 2, 4)
     ax.title.set_text("double norm")
@@ -133,7 +132,7 @@ if plot_tf:
 if plot_idf:
     fig = plt.figure()
     plt.title("Inverse Document Frequency")
-    #fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("idf")
@@ -153,10 +152,9 @@ if plot_idf:
     plt.show()
 
 
-
 if plot_tf_idf_doc:
     fig = plt.figure()
-    #fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("1")
@@ -176,7 +174,7 @@ if plot_tf_idf_doc:
 
 if plot_tf_idf_query:
     fig = plt.figure()
-    #fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("1")

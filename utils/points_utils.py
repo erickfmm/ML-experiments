@@ -1,15 +1,17 @@
 import numpy as np
 
-def nsphere_to_cartesian(r, angles):
+
+def nsphere_to_cartesian(radio: float, angles: list[float]) -> list[float]:
     a = np.concatenate((np.array([2 * np.pi]), angles))
     si = np.sin(a)
     si[0] = 1
     si = np.cumprod(si)
     co = np.cos(a)
     co = np.roll(co, -1)
-    return si * co * r
+    return si * co * radio
 
-def distance(point1, point2):
+
+def distance(point1: list[float], point2: list[float]) -> float:
     sum_pows = 0
     if len(point1) == len(point2):
         for i in range(0, len(point1)):
@@ -18,7 +20,8 @@ def distance(point1, point2):
     else:
         raise ValueError
 
-def distance_squared(point1, point2):
+
+def distance_squared(point1: list[float], point2: list[float]) -> float:
     sum_pows = 0
     if len(point1) == len(point2):
         for i in range(0, len(point1)):
@@ -27,7 +30,8 @@ def distance_squared(point1, point2):
     else:
         raise ValueError
 
-def distance_taxicab(point1, point2):
+
+def distance_taxicab(point1: list[float], point2: list[float]) -> float:
     sum_abs = 0
     if len(point1) == len(point2):
         for i in range(0, len(point1)):

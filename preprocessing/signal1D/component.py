@@ -3,25 +3,27 @@ from PyEMD import EEMD
 from PyEMD import CEEMDAN
 import numpy as np
 
+
 def getEMDs(signal):
 	emd = EMD()
 	IMFs = emd(signal)
 	return IMFs
+
 
 def getEEMD(signal):
 	eemd = EEMD()
 	eIMFs = eemd(signal)
 	return eIMFs
 
+
 def getCEEMDAN(signal):
 	ceemdan = CEEMDAN()
 	cIMFs = ceemdan(signal)
 	return cIMFs
 
+
 def getExactSignal(signal):
 	return [signal]
-
-
 
 
 """ def getMaxComponentsEMDVariants(the_data, signals, Componentfunction):

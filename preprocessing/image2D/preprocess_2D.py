@@ -2,6 +2,7 @@ import numpy as np
 
 __all__ = ["replace_nans", "normalize"]
 
+
 def replace_nans(data, to_replace=0):
     for i in range(len(data)):
         for j in range(len(data[i])):
@@ -9,8 +10,9 @@ def replace_nans(data, to_replace=0):
                 data[i][j] = to_replace
     return data
 
+
 def normalize(data):
-    #delete 0s
+    # delete 0s
     data = replace_nans(data)
     ma = float(np.max(data))
     mi = float(np.min(data))

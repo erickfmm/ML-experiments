@@ -1,6 +1,7 @@
-#asumes:
-#sudo pip install PyYAML
+# asumes:
+# sudo pip install PyYAML
 from keras.models import model_from_yaml
+
 
 def save(model, model_filename: str, weights_filename: str):
     # serialize model to YAML

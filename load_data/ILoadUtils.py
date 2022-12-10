@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod, ABC
 
+
 class IMetadata(ABC):
     __metaclass__ = ABCMeta
 

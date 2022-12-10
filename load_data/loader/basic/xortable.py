@@ -1,17 +1,18 @@
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 
-__all__ = ["LoadXorTable",]
+__all__ = ["LoadXorTable"]
+
 
 class LoadXorTable(ILoadSupervised):
     def __init__(self):
         self.TYPE = SupervisedType.Classification
-        self.Xs = [
+        self.xs = [
             [0, 0],
             [0, 1],
             [1, 0],
             [1, 1]
         ]
-        self.Ys = [1, 0, 0, 1]
+        self.ys = [1, 0, 0, 1]
         self.headers = ["first", "second"]
         self.classes = ["result"]
     
@@ -22,8 +23,8 @@ class LoadXorTable(ILoadSupervised):
         return self.headers
     
     def get_all(self):
-        return self.Xs, self.Ys
+        return self.xs, self.ys
     
     def get_all_yielded(self):
-        for i in range(len(self.Xs)):
-            yield self.Xs[i], self.Ys[i]
+        for i in range(len(self.xs)):
+            yield self.xs[i], self.ys[i]

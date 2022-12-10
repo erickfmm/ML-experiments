@@ -2,13 +2,13 @@ from keras.datasets import fashion_mnist
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import numpy as np
 
-__all__ = ["LoadFashionMnist",]
+__all__ = ["LoadFashionMnist"]
+
 
 class LoadFashionMnist(ILoadSupervised):
     def __init__(self):
         self.TYPE = SupervisedType.Classification
-        (self.XTrain,self.YTrain),(self.XTest,self.YTest)=fashion_mnist.load_data()
-        self.headers = [str(i) for i in range(len(self.XTest[0]))]
+        self.headers = ["pixels"]
         self.classes = [str(i) for i in range(10)]
     
     def get_classes(self):
@@ -18,10 +18,13 @@ class LoadFashionMnist(ILoadSupervised):
         return self.headers
 
     def get_default(self):
-        return self.XTrain, self.YTrain
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        return x_train, y_train
 
     def get_splited(self):
-        return (self.XTrain, self.YTrain), (self.XTest, self.YTest)
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        return (x_train, y_train), (x_test, y_test)
     
     def get_all(self):
-        return np.append(self.XTrain, self.XTest, 0), np.append(self.YTrain, self.YTest, 0)
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        return np.append(x_train, x_test, 0), np.append(y_train, y_test, 0)

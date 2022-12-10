@@ -1,12 +1,14 @@
 from load_data.ILoadUnsupervised import ILoadUnsupervised
 from os import listdir
 from os.path import join, splitext
-#from pims import ImageReader
 from PIL import Image
 
+__all__ = ["LoadAnimeFaces"]
+
+
 class LoadAnimeFaces(ILoadUnsupervised):
-    def __init__(self, folderpath="train_data/Folder_Manga_Anime/anime-faces"):
-        self.folderpath = folderpath
+    def __init__(self, folder_path="train_data/Folder_Manga_Anime/anime-faces"):
+        self.folder_path = folder_path
 
     def get_headers(self):
         return ["Image"]
@@ -18,10 +20,8 @@ class LoadAnimeFaces(ILoadUnsupervised):
         return all_data
 
     def get_all_yield(self):
-        for filename in listdir(self.folderpath):
+        for filename in listdir(self.folder_path):
             if splitext(filename)[1].lower() == ".png":
-                fullname = join(self.folderpath, filename)
-                im = Image.open(fullname)
+                fullname = join(self.folder_path, filename)
+                im = Image.open(fullname)  # TODO: 64x64x4 (to see if alpha channel is real)
                 yield im
-                #data = ImageReader(fullname)
-                #yield data.get_frame(0) #64x64x4 (to see if alpha channel is real)

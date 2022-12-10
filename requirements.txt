@@ -18,3 +18,9 @@ pims
 pysimplegui
 pygubu
 pygubu-designer
+mnist
+Pillow
+pymongo
+PyYAML
+pypng
+PyEMD

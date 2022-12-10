@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def normalize_absmax(signal):
 	maxim = np.max(signal)
 	minim = np.min(signal)

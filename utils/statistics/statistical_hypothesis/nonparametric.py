@@ -1,7 +1,9 @@
-#taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
+# taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
 
 
 from scipy.stats import mannwhitneyu
+
+
 def mann_whitney_u(data1, data2) -> (float, float):
     """Tests whether the distributions of two independent samples are equal or not.
     Assumptions
@@ -29,9 +31,12 @@ def mann_whitney_u(data1, data2) -> (float, float):
         two-sided, depending on the choice of `alternative`.  
     """
     stat, p = mannwhitneyu(data1, data2)
+    return stat, p
 
 
 from scipy.stats import wilcoxon
+
+
 def wilcoxon_signed_rank(data1, data2) -> (float, float):
     """Tests whether the distributions of two paired samples are equal or not.
     Assumptions
@@ -60,11 +65,13 @@ def wilcoxon_signed_rank(data1, data2) -> (float, float):
     p : float
         The two-sided p-value for the test.  
     """
-    stat, p = wilcoxon(data1, data2)
-
+    res = wilcoxon(data1, data2)  # TODO: test and use res
+    return res
 
 
 from scipy.stats import kruskal
+
+
 def kruskal_wallis_h(data1, data2) -> (float, float):
     """Tests whether the distributions of two or more independent samples are equal or not.
     Assumptions
@@ -89,10 +96,12 @@ def kruskal_wallis_h(data1, data2) -> (float, float):
         The p-value for the test using the assumption that H has a chi-square distribution  
     """
     stat, p = kruskal(data1, data2, ...)
-
+    return stat, p
 
 
 from scipy.stats import friedmanchisquare
+
+
 def friedman(data1, data2) -> (float, float):
     """Tests whether the distributions of two or more paired samples are equal or not.
     Assumptions
@@ -118,4 +127,5 @@ def friedman(data1, data2) -> (float, float):
     p : float
         the associated p-value assuming that the test statistic has a chi-squared distribution  
     """
-    stat, p = friedmanchisquare(data1, data2)#, ...)
+    stat, p = friedmanchisquare(data1, data2)  # , ...) # TODO: test
+    return stat, p

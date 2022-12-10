@@ -1,24 +1,23 @@
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 
-__all__ = ["LoadMnistCsv",]
+__all__ = ["LoadMnistCsv"]
+
 
 class LoadMnistCsv(ILoadSupervised):
-    def __init__(self, 
-        trainfile='train_data/Folder_Images_Supervised/sign-language-mnist/sign_mnist_test.csv',
-        testfile='train_data/Folder_Images_Supervised/sign-language-mnist/sign_mnist_train.csv'):
+    def __init__(self,
+                 train_file='train_data/Folder_Images_Supervised/sign-language-mnist/sign_mnist_test.csv',
+                 test_file='train_data/Folder_Images_Supervised/sign-language-mnist/sign_mnist_train.csv'):
         self.TYPE = SupervisedType.Classification
-        self.XTrain, self.YTrain = self.load_file(trainfile)
-        self.XTest, self.YTest = self.load_file(testfile)
-        self.trainfile = trainfile
-        self.testfile = testfile
+        self.XTrain, self.YTrain = self.load_file(train_file)
+        self.XTest, self.YTest = self.load_file(test_file)
+        self.classes = [str(i) for i in list(set(self.YTrain))]
+        self.headers = [str(i) for i in range(len(self.XTest[0]))]
     
     def get_classes(self):
-        self.classes = [str(i) for i in list(set(self.YTrain))]
         return self.classes
     
     def get_headers(self):
-        self.headers = [str(i) for i in range(len(self.XTest[0]))]
         return self.headers
 
     def get_default(self):
@@ -28,30 +27,30 @@ class LoadMnistCsv(ILoadSupervised):
         return (self.XTrain, self.YTrain), (self.XTest, self.YTest)
     
     def get_all(self):
-        Xs = []
-        Ys = []
+        xs = []
+        ys = []
         for i_train in range(len(self.XTrain)):
-            Xs.append(self.XTrain[i_train])
-            Ys.append(self.YTrain[i_train])
+            xs.append(self.XTrain[i_train])
+            ys.append(self.YTrain[i_train])
         for i_test in range(len(self.XTest)):
-            Xs.append(self.XTest[i_test])
-            Ys.append(self.YTest[i_test])
-        return Xs, Ys
+            xs.append(self.XTest[i_test])
+            ys.append(self.YTest[i_test])
+        return xs, ys
     
     @staticmethod
     def load_file(filepath):
-        Xs = []
-        Ys = []
-        with open(filepath, "r") as fileobj:
-            reader = csv.reader(fileobj)
-            irow = -1
+        xs = []
+        ys = []
+        with open(filepath, "r") as file_obj:
+            reader = csv.reader(file_obj)
+            i_row = -1
             for row in reader:
-                if irow >= 0:
-                    Xs.append([])
-                    for icol in range(len(row)):
-                        if icol == 0:
-                            Ys.append(int(row[icol]))
+                if i_row >= 0:
+                    xs.append([])
+                    for i_col in range(len(row)):
+                        if i_col == 0:
+                            ys.append(int(row[i_col]))
                         else:
-                            Xs[irow].append(int(row[icol]))    
-                irow += 1
-        return Xs, Ys
+                            xs[i_row].append(int(row[i_col]))
+                i_row += 1
+        return xs, ys

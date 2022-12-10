@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
 import unsupervised.clustering.utils.initial_assignments as init_assign
 
+
 class ICluster:
     __metaclass__ = ABCMeta
+
     def __init__(self, data):
         self.X = data
         self.assign = []

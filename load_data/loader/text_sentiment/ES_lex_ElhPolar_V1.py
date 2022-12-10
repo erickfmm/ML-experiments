@@ -1,37 +1,39 @@
 from load_data.ILoadSupervised import ILoadSupervised
 
-__all__ = ["LoadElhPolar_es",]
+__all__ = ["LoadElhPolarEs"]
 
-class LoadElhPolar_es(ILoadSupervised):
-    def __init__(self, filepath="train_data/Folder_NLPEspañol_Sentiment/ElhPolar_esV1.lex"):
-        self.filepath = filepath
+
+class LoadElhPolarEs(ILoadSupervised):
+    def __init__(self, file_path="train_data/Folder_NLPEspañol_Sentiment/ElhPolar_esV1.lex"):
+        self.file_path = file_path
         self.classes = ["negative", "positive"]
+        self.wrong = []
 
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self):
         return self.read_file()
     
     def read_file(self):
-        self.X = []
-        self.Y = []
-        self.wrong = []
-        with open(self.filepath, "r") as fileobj:
+        xs = []
+        ys = []
+        with open(self.file_path, "r") as fileobj:
             for line in fileobj:
                 line2 = line.strip()
                 if len(line2) == 0 or line2[0] == "#":
                     continue
                 fields = line2.split("\t")
                 if len(fields) == 2:
-                    self.X.append(fields[0].replace("_", " "))
-                    self.Y.append(fields[1])
+                    xs.append(fields[0].replace("_", " "))
+                    ys.append(fields[1])
                 else:
                     self.wrong.append(fields)
-        return self.X, self.Y
+        return xs, ys
 
     def get_classes(self):
         return self.classes

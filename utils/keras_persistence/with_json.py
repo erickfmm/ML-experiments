@@ -1,5 +1,6 @@
 from keras.models import model_from_json
 
+
 def save(model, model_filename: str, weights_filename: str):
     # serialize model to JSON
     model_json = model.to_json()
@@ -9,7 +10,8 @@ def save(model, model_filename: str, weights_filename: str):
     model.save_weights(weights_filename)
     print("Saved model to disk")
     return model
- 
+
+
 def load(model_filename: str, weights_filename: str):
     # load json and create model
     json_file = open(model_filename, 'r')

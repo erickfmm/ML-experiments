@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
-
 from load_data.ILoadUnsupervised import ILoadUnsupervised
 from csv import DictReader
 
+__all__ = ["LoadMangaAdaptations"]
+
+
 class LoadMangaAdaptations(ILoadUnsupervised):
-    def __init__(self, csvpath="train_data/Folder_Manga_Anime/MangaAdaptaitonScore.csv"):
-        self.csvpath = csvpath
+    def __init__(self, csv_path="train_data/Folder_Manga_Anime/MangaAdaptaitonScore.csv"):
+        self.csv_path = csv_path
 
     def get_headers(self):
         return []
@@ -25,8 +26,8 @@ class LoadMangaAdaptations(ILoadUnsupervised):
         return manga, anime
 
     def get_all_yield(self):
-        with open(self.csvpath, "r") as csvobj:
-            csvreader = DictReader(csvobj)
+        with open(self.csv_path, "r") as csv_obj:
+            csvreader = DictReader(csv_obj)
             for row in csvreader:
                 try:
                     manga_title = row["mangaTitle"]
@@ -34,5 +35,5 @@ class LoadMangaAdaptations(ILoadUnsupervised):
                     manga_rating = float(row["mangaRating"])
                     anime_rating = float(row["adaptationRating"])
                     yield [manga_title, anime_title, manga_rating, anime_rating]
-                except:
-                    pass
+                except Exception as e:
+                    print(e)

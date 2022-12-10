@@ -2,7 +2,9 @@
 
 
 from utils.statistics.online_statistics import movingmean
-#more stable on big amount of data, due to operations with higher of accuracy
+
+
+# more stable on big amount of data, due to operations with higher of accuracy
 def best_variance(data):
     n = len(data)
     sum_sq = 0

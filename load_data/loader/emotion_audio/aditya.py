@@ -3,51 +3,54 @@ from load_data.ILoadSupervised import ILoadSupervised
 from load_data.loader.util_emotions import DiscreteEmotion
 import os
 
-__all__ = ["LoadAditya",]
+__all__ = ["LoadAditya"]
+
 
 class LoadAditya(ILoadSupervised):
-    def __init__(self, classesBinaryArray=[1,1,1,1,1], \
-    foldername="train_data/Folder_AudioEmotion/Aditya_Recordings"):
-        self.foldername = foldername
-        allClasses = [
+    def __init__(self, classes_binary_array=None,
+                 folder_name="train_data/Folder_AudioEmotion/Aditya_Recordings"):
+        if classes_binary_array is None:
+            classes_binary_array = [1, 1, 1, 1, 1]  # using all classes
+        self.folder_name = folder_name
+        self.rate = []
+        all_classes = [
             DiscreteEmotion.Angry.name,
             DiscreteEmotion.Fear.name,
             DiscreteEmotion.Happy.name,
             DiscreteEmotion.Sad.name,
             DiscreteEmotion.Surprise.name]
-        self.classesBinaryArray = classesBinaryArray
+        self.classes_binary_array = classes_binary_array
         self.classes = []
-        for i in range(len(allClasses)):
-            if classesBinaryArray[i] == 1:
-                self.classes.append(allClasses[i])
+        for i in range(len(all_classes)):
+            if classes_binary_array[i] == 1:
+                self.classes.append(all_classes[i])
 
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self):
-        X = []
-        Y = []
-        self.Metadata = []
+        xs = []
+        ys = []
         folders = ["angry", "fear", "happy", "sad", "surprised"]
         icl = 0
         for ifolder in range(len(folders)):
-            if self.classesBinaryArray[ifolder] == 1:
-                emo_folder = os.path.join(self.foldername, folders[ifolder])
+            if self.classes_binary_array[ifolder] == 1:
+                emo_folder = os.path.join(self.folder_name, folders[ifolder])
                 audio_files = os.listdir(emo_folder)
-                for fname in audio_files:
-                    rate, signal = wav.read(os.path.join(emo_folder, fname))
-                    self.Metadata.append(rate)
-                    X.append(signal)
-                    Y.append(self.classes[icl])
+                for file_name in audio_files:
+                    rate, signal = wav.read(os.path.join(emo_folder, file_name))
+                    self.rate.append(rate)
+                    xs.append(signal)
+                    ys.append(self.classes[icl])
                 icl += 1
-        return (X, Y)
+        return xs, ys
     
     def get_classes(self):
         return self.classes
     
     def get_headers(self):
-        return None #self.headers
-
+        return ["audio"]

@@ -6,11 +6,11 @@ from os import listdir
 import csv
 from datetime import date
 
+
 class LoadWeedPrices(ILoadUnsupervised):
 
-    def __init__(self, \
-    datapath="train_data/Folder_TimeSeries/price-of-weed-master/data"):
-        self.datapath = datapath
+    def __init__(self, data_path="train_data/Folder_TimeSeries/price-of-weed-master/data"):
+        self.data_path = data_path
         self.states = []
         
     def get_headers(self):
@@ -19,10 +19,10 @@ class LoadWeedPrices(ILoadUnsupervised):
     def get_all(self):
         data = []
         dates = []
-        for filename in listdir(self.datapath):
+        for filename in listdir(self.data_path):
             if splitext(filename)[1] == ".csv":
                 readed = False
-                with open(join(self.datapath, filename), "r") as fileobj:
+                with open(join(self.data_path, filename), "r") as fileobj:
                     reader = csv.DictReader(fileobj)
                     for row in reader:
                         if not readed:
@@ -42,7 +42,7 @@ class LoadWeedPrices(ILoadUnsupervised):
                         data[index][5].append(int(row["LowQN"]))
                 if readed:
                     date_name = filename.replace(".csv", "").replace("weedprices", "")
-                    dates.append(date(year = int(date_name[4:8]), month = int(date_name[2:4]), day = int(date_name[0:2])))
+                    dates.append(date(year=int(date_name[4:8]), month=int(date_name[2:4]), day=int(date_name[0:2])))
         return data, dates
 
 

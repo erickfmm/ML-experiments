@@ -1,41 +1,45 @@
 from utils.points_utils import distance
 
-class KNN:
-    def __init__(self, kneighbors, distfun=distance):
-        self.kneighbors = kneighbors
-        self.distfun = distfun
-    
-    def fit(self, X, Y):
-        self.X = X
-        self.Y = Y
-        self.classes = list(set(self.Y))
 
-    def predict(self, X):
+class KNN:
+    def __init__(self, k_neighbors, distance_function=distance):
+        self.k_neighbors = k_neighbors
+        self.distance_function = distance_function
+        self.xs = []
+        self.ys = []
+        self.classes = []
+    
+    def fit(self, xs, ys):
+        self.xs = xs
+        self.ys = ys
+        self.classes = list(set(self.ys))
+
+    def predict(self, xs):
         predicted = []
-        for iX in range(len(X)):
-            label = self.vote_mayority(self.get_klabels(X[iX]))
+        for iX in range(len(xs)):
+            label = self.vote_mayority(self.get_klabels(xs[iX]))
             predicted.append(label)
         return predicted
     
     def get_klabels(self, item):
-        #knearest = []
-        #kdistances = []
-        iKnearest = []
-        klabels = []
-        for inearest in range(self.kneighbors):
+        # knearest = []
+        # kdistances = []
+        i_k_nearest = []
+        k_labels = []
+        for inearest in range(self.k_neighbors):
             actual_min_distance = float('+inf')
             actual_min_i = 0
-            for iX in range(len(self.X)):
-                if iX not in iKnearest:
-                    d = self.distfun(self.X[iX], item)
+            for iX in range(len(self.xs)):
+                if iX not in i_k_nearest:
+                    d = self.distance_function(self.xs[iX], item)
                     if d < actual_min_distance:
                         actual_min_i = iX
                         actual_min_distance = d
-            iKnearest.append(actual_min_i)
-            #knearest.append(self.X[actual_min_i])
-            #kdistances.append(self.distfun(self.X[actual_min_i], item))
-            klabels.append(self.Y[actual_min_i])
-        return klabels
+            i_k_nearest.append(actual_min_i)
+            # knearest.append(self.X[actual_min_i])
+            # kdistances.append(self.distfun(self.X[actual_min_i], item))
+            k_labels.append(self.ys[actual_min_i])
+        return k_labels
     
     @staticmethod
     def vote_mayority(klabels):

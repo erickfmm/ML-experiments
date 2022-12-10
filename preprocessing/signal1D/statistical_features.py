@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def statistical_features(coefficients):
 	mean = np.mean(coefficients)
 	var = np.var(coefficients)
@@ -8,11 +9,13 @@ def statistical_features(coefficients):
 	minimmum = np.min(coefficients)
 	return [mean, var, median, maximmum, minimmum]
 
+
 def statistical_paper_pro(coefficients):
 	mean = np.mean(coefficients)
 	var = np.var(coefficients)
 	maximmum = np.max(coefficients)
 	return [mean, var, maximmum]
+
 
 def statistical_paper_pro_4(coefficients):
 	mean = np.mean(coefficients)
@@ -20,6 +23,7 @@ def statistical_paper_pro_4(coefficients):
 	maximmum = np.max(coefficients)
 	minimmum = np.min(coefficients)
 	return [mean, var, maximmum, minimmum]
+
 
 def statistical_slope(coefficients, ms_step):
 	rising_values = []
@@ -29,13 +33,13 @@ def statistical_slope(coefficients, ms_step):
 	rising_its = 0
 	falling_its = 0
 	for i_coef in range(1, len(coefficients)):
-		if(coefficients[i_coef] - coefficients[i_coef-1]) > 0: #rising
+		if(coefficients[i_coef] - coefficients[i_coef-1]) > 0:  # rising
 			rising_values.append(np.abs(coefficients[i_coef] - coefficients[i_coef-1]))
 			if falling_its > 0:
 				falling_dur.append(ms_step*falling_its)
 			falling_its = 0
 			rising_its += 1
-		else: #falling
+		else:  # falling
 			falling_values.append(np.abs(coefficients[i_coef] - coefficients[i_coef-1]))
 			if rising_its > 0:
 				rising_dur.append(ms_step*rising_its)
@@ -50,11 +54,9 @@ def statistical_slope(coefficients, ms_step):
 	features.append(np.median(falling_dur))
 	features.append(np.max(falling_dur))
 
-
 	features.append(np.mean(rising_values))
 	features.append(np.median(rising_values))
 	features.append(np.max(rising_values))
-
 
 	features.append(np.mean(falling_values))
 	features.append(np.median(falling_values))
@@ -74,12 +76,7 @@ def statistical_slope(coefficients, ms_step):
 	return features
 
 
-
-
-
-
-
-#derivatives in first, second and third order
+# derivatives in first, second and third order
 def get_feature_vector31_audio(signal):
 	features = []
 	features.append(np.median(signal))
@@ -109,13 +106,13 @@ def get_feature_vector31_audio(signal):
 	features.append(np.max(ratios))
 
 	#########################################################
-	#second step
+	# second step
 	features.append(np.median(first_differences))
 	features.append(np.mean(first_differences))
 	features.append(np.std(first_differences))
 	features.append(np.max(first_differences)-np.min(first_differences))
-	#features.append(np.min(first_differences))
-	#features.append(np.max(first_differences))
+	# features.append(np.min(first_differences))
+	# features.append(np.max(first_differences))
 
 	second_step_ratios = []
 	second_differences = []
@@ -136,13 +133,13 @@ def get_feature_vector31_audio(signal):
 	features.append(np.min(second_step_ratios))
 	features.append(np.max(second_step_ratios))
 	#############################################################################3
-	#third step
+	# third step
 	features.append(np.median(second_differences))
 	features.append(np.mean(second_differences))
 	features.append(np.std(second_differences))
 	features.append(np.max(second_differences)-np.min(second_differences))
-	#features.append(np.min(second_differences))
-	#features.append(np.max(second_differences))
+	# features.append(np.min(second_differences))
+	# features.append(np.max(second_differences))
 
 	third_step_ratios = []
 	third_differences = []
@@ -175,8 +172,8 @@ def get_feature_vector31_audio(signal):
 	features.append(np.absolute(np.std(fft)))
 	features.append(np.absolute(np.max(fft)))
 	features.append(np.absolute(np.min(fft)))
-	#features.append(np.absolute(np.min(fft)+np.max(fft))) #ni idea, dice "maximum and minimum" y no sé que es y es una sola cosa o no da la cantidad ._.
-	features.append(np.absolute(np.max(fft)-np.min(fft)))
+	features.append(np.absolute(np.min(fft)+np.max(fft)))  # difference between max and min
+	features.append(np.absolute(np.max(fft)-np.min(fft)))  # range
 	"""
 	Frequency
 	Median, mean, standard deviation, maximum, minimum, maximum and minimum (¿6?)

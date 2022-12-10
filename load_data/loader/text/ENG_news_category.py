@@ -1,26 +1,28 @@
 from load_data.ILoadSupervised import ILoadSupervised
 import json
 
-__all__ = ["LoadNewsCategory",]
+__all__ = ["LoadNewsCategory"]
+
 
 class LoadNewsCategory(ILoadSupervised):
-    def __init__(self, filepath="train_data/Folder_NLPEnglish/news-category-dataset/News_Category_Dataset_v2.json"):
-        self.filepath = filepath
+    def __init__(self, file_path="train_data/Folder_NLPEnglish/news-category-dataset/News_Category_Dataset_v2.json"):
+        self.file_path = file_path
         self.headers = ["headline", "short_description"]
+        self.Metadata = []
+        self.MetadataHeaders = ["authors", "link", "date"]
 
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self):
-        fileobj = open(self.filepath, "r")
-        self.X = []
-        self.Y = []
-        self.Metadata = []
-        self.MetadataHeaders = ["authors", "link", "date"]
-        for line in fileobj:
+        file_obj = open(self.file_path, "r")
+        xs = []
+        ys = []
+        for line in file_obj:
             line_dict = json.loads(line)
             self.Metadata.append([
                 line_dict["authors"],
@@ -28,16 +30,16 @@ class LoadNewsCategory(ILoadSupervised):
                 line_dict["date"]
             ])
             y = "WORLDPOST" if line_dict["category"] == "THE WORLDPOST" else line_dict["category"]
-            self.Y.append(y)
-            self.X.append([
+            ys.append(y)
+            xs.append([
                 line_dict["headline"],
                 line_dict["short_description"]
             ])
-        fileobj.close()
-        return self.X, self.Y
+        file_obj.close()
+        return xs, ys
     
     def get_classes(self):
-        return None #self.classes
+        return None
     
     def get_headers(self):
         return self.headers

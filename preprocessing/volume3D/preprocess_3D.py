@@ -2,7 +2,7 @@ import numpy as np
 
 __all__ = ["get_bigmatrix", "get_limits", "normalize3D", "get_data_thresholded",]
 
-#codigo del profesor
+# codigo del profesor
 def get_bigmatrix(D, nrows=7):
     (xdim, ydim, zdim) = D.shape
     ncols = int(np.ceil(float(zdim)/nrows))
@@ -15,7 +15,7 @@ def get_bigmatrix(D, nrows=7):
         for c in range(ncols):
             sl = c + ncols*(r)
             if sl <= zdim-1:
-                Mrow = np.hstack([Mrow, (D[:,::-1,sl].T)])
+                Mrow = np.hstack([Mrow, D[:, ::-1, sl].T])
                 Mmskrow = np.hstack([Mmskrow, msk*sl])
             else:
                 Mrow = np.hstack([Mrow, np.zeros((ydim, xdim))])
@@ -40,7 +40,7 @@ def get_limits(data):
         else:
             min_number = tmp_min_number if tmp_min_number < min_number else min_number
             max_number = tmp_max_number if tmp_max_number > max_number else max_number
-    return (min_number, max_number)
+    return min_number, max_number
 
 def normalize3D(data, use_local=False):
     data_to_return = []

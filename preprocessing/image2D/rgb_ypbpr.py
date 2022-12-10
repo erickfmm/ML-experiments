@@ -1,9 +1,12 @@
-#luminancia, cromancia
-#https://en.wikipedia.org/wiki/YCbCr
-#code:
-#https://stackoverflow.com/questions/7041172/pils-colour-space-conversion-ycbcr-rgb
+# luminancia, cromancia
+# https://en.wikipedia.org/wiki/YCbCr
+# code:
+# https://stackoverflow.com/questions/7041172/pils-colour-space-conversion-ycbcr-rgb
 
 from numpy import dot, ndarray, array
+
+__al__ = ["yuv2rgb"]
+
 
 def yuv2rgb(im, version='SDTV'):
     """
@@ -22,7 +25,7 @@ def yuv2rgb(im, version='SDTV'):
     yuv[:,:,1:] = im[:,:,1:].clip(16, 240).astype(yuv.dtype) - 128
 
     if version.upper() == 'SDTV':
-        A = array([[1.,                 0.,  0.701            ],
+        A = array([[1.,                 0.,  0.701],
                    [1., -0.886*0.114/0.587, -0.701*0.299/0.587],
                    [1.,  0.886,                             0.]])
         A[:,0]  *= 255./219.

@@ -3,19 +3,20 @@ from enum import Enum
 from load_data.ILoadSupervised import ILoadSupervised
 import os
 
-#this code: import load_data.data_inside.not_shared.emotion_eeg.extracted_sqlite as extr
-
 __all__ = ["LoadEEGEmotionExtracted", "EEGEmotionSegmentions", "EEGEmotionDataset"]
+
 
 class EEGEmotionSegmentions(Enum):
     Paper = 1
     Yo = 2
     Otro5Classes = 3
 
+
 class EEGEmotionDataset(Enum):
     Deap = 1
     Enterface = 2
     Mahnob = 3
+
 
 class LoadEEGEmotionExtracted(ILoadSupervised):
     def __init__(self, segtype=EEGEmotionSegmentions.Paper, dataset=EEGEmotionDataset.Deap):
@@ -49,40 +50,40 @@ class LoadEEGEmotionExtracted(ILoadSupervised):
         self.classes = [tag.replace(".db", "") for tag in os.listdir(self.path)]
         self.headers = ["F3", "C4"]
 
-
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self):
-        self.X = []
-        #self.Y = []
-        self.YSession = []
-        isession = -1
+        xs = []
+        # self.Y = []
+        y_session = []
+        i_session = -1
         max_fs = 0
         for filename in os.listdir(self.path):
             conn = sqlite3.connect(os.path.join(self.path, filename))
             last_session = None
             for row in conn.execute("SELECT * from data"):
                 if row[5] != last_session:
-                    isession += 1
-                    self.X.append([ [], [] ])
-                    #self.Y.append([])
-                    self.YSession.append(filename.replace(".db", ""))
-                if row[2] > max_fs: #row[2] it the iteration in sec
+                    i_session += 1
+                    xs.append([[], []])
+                    # self.Y.append([])
+                    y_session.append(filename.replace(".db", ""))
+                if row[2] > max_fs:  # row[2] it the iteration in sec
                     max_fs = row[2]
-                elif 9*(max_fs+1) == len(self.X[isession][0]):
+                elif 9*(max_fs+1) == len(xs[i_session][0]):
                     continue
-                #if row[1] <= 8:
-                #self.X[isession].append([row[3], row[4]])
-                self.X[isession][0].append(row[3])
-                self.X[isession][1].append(row[4])
-                #self.Y[isession].append(filename)
+                # if row[1] <= 8:
+                # self.X[i_session].append([row[3], row[4]])
+                xs[i_session][0].append(row[3])
+                xs[i_session][1].append(row[4])
+                # self.Y[i_session].append(filename)
                 last_session = row[5]
         self.fs = max_fs+1
-        return (self.X, self.YSession)
+        return xs, y_session
     
     def get_classes(self):
         return self.classes

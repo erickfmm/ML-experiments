@@ -3,31 +3,32 @@ from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import preprocessing.change_types as change_types
 from os.path import join
 
-__all__ = ["LoadTitanic",]
+__all__ = ["LoadTitanic"]
+
 
 class LoadTitanic(ILoadSupervised):
-    def __init__(self, folderPath="train_data/Folder_Basic/titanic/"):
+    def __init__(self, folder_path="train_data/Folder_Basic/titanic/"):
         self.TYPE = SupervisedType.Classification
-        self.folderPath = folderPath
-        #_, self.XTest, _, self.headers = self.read_titanicfile(join(folderPath, "test.csv"))
-        #self.classes = ["Not survived", "Survived"]
+        self.folder_path = folder_path
+        # _, self.XTest, _, self.headers = self.read_titanicfile(join(folderPath, "test.csv"))
+        # self.classes = ["Not survived", "Survived"]
     
     def get_all(self):
-        Xs = []
-        Ys = []
-        for x, y in self.read_titanicfile(join(self.folderPath, "train.csv")):
-            Xs.append(x)
-            Ys.append(y)
-        return Xs, Ys
+        xs = []
+        ys = []
+        for x, y in self.read_titanicfile(join(self.folder_path, "train.csv")):
+            xs.append(x)
+            ys.append(y)
+        return xs, ys
     
     def get_classes(self):
-        return ["Not survived", "Survived"] #[1, 0]
+        return ["Not survived", "Survived"]  # [1, 0]
     
     def get_headers(self):
         return ["Sex", "Pclass", "Age", "SibSp", "Fare", "Embarked"]
     
     def get_all_yielded(self):
-        for x, y in self.read_titanicfile(join(self.folderPath, "train.csv")):
+        for x, y in self.read_titanicfile(join(self.folder_path, "train.csv")):
             yield x, y
 
     @staticmethod
@@ -35,7 +36,7 @@ class LoadTitanic(ILoadSupervised):
         with open(filepath, 'r') as t_file:
             t_csv = csv.DictReader(t_file)
             for row in t_csv:
-                #passengerId = int(row['PassengerId'])
+                # passengerId = int(row['PassengerId'])
                 sex = 0 if row['Sex'] == 'male' else 1
                 if row['Embarked'] == '':
                     embarked = 0

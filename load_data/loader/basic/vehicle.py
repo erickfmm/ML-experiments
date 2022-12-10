@@ -2,25 +2,26 @@ from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 from os.path import join
 
-__all__ = ["LoadVehicle",]
+__all__ = ["LoadVehicle"]
+
 
 class LoadVehicle(ILoadSupervised):
-    def __init__(self, folderpath="train_data/Folder_Basic/vehicle/"):
+    def __init__(self, folder_path="train_data/Folder_Basic/vehicle/"):
         self.TYPE = SupervisedType.Classification
-        self.folder_path = folderpath
+        self.folder_path = folder_path
         self.headers = ["COMPACTNESS", "CIRCULARITY",
-            "DISTANCE CIRCULARITY", "RADIUS RATIO",
-            "PR.AXIS ASPECT RATIO", "MAX.LENGTH ASPECT RATIO",
-            "SCATTER RATIO", "ELONGATEDNESS", "RECTANGULARITY",
-            "MAX.LENGTH RECTANGULARITY",
-            "SCALED VARIANCE ALONG MAJOR AXIS",
-            "SCALED VARIANCE ALONG MINOR AXIS ",
-            "SCALED RADIUS OF GYRATION",
-            "SKEWNESS ABOUT MAJOR AXIS",
-            "SKEWNESS ABOUT MINOR AXIS",
-            "KURTOSIS ABOUT MINOR AXIS",
-            "KURTOSIS ABOUT MAJOR AXIS",
-            "HOLLOWS RATIO"]
+                        "DISTANCE CIRCULARITY", "RADIUS RATIO",
+                        "PR.AXIS ASPECT RATIO", "MAX.LENGTH ASPECT RATIO",
+                        "SCATTER RATIO", "ELONGATEDNESS", "RECTANGULARITY",
+                        "MAX.LENGTH RECTANGULARITY",
+                        "SCALED VARIANCE ALONG MAJOR AXIS",
+                        "SCALED VARIANCE ALONG MINOR AXIS ",
+                        "SCALED RADIUS OF GYRATION",
+                        "SKEWNESS ABOUT MAJOR AXIS",
+                        "SKEWNESS ABOUT MINOR AXIS",
+                        "KURTOSIS ABOUT MINOR AXIS",
+                        "KURTOSIS ABOUT MAJOR AXIS",
+                        "HOLLOWS RATIO"]
         self.classes = ["OPEL", "SAAB", "BUS", "VAN"]
     
     def get_classes(self):
@@ -30,12 +31,12 @@ class LoadVehicle(ILoadSupervised):
         return self.headers
     
     def get_all(self):
-        Xs = []
-        Ys = []
+        xs = []
+        ys = []
         for x, y in self.get_all_yielded():
-            Xs.append(x)
-            Ys.append(y)
-        return Xs, Ys
+            xs.append(x)
+            ys.append(y)
+        return xs, ys
 
     def get_all_yielded(self):
         data_vs = []
@@ -60,17 +61,17 @@ class LoadVehicle(ILoadSupervised):
         i = 0
         for csv_reader in data_vs:
             for row in csv_reader:
-                X = []
-                Y = None
-                iField = 0
+                x = []
+                y = None
+                i_field = 0
                 for field in row:
-                    if iField < len(row) -1:
-                        X.append(int(field))
+                    if i_field < len(row) - 1:
+                        x.append(int(field))
                     else:
-                        Y = field
-                    iField += 1
+                        y = field
+                    i_field += 1
                 i += 1
-                yield X, Y
+                yield x, y
         file_a.close()
         file_b.close()
         file_c.close()
@@ -80,4 +81,3 @@ class LoadVehicle(ILoadSupervised):
         file_g.close()
         file_h.close()
         file_i.close()
-

@@ -1,13 +1,14 @@
 from load_data.ILoadUnsupervised import ILoadUnsupervised
 import csv
-import preprocessing.verify_types as verify_types
-import preprocessing.change_types as change_types
+
+__all__ = ["LoadOnuDebates"]
+
 
 class LoadOnuDebates(ILoadUnsupervised):
-
-    def __init__(self, \
-    path_to_csv="train_data/Folder_NLPEnglish/ONU Debates de asambleas generales/un-general-debates.csv", \
-    country_codes_csv="train_data/Folder_NLPEnglish/ONU Debates de asambleas generales/ISO-Country-Codes.csv"):
+    def __init__(self,
+                 path_to_csv="train_data/Folder_NLPEnglish/ONU Debates de asambleas generales/un-general-debates.csv",
+                 country_codes_csv="train_data/Folder_NLPEnglish/"
+                                   "ONU Debates de asambleas generales/ISO-Country-Codes.csv"):
         self.path_to_csv = path_to_csv
         self.country_codes_csv = country_codes_csv
 
@@ -30,12 +31,12 @@ class LoadOnuDebates(ILoadUnsupervised):
         return country_names
 
     def read_file(self):
-        #country_names = self.read_country_codes()
-        fobj = open(self.path_to_csv, "r", encoding="utf-8-sig")
-        file_reader = csv.DictReader(fobj, delimiter=',')
+        # country_names = self.read_country_codes()
+        file_obj = open(self.path_to_csv, "r", encoding="utf-8-sig")
+        file_reader = csv.DictReader(file_obj, delimiter=',')
         data = []
         for row in file_reader:
-            #if row["country"] not in country_names:
+            # if row["country"] not in country_names:
             #    print("not found: ", row["country"])
             text = row["text"] if row["text"][0] != "\ufeff" else row["text"][1:]
             data.append([
@@ -44,4 +45,5 @@ class LoadOnuDebates(ILoadUnsupervised):
                 int(row["session"]),
                 text
             ])
+        file_obj.close()
         return data

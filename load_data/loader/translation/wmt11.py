@@ -1,12 +1,13 @@
 from load_data.ILoadUnsupervised import ILoadUnsupervised
 from os.path import join
-#import sys
+
+__all__ = ["LoadWMT11"]
+
 
 class LoadWMT11(ILoadUnsupervised):
-
-    #datapath="train_data/Folder_NLPEspañol_Translation/WMT13 [ES-EN]/training"
-    def __init__(self, datapath="train_data/Folder_NLPEspañol_Translation/WMT11_Translation/training", \
-                 dataset="news-commentary-v6"):
+    # datapath="train_data/Folder_NLPEspañol_Translation/WMT13 [ES-EN]/training"
+    def __init__(self, folder_path="train_data/Folder_NLPEspañol_Translation/WMT11_Translation/training",
+                 data_set="news-commentary-v6"):
         """
         nombre + ".es-en.en" y ".es-en.es"
         wmt11:
@@ -18,11 +19,9 @@ class LoadWMT11(ILoadUnsupervised):
             - news-commentary-v8.es-en
             - undoc.2000.es-en
         """
-        self.datapath = datapath
-        #self.filename_eng = "europarl-v6.es-en.en" if dataset == "europarl" else "news-commentary-v6.es-en.en"
-        #self.filename_es = "europarl-v6.es-en.es" if dataset == "europarl" else "news-commentary-v6.es-en.es"
-        self.filename_eng = dataset + ".es-en.en"
-        self.filename_es = dataset + ".es-en.es"
+        self.folder_path = folder_path
+        self.filename_eng = data_set + ".es-en.en"
+        self.filename_es = data_set + ".es-en.es"
 
     def get_headers(self):
         return None
@@ -36,9 +35,9 @@ class LoadWMT11(ILoadUnsupervised):
         return data_eng, data_es
     
     def get_all_yielded(self):
-        fullname_eng = join(self.datapath, self.filename_eng)
+        fullname_eng = join(self.folder_path, self.filename_eng)
         eng_obj = open(fullname_eng, "r", encoding="utf-8")
-        fullname_es = join(self.datapath, self.filename_es)
+        fullname_es = join(self.folder_path, self.filename_es)
         es_obj = open(fullname_es, "r", encoding="utf-8")
         print(fullname_eng)
         has_lines = True
@@ -50,7 +49,8 @@ class LoadWMT11(ILoadUnsupervised):
                     has_lines = False
                 else:
                     yield eng_line.strip(), es_line.strip()
-            except:
+            except Exception as e:
+                print(e)
                 has_lines = False
                 eng_obj.close()
                 es_obj.close()

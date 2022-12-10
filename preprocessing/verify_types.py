@@ -6,6 +6,7 @@ def is_integer(s, base=10):
 	except ValueError:
 		return False
 
+
 def is_float(s):
 	try:
 		_ = float(s)

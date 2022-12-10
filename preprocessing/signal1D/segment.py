@@ -1,16 +1,18 @@
-#gsr, 6, 256
+# gsr, 6, 256
+
 def get_middle_seconds(signal, seconds, frequency):
 	half_seconds = seconds/2
-	min = int(len(signal)/2-(frequency*half_seconds))
-	max = int(len(signal)/2+(frequency*half_seconds))
-	return signal[min:max]
+	min_ = int(len(signal)/2-(frequency*half_seconds))
+	max_ = int(len(signal)/2+(frequency*half_seconds))
+	return signal[min_:max_]
+
 
 def get_exact_index_segment(signal, min_length, max_length):
-	if(len(signal) < max_length):
+	if len(signal) < max_length:
 		raise Exception("not enough elements in signal")
 	length = max_length - min_length
-	newSignal = signal[min_length:max_length]
-	if(len(newSignal) == length):
-		return newSignal
+	new_signal = signal[min_length:max_length]
+	if len(new_signal) == length:
+		return new_signal
 	else:
 		raise Exception("different length in signal")

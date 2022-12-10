@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 from csv import DictReader
 from os.path import join
 
+__all__ = ["LoadAnimeData"]
+
+
 class LoadAnimeData(ILoadSupervised):
-    def __init__(self, folderpath="train_data/Folder_Manga_Anime/anime-recommendations-database"):
-        self.folderpath = folderpath
+    def __init__(self, folder_path="train_data/Folder_Manga_Anime/anime-recommendations-database"):
+        self.folder_path = folder_path
         self.TYPE = SupervisedType.Regression
-        
-    
+
     def get_all(self):
         xs = []
         ys = []
@@ -19,11 +19,11 @@ class LoadAnimeData(ILoadSupervised):
         return xs, ys
 
     def get_all_yielded(self):
-        with open(join(self.folderpath, "anime.csv"), "r", encoding="utf-8") as fileobj:
-            filereader = DictReader(fileobj)
+        with open(join(self.folder_path, "anime.csv"), "r", encoding="utf-8") as file_obj:
+            filereader = DictReader(file_obj)
             i = 0
             for row in filereader:
-                i+=1
+                i += 1
                 name = row["name"]
                 name = name.replace("°", "")
                 name = name.replace("&#039;", "")
@@ -34,22 +34,21 @@ class LoadAnimeData(ILoadSupervised):
                 try:
                     episodes = int(row["episodes"])
                     rating = float(row["rating"])
-                except:
+                except Exception as e:
                     error_msg = ""
                     if episodes is None:
                         error_msg += ". Episodes is not integer: "+row["episodes"]
                     if rating is None:
                         error_msg += ". Rating is not float: "+row["rating"]
-                    print(i,": ", name, error_msg)
+                    print(i, ": ", name, error_msg, " error: ", e)
                 if episodes is not None and rating is not None:
-                    yield ([
+                    yield [
                         name,
                         genre,
                         row["type"],
                         episodes,
                         int(row["members"])
-                        ],rating )
-                
+                        ], rating
 
     def get_classes(self):
         return []

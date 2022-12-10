@@ -1,10 +1,12 @@
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 from numpy.random import random as np_rnd
 
-__all__ = ["LoadRandom",]
+__all__ = ["LoadRandom"]
 
-def unitary_function(X):
+
+def unitary_function(x: list) -> int:
     return 1
+
 
 class LoadRandom(ILoadSupervised):
     def __init__(self, num_instances: int, num_dimensions: int, fn, min_value=0, max_value=1):
@@ -24,12 +26,12 @@ class LoadRandom(ILoadSupervised):
         return self.headers
     
     def get_all(self):
-        Xs = (np_rnd(self.num_instances * self.num_dimensions) * self.max_value) + self.min_value
-        Xs = Xs.reshape(self.num_instances, self.num_dimensions)
-        Ys = []
+        xs = (np_rnd(self.num_instances * self.num_dimensions) * self.max_value) + self.min_value
+        xs = xs.reshape(self.num_instances, self.num_dimensions)
+        ys = []
         for i in range(self.num_instances):
-            Ys.append(self.fn(Xs[i]))
-        return Xs, Ys
+            ys.append(self.fn(xs[i]))
+        return xs, ys
     
     def get_all_yielded(self):
         for i in range(self.num_instances):

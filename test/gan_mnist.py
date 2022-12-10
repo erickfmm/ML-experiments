@@ -1,11 +1,11 @@
-#taken from:
-#https://medium.com/sigmoid/a-brief-introduction-to-gans-and-how-to-code-them-2620ee465c30
-#https://github.com/sarvasvkulpati/intro_to_gans/blob/master/intro_to_gans.ipynb
+# taken from:
+# https://medium.com/sigmoid/a-brief-introduction-to-gans-and-how-to-code-them-2620ee465c30
+# https://github.com/sarvasvkulpati/intro_to_gans/blob/master/intro_to_gans.ipynb
 
 
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm #progress bar
+from tqdm import tqdm  # progress bar
 
 from keras.layers import Input
 from keras.models import Model, Sequential
@@ -18,6 +18,7 @@ from keras import initializers
 
 def get_optimizer():
     return Adam(lr=0.0002, beta_1=0.5)
+
 
 def get_generator(optimizer, random_dim, dense_neurons=[256, 512, 1024, 784]):
     generator = Sequential()
@@ -33,6 +34,7 @@ def get_generator(optimizer, random_dim, dense_neurons=[256, 512, 1024, 784]):
     generator.add(Dense(dense_neurons[3], activation='tanh'))
     generator.compile(loss='binary_crossentropy', optimizer=optimizer)
     return generator
+
 
 def get_discriminator(optimizer, input_dim=784, dense_neurons=[1024, 512, 256]):
     discriminator = Sequential()
@@ -51,6 +53,7 @@ def get_discriminator(optimizer, input_dim=784, dense_neurons=[1024, 512, 256]):
     discriminator.add(Dense(1, activation='sigmoid'))
     discriminator.compile(loss='binary_crossentropy', optimizer=optimizer)
     return discriminator
+
 
 def plot_generated_images(epoch, generator, random_dim, random_gen, examples=100, dim=(10, 10), figsize=(10, 10), image_size=(28, 28)):
     noise = random_gen.normal(0, 1, size=[examples, random_dim])
@@ -79,6 +82,7 @@ def get_gan_network(discriminator, random_dim, generator, optimizer):
     gan = Model(inputs=gan_input, outputs=gan_output)
     gan.compile(loss='binary_crossentropy', optimizer=optimizer)
     return gan
+
 
 def train(random_dim, random_gen, x_train, epochs=1, batch_size=128):
     # Split the training data into batches of size 128
@@ -122,9 +126,11 @@ from load_data.loader.downloadable.mnist_keras import LoadMnist
 from utils.keras_persistence.all_inside import save, load
 import os
 import shutil
+
+
 class GanMnist:
     def __init__(self, seed=None, random_dim=100):
-        #np.random.seed(seed)
+        # np.random.seed(seed)
         # The dimension of our random noise vector.
         self.random_dim = random_dim
         self.random_gen = np.random.RandomState(seed)
@@ -182,5 +188,5 @@ class GanMnist:
                     print("files doesn't exists")
             else:
                 print("folder doesn't exists")
-        except:
-            print("unknown error in loading")
+        except Exception as e:
+            print("unknown error in loading ", e)

@@ -1,7 +1,7 @@
 import tkinter as tk
 
 import matplotlib
-matplotlib.use("TkAgg")
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -14,26 +14,29 @@ import preprocessing.psychoacoustics.erb as erb
 import preprocessing.psychoacoustics.mel as mel
 import preprocessing.psychoacoustics.sone as sone
 
+matplotlib.use("TkAgg")
+
+
 class PsychoAcPlotsWin:
     def __init__(self, master, min_value=0, max_value=20000, step=10, max_sone=625):
         self.frame = tk.Frame(master)
-        #scrollbar = tk.Scrollbar(self.frame, width=16)
-        #scrollbar.pack(side=tk.RIGHT, fill=tk.Y)#, expand=False)
+        # scrollbar = tk.Scrollbar(self.frame, width=16)
+        # scrollbar.pack(side=tk.RIGHT, fill=tk.Y)#, expand=False)
         figure = Figure()
         plot = figure.add_subplot(2, 2, 1)
         x = [i for i in range(min_value, max_value, step)]
-        #Bark
+        # Bark
         y = [bark.bark(i) for i in range(min_value, max_value, step)]
         plot.plot(x, y, color="red")
         y = [bark.bark2(i) for i in range(min_value, max_value, step)]
         plot.plot(x, y, color="blue")
-        y = [bark.bark_1990Traunmuller(i) for i in range(min_value, max_value, step)]
+        y = [bark.bark_1990_traunmuller(i) for i in range(min_value, max_value, step)]
         plot.plot(x, y, color="green")
-        y = [bark.bark_1992Wang(i) for i in range(min_value, max_value, step)]
+        y = [bark.bark_1992_wang(i) for i in range(min_value, max_value, step)]
         plot.plot(x, y, color="black")
         plot.set_title("Bark plots vs frequency")
         plot.legend(["7000", "1990Traunmuller", "1992Wang", "7500"])
-        #ERB
+        # ERB
         plot = figure.add_subplot(2, 2, 2)
         y = [erb.erb_linear(i) for i in range(min_value, max_value, step)]
         plot.plot(x, y, color="red")
@@ -43,7 +46,7 @@ class PsychoAcPlotsWin:
         plot.plot(x, y, color="orange")
         plot.set_title("ERB plots vs frequency")
         plot.legend(["linear", "poly 2nd", "matlab"])
-        #MEL
+        # MEL
         plot = figure.add_subplot(2, 2, 3)
         y = [mel.mel_700(i) for i in range(min_value, max_value, step)]
         plot.plot(x, y, color="red")
@@ -53,7 +56,7 @@ class PsychoAcPlotsWin:
         plot.plot(x, y, color="green")
         plot.set_title("MEL plots vs frequency")
         plot.legend(["700", "1000", "625"])
-        #SONE
+        # SONE
         plot = figure.add_subplot(2, 2, 4)
         x_sone = [i for i in range(1, max_sone, step)]
         y = [sone.sone_aproximation(i) for i in range(1, max_sone, step)]
@@ -63,10 +66,10 @@ class PsychoAcPlotsWin:
         plot.set_title("Sone vs phons")
         plot.legend(["sone", "sone aproximation"])
         self.canvas = FigureCanvasTkAgg(figure, self.frame)
-        self.canvas.get_tk_widget().pack(side="top",fill='both',expand=True)
-        #canvas.pack(side="top",fill='both',expand=True)
-        #main loop
-        self.frame.pack(side="top",fill='both',expand=True)
+        self.canvas.get_tk_widget().pack(side="top", fill='both', expand=True)
+        # canvas.pack(side="top",fill='both',expand=True)
+        # main loop
+        self.frame.pack(side="top", fill='both', expand=True)
 
 
 if __name__ == '__main__':

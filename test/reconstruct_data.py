@@ -19,6 +19,7 @@ from load_data.loader.basic.vehicle import LoadVehicle
 
 print("all imported")
 
+
 def calc_differences(real_data, reconstructed_data):
     difs = np.abs(real_data - reconstructed_data)
     difs_percentage = difs / real_data
@@ -44,14 +45,13 @@ l_iris = LoadIris()
 Xs, Ys = l_iris.get_all()
 
 
-
-X_train, X_test, y_train, y_test = train_test_split(Xs, Ys, test_size = 0.3, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(Xs, Ys, test_size=0.3, random_state=0)
 
 codings, reconstructed = reconstruct_data(X_train, X_test, 1)
 calc_differences(X_test, reconstructed)
 
 plt.plot(X_test, c='g')
 plt.plot(reconstructed, c='b')
-custom_lines = [Line2D([0],[0],color='g',lw=4), Line2D([0],[0],color='b',lw=4)]
+custom_lines = [Line2D([0], [0], color='g', lw=4), Line2D([0], [0], color='b', lw=4)]
 plt.legend(custom_lines, ['original', 'reconstructed'])
 plt.show()

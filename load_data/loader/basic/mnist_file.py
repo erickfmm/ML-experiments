@@ -1,19 +1,20 @@
 import mnist
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 
-__all__ = ["LoadMnist",]
+__all__ = ["LoadMnist"]
 
 fashion_path = 'train_data/Folder_Images_Supervised/fashionmnist'
 kuzushiji_path = 'train_data/Folder_Images_Supervised/kuzushiji'
 
+
 class LoadMnist(ILoadSupervised):
-    #fashion: mnist_path='train_data\\Folder_Images_Supervised\\fashionmnist'
+    # fashion: mnist_path='train_data\\Folder_Images_Supervised\\fashionmnist'
     def __init__(self, mnist_path='train_data/Folder_Images_Supervised/mnist'):
         self.TYPE = SupervisedType.Classification
-        self.mndata = mnist.parse_idx(mnist_path)
-        self.XTrain, self.YTrain = self.mndata.load_training()
-        self.XTest, self.YTest = self.mndata.load_testing()
-        #print(mndata.display(images[index]))
+        self.mnist_data = mnist.parse_idx(mnist_path)
+        self.XTrain, self.YTrain = self.mnist_data.load_training()
+        self.XTest, self.YTest = self.mnist_data.load_testing()
+        # print(mnist_data.display(images[index]))
         self.headers = [str(i) for i in range(len(self.XTest[0]))]
         self.classes = [str(i) for i in list(set(self.YTrain))]
     
@@ -30,19 +31,18 @@ class LoadMnist(ILoadSupervised):
         return (self.XTrain, self.YTrain), (self.XTest, self.YTest)
     
     def get_all(self):
-        Xs = []
-        Ys = []
+        xs = []
+        ys = []
         for i_train in range(len(self.XTrain)):
-            Xs.append(self.XTrain[i_train])
-            Ys.append(self.YTrain[i_train])
+            xs.append(self.XTrain[i_train])
+            ys.append(self.YTrain[i_train])
         for i_test in range(len(self.XTest)):
-            Xs.append(self.XTest[i_test])
-            Ys.append(self.YTest[i_test])
-        return Xs, Ys
+            xs.append(self.XTest[i_test])
+            ys.append(self.YTest[i_test])
+        return xs, ys
 
 
-
-#call gen_image(x[0]).show()
+# call gen_image(x[0]).show()
 def gen_image(arr):
     from matplotlib import pyplot as plt
     import numpy as np

@@ -37,10 +37,10 @@ def save_as_pickle(new_size:int = 100, to_gray: bool = True):
         y.append(btype)
     with open("created_models/butterfly.pkl", "wb") as file_handle:
         print("writing pickle xgray, type")
-        pickle.dump({"x":x_gray,"y":y}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump({"x": x_gray,"y": y}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
     with open("created_models/butterfly_segment.pkl", "wb") as file_handle:
         print("writing pickle xgray, xseg")
-        pickle.dump({"x":x_gray,"y":x_seg}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump({"x": x_gray,"y": x_seg}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def open_pickle(which_pkl:str) -> dict:

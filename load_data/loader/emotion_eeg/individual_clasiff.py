@@ -2,9 +2,8 @@ from load_data.ILoadSupervised import ILoadSupervised
 from load_data.loader.util_emotions import DiscreteEmotion
 import os
 
-#this code: import load_data.loader.emotion_eeg.individual_clasiff as indiv
+__all__ = ["LoadEEGIndividualEmotions"]
 
-__all__ = ["LoadEEGIndividualEmotions",]
 
 class LoadEEGIndividualEmotions(ILoadSupervised):
     def __init__(self, channels=None):
@@ -21,12 +20,13 @@ class LoadEEGIndividualEmotions(ILoadSupervised):
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self, verbose=False):
-        self.X = []
-        self.Y = []
+        xs = []
+        ys = []
         files = os.listdir(self._path)
         i_file = 0
         for filename in files:
@@ -34,7 +34,8 @@ class LoadEEGIndividualEmotions(ILoadSupervised):
                 continue
             i_file += 1
             if verbose:
-                print("to process ", i_file, " of ", len(files), ": ", round(i_file/float(len(files))*100, 2), "%, file: ", filename)
+                print("to process ", i_file, " of ", len(files), ": ", round(i_file/float(len(files))*100, 2),
+                      "%, file: ", filename)
             tag = self.tags[filename[2:4]]
             file_obj = open(os.path.join(self._path, filename), "r")
             data_of_file = []
@@ -45,12 +46,12 @@ class LoadEEGIndividualEmotions(ILoadSupervised):
                     data_line = [float(element) for element in data_line]
                     data_of_file.append(data_line)
                 i_channel += 1
-            self.X.append(data_of_file)
-            self.Y.append(tag)
-        return (self.X, self.Y)
+            xs.append(data_of_file)
+            ys.append(tag)
+        return xs, ys
     
     def get_classes(self):
         return self.classes
     
     def get_headers(self):
-        return None #self.headers
+        return None  # self.headers

@@ -1,4 +1,7 @@
 
+__all__ = ["iterate_matrices_by_matrix", "iterate_matrix_by_const", "iterate_matrix_func"]
+
+
 def iterate_matrices_by_matrix(data, data2, func, as_array=True):
     for i in range(len(data)):
         for j in range(len(data[i])):
@@ -8,6 +11,7 @@ def iterate_matrices_by_matrix(data, data2, func, as_array=True):
                 data[i][j] = func(data[i][j], data2[i][j])
     return data
 
+
 def iterate_matrix_by_const(data, constant, func, as_array=True):
     for i in range(len(data)):
         for j in range(len(data[i])):
@@ -16,6 +20,7 @@ def iterate_matrix_by_const(data, constant, func, as_array=True):
             else:
                 data[i][j] = func(data[i][j], constant)
     return data
+
 
 def iterate_matrix_func(data, func):
     for i in range(len(data)):

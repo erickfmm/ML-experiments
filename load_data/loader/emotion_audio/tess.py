@@ -3,13 +3,16 @@ from load_data.ILoadSupervised import ILoadSupervised
 from load_data.loader.util_emotions import DiscreteEmotion
 import os
 
-__all__ = ["LoadTESS",]
+__all__ = ["LoadTESS"]
+
 
 class LoadTESS(ILoadSupervised):
-    def __init__(self, classesBinaryArray=[1,1,1,1,1,1,1], \
-        foldername="train_data/Folder_AudioEmotion/TESS"):
-        self.foldername = foldername
-        allClasses = [
+    def __init__(self, classes_binary_array=None,
+                 folder_name="train_data/Folder_AudioEmotion/TESS"):
+        if classes_binary_array is None:
+            classes_binary_array = [1, 1, 1, 1, 1, 1, 1]
+        self.folder_name = folder_name
+        all_classes = [
             DiscreteEmotion.Neutral.name,
             DiscreteEmotion.Angry.name,
             DiscreteEmotion.Disgust.name,
@@ -17,24 +20,25 @@ class LoadTESS(ILoadSupervised):
             DiscreteEmotion.Happy.name,
             DiscreteEmotion.Sad.name,
             DiscreteEmotion.Surprise.name]
-        self.classesBinaryArray = classesBinaryArray
+        self.classes_binary_array = classes_binary_array
         self.classes = []
-        for i in range(len(allClasses)):
-            if classesBinaryArray[i] == 1:
-                self.classes.append(allClasses[i])
+        for i in range(len(all_classes)):
+            if classes_binary_array[i] == 1:
+                self.classes.append(all_classes[i])
+        self.Metadata = []
+        self.MetadataHeaders = ["rate", "sex", "age", "text"]
 
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self):
-        X = []
-        Y = []
-        self.Metadata = []
-        self.MetadataHeaders = ["rate", "sex", "age", "text"]
-        for audio_filename in os.listdir(self.foldername):
+        xs = []
+        ys = []
+        for audio_filename in os.listdir(self.folder_name):
             if audio_filename.find(".wav") == -1:
                 print("its not a wav file: ", audio_filename)
                 continue
@@ -45,18 +49,17 @@ class LoadTESS(ILoadSupervised):
                 age_speaker = 26 if segments[0] == "YAF" else 64
                 text = segments[1]
                 try:
-                    rate, signal = wav.read(os.path.join(self.foldername, audio_filename))
-                except:
-                    print("error reading file: ", audio_filename)
+                    rate, signal = wav.read(os.path.join(self.folder_name, audio_filename))
+                except Exception as e:
+                    print("error reading file: ", audio_filename, " error: ", e)
                     continue
-                X.append(signal)
-                Y.append(emo_file)
+                xs.append(signal)
+                ys.append(emo_file)
                 self.Metadata.append([rate, sex_speaker, age_speaker, text])
-        return (X, Y)
+        return xs, ys
     
     def get_classes(self):
         return self.classes
     
     def get_headers(self):
-        return None #self.headers
-
+        return None  # self.headers

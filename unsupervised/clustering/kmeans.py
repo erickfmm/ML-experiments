@@ -3,14 +3,19 @@ import math
 from unsupervised.clustering.ICluster import ICluster
 from unsupervised.clustering.utils.initial_assignments import random_assignment
 
+__all__ = ["KMeans"]
+
+
 class KMeans(ICluster):
-    def __init__(self, data, initial_assignmentfun = random_assignment):
+    def __init__(self, data, initial_assignment_function=random_assignment):
+        super().__init__(data)
         self.X = data
         self.assign = []
         self.centroids = []
         self.distances = []
-        self.initial_assignment = initial_assignmentfun
-        #for i in range(len(data)):
+        self.initial_assignment = initial_assignment_function
+        self.iterations = 0
+        # for i in range(len(data)):
         #    self.assign.append(-1)
 
     def create_centroids(self, num_clusters):
@@ -23,16 +28,16 @@ class KMeans(ICluster):
         num_data_centroids = []
         for i_centroid in range(len(self.centroids)):
             num_data_centroids.append(0)
-            #restart centroids
+            # restart centroids
             for i_data in range(len(self.centroids[i_centroid])):
                 self.centroids[i_centroid][i_data] = 0
         for i in range(len(self.X)):
             num_data_centroids[self.assign[i]] += 1
             for i_data in range(len(self.X[i])):
                 self.centroids[self.assign[i]][i_data] += self.X[i][i_data]
-        #now make average
+        # now make average
         for i_centroid in range(len(self.centroids)):
-            #restart centroids
+            # restart centroids
             for i_data in range(len(self.centroids[i_centroid])):
                 if self.centroids[i_centroid][i_data] != 0 and num_data_centroids[i_centroid] != 0:
                     self.centroids[i_centroid][i_data] = self.centroids[i_centroid][i_data] \
@@ -62,20 +67,20 @@ class KMeans(ICluster):
                 self.distances[i].append(0)
         self.iterations = 0
         while True:
-            #clone list
+            # clone list
             last_assignment = list(self.assign)
             self.compute_centroids()
             self.reassign()
             if last_assignment == self.assign:
                 break
-            if max_iterations > 0 and self.iterations >= max_iterations:
+            if 0 < max_iterations <= self.iterations:
                 break
             self.iterations += 1
         return self.assign
 
 
-#randomly assign all data items to a cluster
-#loop until no change in cluster assignments
+# randomly assign all data items to a cluster
+# loop until no change in cluster assignments
 #    compute centroids for each cluster
 #    reassign each data item to cluster of closest centroid
-#end
+# end

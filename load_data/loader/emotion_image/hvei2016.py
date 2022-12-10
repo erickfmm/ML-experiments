@@ -1,38 +1,16 @@
-#train_data\\not_shared\\Folder_ImageEmotion\\ImageDataset
-#ground_truth_each_image.csv
-
 from load_data.ILoadSupervised import ILoadSupervised
 from PIL import Image
-from os.path import join, splitext
-from os import listdir
+from os.path import join
 import csv
 
-__all__ = ["LoadHVEI2016ImageEmotion",]
+__all__ = ["LoadHVEI2016ImageEmotion"]
+
 
 class LoadHVEI2016ImageEmotion(ILoadSupervised):
-    def __init__(self, folderpath="train_data/Folder_ImageEmotion/ImageDataset",\
-        target_type="discrete"): #"discrete" or "circumplex"
-        self.folderpath = folderpath
+    def __init__(self, folder_path="train_data/Folder_ImageEmotion/ImageDataset",
+                 target_type="discrete"):  # "discrete" or "circumplex"
+        self.folder_path = folder_path
         self.target_type = "circumplex" if target_type == "circumplex" else "discrete"
-
-    def get_default(self):
-        return None
-
-    def get_splited(self):
-        return None
-    
-    def get_all(self):
-        return self.read_files()
-    
-    def get_classes(self):
-        return ["Valence mean", "Arousal mean"] #self.classes
-    
-    def get_headers(self):
-        return ["image"] #self.headers
-    
-    def read_files(self):
-        self.X = []
-        self.Y = []
         self.Metadata = []
         if self.target_type == "circumplex":
             self.MetadataHeaders = [
@@ -51,7 +29,7 @@ class LoadHVEI2016ImageEmotion(ILoadSupervised):
                 "surprise",
                 "neutral"
             ]
-        else: #discrete
+        else:  # discrete
             self.MetadataHeaders = [
                 "Face",
                 "Color",
@@ -63,15 +41,35 @@ class LoadHVEI2016ImageEmotion(ILoadSupervised):
                 "v_score_mean",
                 "a_score_mean"
             ]
-        csv_path = join(self.folderpath, "ground_truth_each_image.csv")
+
+    def get_default(self):
+        return self.get_all()
+
+    @staticmethod
+    def get_splited():
+        return None
+    
+    def get_all(self):
+        return self.read_files()
+    
+    def get_classes(self):
+        return ["Valence mean", "Arousal mean"]  # self.classes
+    
+    def get_headers(self):
+        return ["image"]  # self.headers
+    
+    def read_files(self):
+        xs = []
+        ys = []
+        csv_path = join(self.folder_path, "ground_truth_each_image.csv")
         with open(csv_path, "r") as csv_obj:
             csv_reader = csv.DictReader(csv_obj)
             for row in csv_reader:
-                image_path = join(self.folderpath, row["image"]+".jpg")
+                image_path = join(self.folder_path, row["image"]+".jpg")
                 im = Image.open(image_path)
-                self.X.append(im) #640x640
+                xs.append(im)  # 640x640
                 if self.target_type == "circumplex":
-                    self.Y.append([float(row["v_score_mean"]), float(row["a_score_mean"])])
+                    ys.append([float(row["v_score_mean"]), float(row["a_score_mean"])])
                     self.Metadata.append([
                         float(row["Face"]),
                         float(row["Color"]),
@@ -88,8 +86,8 @@ class LoadHVEI2016ImageEmotion(ILoadSupervised):
                         float(row["surprise"]),
                         float(row["neutral"])
                     ])
-                else: #discrete
-                    self.Y.append([
+                else:  # discrete
+                    ys.append([
                         float(row["joy"]),
                         float(row["sadness"]),
                         float(row["fear"]),
@@ -109,4 +107,4 @@ class LoadHVEI2016ImageEmotion(ILoadSupervised):
                         float(row["v_score_mean"]),
                         float(row["a_score_mean"])
                     ])
-        return self.X, self.Y
+        return xs, ys

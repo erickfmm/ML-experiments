@@ -2,18 +2,19 @@ from load_data.ILoadSupervised import ILoadSupervised, SupervisedType, ISplitted
 import csv
 from os.path import join
 
-__all__ = ["LoadSegment",]
+__all__ = ["LoadSegment"]
+
 
 class LoadSegment(ILoadSupervised, ISplitted):
-    def __init__(self, folderpath="train_data/Folder_Basic/segment/"):
+    def __init__(self, folder_path="train_data/Folder_Basic/segment/"):
         self.TYPE = SupervisedType.Classification
-        self.folder_path = folderpath
+        self.folder_path = folder_path
         self.headers = ["REGION-CENTROID-ROW", "REGION-PIXEL-COUNT",
-        "SHORT-LINE-DENSITY-5", "SHORT-LINE-DENSITY-2",
-        "VEDGE-MEAN", "VEDGE-SD", "HEDGE-MEAN", "HEDGE-SD",
-        "INTENSITY-MEAN", "RAWRED-MEAN", "RAWBLUE-MEAN",
-        "RAWGREEN-MEAN", "EXRED-MEAN", "EXBLUE-MEAN", "EXGREEN-MEAN",
-        "VALUE-MEAN", "SATURATION-MEAN", "HUE-MEAN"]
+                        "SHORT-LINE-DENSITY-5", "SHORT-LINE-DENSITY-2",
+                        "VEDGE-MEAN", "VEDGE-SD", "HEDGE-MEAN", "HEDGE-SD",
+                        "INTENSITY-MEAN", "RAWRED-MEAN", "RAWBLUE-MEAN",
+                        "RAWGREEN-MEAN", "EXRED-MEAN", "EXBLUE-MEAN", "EXGREEN-MEAN",
+                        "VALUE-MEAN", "SATURATION-MEAN", "HUE-MEAN"]
         self.classes = ["brickface", "sky", "foliage", "cement", "window", "path", "grass"]
     
     def get_classes(self):
@@ -25,98 +26,99 @@ class LoadSegment(ILoadSupervised, ISplitted):
     def get_train(self):
         segment_data_file = open(join(self.folder_path, 'segmentation.data'))
         data_segment_csv = csv.reader(segment_data_file)
-        X_train = []
-        Y_train = []
+        x_train = []
+        y_train = []
         i = 0
         for row in data_segment_csv:
             if i >= 5:
-                X_train.append([])
-                iField = 0
+                x_train.append([])
+                i_field = 0
                 for field in row:
-                    if iField == 0:
-                        Y_train.append(field)
+                    if i_field == 0:
+                        y_train.append(field)
                     else:
-                        X_train[i-5].append(float(field))
-                    iField += 1
-                #print(row)
+                        x_train[i-5].append(float(field))
+                    i_field += 1
+                # print(row)
             i += 1
         segment_data_file.close()
-        return (X_train, Y_train)
+        return x_train, y_train
 
     def get_test(self):
         segment_test_file = open(join(self.folder_path, 'segmentation.test'))
         data_segment_test_csv = csv.reader(segment_test_file)
 
-        X_test = []
-        Y_test = []
+        x_test = []
+        y_test = []
         i2 = 0
         for row in data_segment_test_csv:
             if i2 >= 5:
-                X_test.append([])
-                iField = 0
+                x_test.append([])
+                i_field = 0
+                i = 0  # TODO: test
                 for field in row:
-                    if iField == 0:
-                        Y_test.append(field)
+                    if i_field == 0:
+                        y_test.append(field)
                     else:
-                        X_test[i-5].append(float(field))
-                    iField += 1
-                #print(row)
+                        x_test[i-5].append(float(field))
+                    i_field += 1
+                # print(row)
                 i += 1
             i2 += 1
         segment_test_file.close()
-        return X_test, Y_test
+        return x_test, y_test
 
     def get_splited(self):
-        X_train, Y_train = self.get_train()
-        X_test, Y_test = self.get_test()
-        return (X_train, Y_train), (X_test, Y_test)
+        x_train, y_train = self.get_train()
+        x_test, y_test = self.get_test()
+        return (x_train, y_train), (x_test, y_test)
     
     def get_train_yielded(self):
-        X_train, Y_train = self.get_train()
-        for i in range(len(X_train)):
-            yield X_train[i], Y_train[i]
+        x_train, y_train = self.get_train()
+        for i in range(len(x_train)):
+            yield x_train[i], y_train[i]
     
     def get_test_yielded(self):
-        X_test, Y_test = self.get_test()
-        for i in range(len(X_test)):
-            yield X_test[i], Y_test[i]
+        x_test, y_test = self.get_test()
+        for i in range(len(x_test)):
+            yield x_test[i], y_test[i]
 
     def get_all(self):
         segment_data_file = open(join(self.folder_path, 'segmentation.data'))
         data_segment_csv = csv.reader(segment_data_file)
         segment_test_file = open(join(self.folder_path, 'segmentation.test'))
         data_segment_test_csv = csv.reader(segment_test_file)
-        Xs = []
-        Ys = []
+        xs = []
+        ys = []
         i = 0
         for row in data_segment_csv:
             if i >= 5:
-                Xs.append([])
-                iField = 0
+                xs.append([])
+                i_field = 0
                 for field in row:
-                    if iField == 0:
-                        Ys.append(field)
+                    if i_field == 0:
+                        ys.append(field)
                     else:
-                        Xs[i-5].append(float(field))
-                    iField += 1
+                        xs[i-5].append(float(field))
+                    i_field += 1
             i += 1
 
         i2 = 0
         for row in data_segment_test_csv:
             if i2 >= 5:
-                Xs.append([])
-                iField = 0
+                xs.append([])
+                i_field = 0
                 for field in row:
-                    if iField == 0:
-                        Ys.append(field)
+                    if i_field == 0:
+                        ys.append(field)
                     else:
-                        Xs[i-5].append(float(field))
-                    iField += 1
+                        xs[i-5].append(float(field))
+                    i_field += 1
                 i += 1
             i2 += 1
         segment_data_file.close()
         segment_test_file.close()
-        return Xs, Ys
+        return xs, ys
 
     def get_all_yielded(self):
         xs, ys = self.get_all()

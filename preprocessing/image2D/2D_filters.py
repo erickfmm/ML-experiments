@@ -6,6 +6,9 @@ import preprocessing.image2D.preprocess_2D as pre
 import preprocessing.image2D.convolution as conv
 import preprocessing.image2D.iterative_point_processing as itproc
 
+__all__ = ["fl_linear", "fl_isotropic", "fl_anisotropic", "fl_laplacian"]
+
+
 def fl_linear(data, kernel):
     return signal.convolve2d(data, kernel, 'same')
 
@@ -43,11 +46,11 @@ def fl_laplacian(data, c, its):
     return data 
 
 
-
 def example():
     import matplotlib.pyplot as plt
-    def plotImg(data):
-        _ = plt.figure(1,figsize=(10, 10))
+
+    def plot_img(data):
+        _ = plt.figure(1, figsize=(10, 10))
         plt.imshow(data, interpolation='nearest', aspect='auto', cmap='gray')
         plt.axis('off')
         plt.show()
@@ -57,65 +60,65 @@ def example():
     data = pre.normalize(data)
     orig_data = np.copy(data)
     kernel3x3 = [[0.1, 5.0, 0.3],
-        [0.1, 0.7, 0.4],
-        [0.5, 5.0, 0.8]]
+                 [0.1, 0.7, 0.4],
+                 [0.5, 5.0, 0.8]]
     kernel5x5 = [[0, 1, 2, 3, 4],
-    [0, 1, 2, 3, 4],
-    [0, 1, 2, 3, 4],
-    [0, 1, 2, 3, 4],
-    [0, 1, 2, 3, 4]]
+                 [0, 1, 2, 3, 4],
+                 [0, 1, 2, 3, 4],
+                 [0, 1, 2, 3, 4],
+                 [0, 1, 2, 3, 4]]
     kernel = []
     for i in range(5):
         kernel.append([])
         for _ in range(7):
             kernel[i].append(0)
-    #data = normalize(filterLinear(data, kernel))
-    #data = normalize(make_convolution(data, kernel3x3))
-    #data = normalize(fl_laplacian(data, 0.5, 4))
-    #data = normalize(fl_isotropic(data, 0.5, 4))
+    # data = normalize(filterLinear(data, kernel))
+    # data = normalize(make_convolution(data, kernel3x3))
+    # data = normalize(fl_laplacian(data, 0.5, 4))
+    # data = normalize(fl_isotropic(data, 0.5, 4))
     print("5x5 mean")
     data = pre.normalize(conv.make_convolution_with_func(data, kernel5x5, np.mean))
-    #data = normalize(fl_anisotropic(data, 0.5, 4))
+    # data = normalize(fl_anisotropic(data, 0.5, 4))
     print("data len:", len(data), ", y [0]:", len(data[0]))
     print("data mean: ", np.mean(data))
     print("data std: ", np.std(data))
     print("data median: ", np.median(data))
     print("data prod: ", np.prod(data))
     print("data sum: ", np.sum(data))
-    plotImg(data)
+    plot_img(data)
 
     print("5x5 max")
     data = np.copy(orig_data)
     data = pre.normalize(conv.make_convolution_with_func(data, kernel5x5, np.max))
-    #data = normalize(fl_anisotropic(data, 0.5, 4))
+    # data = normalize(fl_anisotropic(data, 0.5, 4))
     print("data len:", len(data), ", y [0]:", len(data[0]))
     print("data mean: ", np.mean(data))
     print("data std: ", np.std(data))
     print("data median: ", np.median(data))
     print("data prod: ", np.prod(data))
     print("data sum: ", np.sum(data))
-    plotImg(data)
+    plot_img(data)
 
     print("3x3 sum")
     data = np.copy(orig_data)
     data = pre.normalize(conv.make_convolution_with_func(data, kernel3x3, np.sum))
-    #data = normalize(fl_anisotropic(data, 0.5, 4))
+    # data = normalize(fl_anisotropic(data, 0.5, 4))
     print("data len:", len(data), ", y [0]:", len(data[0]))
     print("data mean: ", np.mean(data))
     print("data std: ", np.std(data))
     print("data median: ", np.median(data))
     print("data prod: ", np.prod(data))
     print("data sum: ", np.sum(data))
-    plotImg(data)
+    plot_img(data)
 
     print("3x3 median")
     data = np.copy(orig_data)
     data = pre.normalize(conv.make_convolution_with_func(data, kernel3x3, np.median))
-    #data = normalize(fl_anisotropic(data, 0.5, 4))
+    # data = normalize(fl_anisotropic(data, 0.5, 4))
     print("data len:", len(data), ", y [0]:", len(data[0]))
     print("data mean: ", np.mean(data))
     print("data std: ", np.std(data))
     print("data median: ", np.median(data))
     print("data prod: ", np.prod(data))
     print("data sum: ", np.sum(data))
-    plotImg(data)
+    plot_img(data)

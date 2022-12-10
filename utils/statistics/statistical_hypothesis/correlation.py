@@ -1,7 +1,8 @@
-#taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-#This section lists statistical tests that you can use to check if two samples are related.
+# taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
+# This section lists statistical tests that you can use to check if two samples are related.
 
 from scipy.stats import pearsonr
+
 def pearson_coeff(data1, data2) -> (float, float):
     """Tests whether two samples have a linear relationship.
     Assumptions
@@ -26,10 +27,12 @@ def pearson_coeff(data1, data2) -> (float, float):
     p : float
         2-tailed p-value  
     """
-    corr, p = pearsonr(data1, data2)
+    corr, p = pearsonr(data1, data2)  # TODO: test
     return corr, p
 
 from scipy.stats import spearmanr
+
+
 def spearman_rank(data1, data2):
     """Tests whether two samples have a monotonic relationship.
     Assumptions
@@ -61,6 +64,8 @@ def spearman_rank(data1, data2):
     return corr, p
 
 from scipy.stats import kendalltau
+
+
 def kendall_rank(data1, data2) -> (float, float):
     """Tests whether two samples have a monotonic relationship.
     Assumptions
@@ -85,9 +90,11 @@ def kendall_rank(data1, data2) -> (float, float):
         The two-sided p-value for a hypothesis test whose null hypothesis is an absence of association, tau = 0. 
     """
     corr, p = kendalltau(data1, data2)
-    return corr, p
+    return corr, p  # TODO: test
 
 from scipy.stats import chi2_contingency
+
+
 def chi_squared(table):
     """Tests whether two categorical variables are related or independent.
     Assumptions

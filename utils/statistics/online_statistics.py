@@ -4,18 +4,20 @@
 def movingmean2(n, x, lastmean):
     return 1/float(n) * (x + n*lastmean - lastmean)
 
-#more stable version
+
+# more stable version
 def movingmean(n, x, lastmean):
     return lastmean + ((x - lastmean)/float(n))
 
 
-#s_n is a 
+# s_n is a
 def moving_s(last_s_n, n, x, lastmean):
     now_mean = movingmean(n, x, lastmean)
-    #s_n = (variance**2) * n
-    #s_n = s_n-1 + (x_n - u_n-1)*(x_n - u_n)
+    # s_n = (variance**2) * n
+    # s_n = s_n-1 + (x_n - u_n-1)*(x_n - u_n)
     return last_s_n + (x - lastmean)*(x - now_mean)
-    
+
+
 def movingpvariance(s_n, n):
     return s_n/float(n)
 

@@ -1,8 +1,10 @@
-#taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
+# taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
 
-#This section lists statistical tests that you can use to check if your data has a Gaussian distribution
+# This section lists statistical tests that you can use to check if your data has a Gaussian distribution
 
 from scipy.stats import shapiro
+
+
 def ShapiroWilk(data):
     """Tests whether a data sample has a Gaussian distribution.
     Assumptions
@@ -24,8 +26,11 @@ def ShapiroWilk(data):
     """
     stat, p = shapiro(data)
     return stat, p
-	
+
+
 from scipy.stats import normaltest
+
+
 def DAgostinosK2(data):
     """Tests whether a data sample has a Gaussian distribution.
     Assumptions
@@ -50,7 +55,10 @@ def DAgostinosK2(data):
     stat, p = normaltest(data)
     return stat, p
 
+
 from scipy.stats import anderson
+
+
 def AndersonDarling(data):
     """Tests whether a data sample has a Gaussian distribution.
     Assumptions

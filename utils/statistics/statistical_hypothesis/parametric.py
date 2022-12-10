@@ -1,8 +1,10 @@
-#taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-#This section lists statistical tests that you can use to compare data samples.
+# taken from https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
+# This section lists statistical tests that you can use to compare data samples.
 import numpy as np
 
 from scipy.stats import ttest_ind
+
+
 def student(data1, data2):
     """Tests whether the means of two independent samples are significantly different.
     Assumptions
@@ -30,7 +32,10 @@ def student(data1, data2):
     stat, p = ttest_ind(data1, data2)
     return stat, p
 
+
 from scipy.stats import ttest_rel
+
+
 def paired_student(data1, data2):
     """Tests whether the means of two paired samples are significantly different.
     Assumptions
@@ -61,6 +66,8 @@ def paired_student(data1, data2):
 
 
 from scipy.stats import f_oneway
+
+
 def ANOVA(data1, data2):
     """Analysis of Variance Test (ANOVA)
     Tests whether the means of two or more independent samples are significantly different.
@@ -86,5 +93,5 @@ def ANOVA(data1, data2):
     p : float
         The associated p-value from the F-distribution. 
     """
-    stat, p = f_oneway(data1, data2)#, ...)
+    stat, p = f_oneway(data1, data2)  # , ...)
     return stat, p

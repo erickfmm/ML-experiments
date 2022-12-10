@@ -2,12 +2,12 @@ from keras.datasets import cifar10
 from load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import numpy as np
 
-__all__ = ["LoadCifar10",]
+__all__ = ["LoadCifar10"]
+
 
 class LoadCifar10(ILoadSupervised):
     def __init__(self):
         self.TYPE = SupervisedType.Classification
-        (self.XTrain,self.YTrain),(self.XTest,self.YTest)=cifar10.load_data()
         self.headers = ["pixels"]
         self.classes = []
     
@@ -17,11 +17,16 @@ class LoadCifar10(ILoadSupervised):
     def get_headers(self):
         return self.headers
 
-    def get_default(self):
-        return self.XTrain, self.YTrain
+    @staticmethod
+    def get_default():
+        (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+        return x_train, y_train
 
-    def get_splited(self):
-        return (self.XTrain, self.YTrain), (self.XTest, self.YTest)
+    @staticmethod
+    def get_splited():
+        (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+        return (x_train, y_train), (x_test, y_test)
     
     def get_all(self):
-        return np.append(self.XTrain, self.XTest, 0), np.append(self.YTrain, self.YTest, 0)
+        (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+        return np.append(x_train, x_test, 0), np.append(y_train, y_test, 0)

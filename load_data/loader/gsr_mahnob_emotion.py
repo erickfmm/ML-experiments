@@ -4,9 +4,9 @@ import pickle
 from os.path import join
 from os import listdir
 
-#from load_data.loader.gsr_mahnob_emotion import LoadGsrMahnobEmotion
 
-__all__ = ["LoadGsrMahnobEmotion",]
+__all__ = ["LoadGsrMahnobEmotion"]
+
 
 class LoadGsrMahnobEmotion(ILoadSupervised):
     def __init__(self, data_folder="train_data/Folder_Biosignal/gsr_mahnob_data"):
@@ -36,21 +36,22 @@ class LoadGsrMahnobEmotion(ILoadSupervised):
     def get_default(self):
         return self.get_all()
 
-    def get_splited(self):
+    @staticmethod
+    def get_splited():
         return None
     
     def get_all(self):
-        self.X = []
-        self.Y = []
+        xs = []
+        ys = []
         ifolder = 0
         for folder_name in self.folders_of_data:
             files = listdir(join(self.data_folder, folder_name))
             for filename in files:
-                with open(join(self.data_folder, folder_name, filename), "rb") as fobj:
-                    self.X.append(pickle.load(fobj))
-                    self.Y.append(self.classes[ifolder])
+                with open(join(self.data_folder, folder_name, filename), "rb") as file_handler:
+                    xs.append(pickle.load(file_handler))
+                    ys.append(self.classes[ifolder])
             ifolder += 1
-        return (self.X, self.Y)
+        return xs, ys
     
     def get_classes(self):
         return self.classes
