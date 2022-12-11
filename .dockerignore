@@ -1,0 +1,8 @@
+created_models
+train_data
+venv
+
+.vs/
+.vscode/
+.idea/
+*.pyc

@@ -16,16 +16,16 @@ from load_data.loader.recognition_human_actions_video import LoadRecognitionHuma
 
 from load_data.loader.downloadable.mnist_keras import LoadMnist
 from load_data.loader.downloadable.iris_sklearn import LoadIris
-from load_data.loader.downloadable.cifar100_keras import LoadCifar10
+from load_data.loader.downloadable.cifar10_keras import LoadCifar10
 
 from unsupervised.clustering.kmeans import KMeans
 from unsupervised.clustering.utils.monte_carlo import montecarlo_clustering
 import numpy as np
 
 #data = LoadAndTable()
-#data = LoadXorTable()
-data = LoadTitanic()
-X, Y = data.get_default()
+data = LoadXorTable()
+#data = LoadTitanic()
+X, Y = data.get_all()
 
 #pr = Perceptron()
 #performance = pr.train(X, Y)

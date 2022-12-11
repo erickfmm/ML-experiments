@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def montecarlo_clustering(model, data, executions, num_clusters, max_iterations):
+def montecarlo_clustering(model, data: list, executions: int, num_clusters: int, max_iterations: int):
     all_assignments = []
     models = []
     # print("holi")
