@@ -24,3 +24,5 @@ pymongo
 PyYAML
 pypng
 PyEMD
+pydot
+FuzzyTM

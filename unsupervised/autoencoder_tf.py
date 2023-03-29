@@ -1,6 +1,7 @@
+from os.path import join
 import numpy as np
-import tensorflow as tf
-from tensorflow.contrib.layers import fully_connected  # the VSCode says its error but not # TODO: test this code
+from tensorflow import keras
+from tensorflow.keras import layers
 # from sklearn import datasets
 # from sklearn.model_selection import train_test_split
 
@@ -16,24 +17,26 @@ def reconstruct_data(X_train, X_test, n_hidden=2, learning_rate=0.1, n_iteration
         raise ValueError("X has no length")
     n_input = len(X_train[0])
     n_output = n_input
+    # TODO: Reimplement using keras
+    input = keras.Input(shape=(n_input, ))
+    hidden = layers.Dense(n_hidden, activation='relu', name="hidden")
+    x = hidden(input)
+    output = layers.Dense(n_input, activation='relu')(x)
+    model = keras.Model(inputs=input, outputs=output)
+    keras.utils.plot_model(model, join("created_models", "reconstructed_model.png"), show_shapes=True)
 
-    # Construcción de la estructura de Autoencoder
-    input_layer = tf.placeholder(np.float64, shape=[None, n_input])  #  Placeholder es una variable que se le asignará datos.
-    hidden = fully_connected(input_layer, n_hidden, activation_fn=None)
-    # si activation_fn=None entonces activación lineal
-    outputs = fully_connected(hidden, n_output, activation_fn=None)
-    reconstruction_loss = tf.reduce_mean(tf.square(outputs-input_layer))
-    # Función de costo igual a MSE
-    optimizer = tf.train.AdamOptimizer(learning_rate)
-    training_op = optimizer.minimize(reconstruction_loss)
-    init=tf.global_variables_initializer()
+    model.compile(
+        loss=keras.losses.MeanSquaredError(),
+        optimizer=keras.optimizers.SGD(),
+        metrics=["mse"],
+    )
+    model.fit(X_train, X_train, batch_size=2, epochs=3, validation_split=0.2)
+    model.save(join("created_models", "reconstructed.model"))
+    reconstructed = model.predict(X_test)
+    
 
-    codings = hidden  # la salida de la capa oculta provee los codings
-    hidden_values = None
-    with tf.Session() as sess:
-        init.run()
-        for iteration in range(n_iterations):
-            training_op.run(feed_dict = {input_layer: X_train}) # no labels
-        codings_val = codings.eval(feed_dict = {input_layer:X_test})
-        reconstructed = outputs.eval(feed_dict = {hidden: codings_val})
+    intermediate_layer_model = keras.Model(inputs=model.input,
+                                 outputs=model.get_layer("hidden").output)
+    codings_val = intermediate_layer_model.predict(X_test)
+    
     return codings_val, reconstructed

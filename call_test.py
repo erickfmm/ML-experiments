@@ -12,4 +12,5 @@ for test_file in test_files:
 
 which_idx = int(input("Id of file: "))
 
-subprocess.run(["venv/Scripts/python", join("test", test_files[which_idx])])
+subprocess.run(["pip", "list", "--format=freeze", ">", "data/sample_data/reqs.txt" ])
+subprocess.run(["python", join("test", test_files[which_idx])])

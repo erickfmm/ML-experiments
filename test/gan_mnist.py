@@ -157,7 +157,7 @@ class GanMnist:
 
     def save(self):
         try:
-            base_folder = "train_data\\created_models"
+            base_folder = "created_models"
             if not os.path.exists(base_folder):
                 os.mkdirs(base_folder)
             newfolder = os.path.join(base_folder, "gan_mnist_v1")
@@ -173,7 +173,7 @@ class GanMnist:
             print("error in saving")
 
     def load(self):
-        base_folder = "train_data\\created_models"
+        base_folder = "created_models"
         newfolder = os.path.join(base_folder, "gan_mnist_v1")
         try:
             if os.path.exists(newfolder):

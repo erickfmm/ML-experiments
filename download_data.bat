@@ -1,0 +1,12 @@
+data/train_data/Audio/download.bat
+data/train_data/Emotions_Images/download.bat
+data/train_data/Images_Supervised/download.bat
+data/train_data/NLP_ENG/download.bat
+data/train_data/NLP_ENG_Sentiment/download.bat
+data/train_data/NLP_ESP_Translation/download.bat
+data/train_data/Emotions_EEG/download.bat
+data/train_data/Emotions_Voice/download.bat
+data/train_data/Manga_Anime/download.bat
+data/train_data/NLP_ENG_Dialogs/download.bat
+data/train_data/NLP_ESP/download.bat
+data/train_data/NLP_Multilingual/download.bat

@@ -1,28 +1,27 @@
-train_data/**
-!train_data/Audio
-!train_data/Emotions_EEG
-!train_data/Emotions_Images
-!train_data/Emotions_Voice
-!train_data/Images_Supervised
-!train_data/Images_Unsupervised
-!train_data/Manga_Anime
-!train_data/NLP_ENG
-!train_data/NLP_ENG_Dialogs
-!train_data/NLP_ENG_Sentiment
-!train_data/NLP_ESP
-!train_data/NLP_ESP_Sentiment
-!train_data/NLP_ESP_Translation
-!train_data/TimeSeries
-!train_data/Videogames
+data/train_data/**
+!data/train_data/Audio
+!data/train_data/Emotions_EEG
+!data/train_data/Emotions_Images
+!data/train_data/Emotions_Voice
+!data/train_data/Images_Supervised
+!data/train_data/Images_Unsupervised
+!data/train_data/Manga_Anime
+!data/train_data/NLP_ENG
+!data/train_data/NLP_ENG_Dialogs
+!data/train_data/NLP_ENG_Sentiment
+!data/train_data/NLP_ESP
+!data/train_data/NLP_ESP_Translation
+!data/train_data/NLP_Multilingual
 
 
-created_models/**
-!created_models
+data/created_models/**
+!data/created_models
 
-sample_data/**
-!sample_data
+data/sample_data/**
+!data/sample_data
 
 !.gitkeep
+!download.bat
 
 **/Thumbs.db
 **/thumbs.db

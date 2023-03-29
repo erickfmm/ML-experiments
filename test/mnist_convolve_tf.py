@@ -7,14 +7,15 @@ sys.path.append(abspath(join(dirname(__file__), '..')))
 from load_data.loader.downloadable.mnist_keras import LoadMnist
 from load_data.loader.downloadable.cifar10_keras import LoadCifar10
 from load_data.loader.basic.mnist_file import LoadMnist as LoadMnistFile
+from utils.keras_persistence.all_inside import save
 
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Convolution2D, MaxPooling2D
 from keras.utils.np_utils import to_categorical
 
-dataset_to_use = "cifar10"
-# dataset_to_use = "mnist"
+#dataset_to_use = "cifar10"
+dataset_to_use = "mnist"
 # dataset_to_use = "fashion"
 
 if dataset_to_use == "cifar10":
@@ -92,3 +93,5 @@ model.fit(Xtrain,Ytrain,epochs=1,batch_size=2,verbose=1,shuffle=True)
 
 score=model.evaluate(Xtest,Ytest,verbose=1)
 print("\n Loss: %.3f \t Accuracy: %.3f"%(score[0],score[1]))
+
+save(model, os.path.join("created_models", "mnist_convolve.model"))
