@@ -94,4 +94,4 @@ model.fit(Xtrain,Ytrain,epochs=1,batch_size=2,verbose=1,shuffle=True)
 score=model.evaluate(Xtest,Ytest,verbose=1)
 print("\n Loss: %.3f \t Accuracy: %.3f"%(score[0],score[1]))
 
-save(model, os.path.join("created_models", "mnist_convolve.model"))
+save(model, os.path.join("data", "created_models", "mnist_convolve.model"))

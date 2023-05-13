@@ -1,6 +1,10 @@
 # taken from:
 # https://medium.com/sigmoid/a-brief-introduction-to-gans-and-how-to-code-them-2620ee465c30
 # https://github.com/sarvasvkulpati/intro_to_gans/blob/master/intro_to_gans.ipynb
+import sys
+from os.path import dirname, join, abspath
+
+sys.path.append(abspath(join(dirname(__file__), '..')))
 
 
 import numpy as np
@@ -10,7 +14,7 @@ from tqdm import tqdm  # progress bar
 from keras.layers import Input
 from keras.models import Model, Sequential
 from keras.layers.core import Dense, Dropout
-from keras.layers.advanced_activations import LeakyReLU
+from keras.layers.activation import LeakyReLU
 from keras.datasets import mnist
 from keras.optimizers import Adam
 from keras import initializers

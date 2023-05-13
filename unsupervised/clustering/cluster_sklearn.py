@@ -33,7 +33,7 @@ def hierarchical_connected(dataset, n_clusters, n_neighbors=5, include_self=Fals
 
 
 def gaussian_mixture(dataset, n_clusters, covariance_type='full'):
-    return mixture.GaussianMixture(n_components=n_clusters, covariance_type=covariance_type).fit(dataset)
+    return mixture.GaussianMixture(n_components=n_clusters, covariance_type=covariance_type).fit_predict(dataset)
 
 
 def dirichlet(dataset, n_clusters, max_iter=100, covariance_type='full',

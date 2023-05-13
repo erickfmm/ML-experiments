@@ -8,7 +8,7 @@ __all__ = ["LoadBerlin"]
 
 class LoadBerlin(ILoadSupervised):
     def __init__(self, classes_binary_array=None,
-                 folder_name="train_data/Folder_AudioEmotion/Berlin/wav"):
+                 folder_name="data/train_data/Emotions_Voice/berlin-database-of-emotional-speech-emodb"):
         if classes_binary_array is None:
             classes_binary_array = [1, 1, 1, 1, 1, 1, 1]
         self.folder_name = folder_name

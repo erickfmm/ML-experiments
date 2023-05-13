@@ -66,7 +66,9 @@ def davies_bouldin_index(data, assignments, centroids):  # DB less its better
     return -99  # TODO: make it
 
 
-def all_silhouettes(data, assignments):
+def all_silhouettes(data: list, assignments: list):
+    print(assignments)
+    print("*"*40)
     silhouettes = []
     for idata in range(len(data)):
         a_i = 0
@@ -77,7 +79,7 @@ def all_silhouettes(data, assignments):
             if idata != idata2 and assignments[idata2] == idata_assignment:
                 a_i += distance(data[idata], data[idata2])
                 n_idata_cluster += 1
-        a_i /= float(n_idata_cluster)
+        a_i /= float(n_idata_cluster) if n_idata_cluster != 0 else 0.1
         # calc b
         b_n = [0 for _ in set(assignments)]
         b = [0.0 for _ in set(assignments)]
@@ -101,14 +103,14 @@ def mean_silhouette(data, assignments):  # -1 bad, 0 meh, 1 good
 def evaluate_all_metrics(data, assignments, centroids=None, toshow_all_silhouettes=False):
     result_metrics = {}
     if centroids is not None:
-        result_metrics["Sum of squared"] = sum_of_squared(data, assignments, centroids)
+        #result_metrics["Sum of squared"] = sum_of_squared(data, assignments, centroids)
         result_metrics["Sum of squared within"] = sum_of_squared_within(data, assignments, centroids)
-        result_metrics["Sum of squared between"] = sum_of_squared_between(data, assignments, centroids)
+        #result_metrics["Sum of squared between"] = sum_of_squared_between(data, assignments, centroids)
         result_metrics["Ball and hall"] = ball_and_hall(data, assignments, centroids)
-        result_metrics["Calinski and Harabasz"] = calinski_and_harabasz(data, assignments, centroids)
-        result_metrics["Hartigan"] = hartigan(data, assignments, centroids)
+        #result_metrics["Calinski and Harabasz"] = calinski_and_harabasz(data, assignments, centroids)
+        #result_metrics["Hartigan"] = hartigan(data, assignments, centroids)
         result_metrics["Xu"] = xu(data, assignments, centroids)
-        result_metrics["Davies Bouldin index"] = davies_bouldin_index(data, assignments, centroids)
+        #result_metrics["Davies Bouldin index"] = davies_bouldin_index(data, assignments, centroids)
     result_metrics["Sillouhete"] = mean_silhouette(data, assignments)
     if toshow_all_silhouettes:
         result_metrics["All sillouhettes"] = all_silhouettes(data, assignments)

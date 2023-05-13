@@ -16,4 +16,4 @@ rm wikipedia-movie-plots.zip
 
 kaggle datasets download -d PromptCloudHQ/flipkart-products
 unzip flipkart-products.zip -d flipkart-products
-rm flipkart-products
+rm flipkart-products.zip

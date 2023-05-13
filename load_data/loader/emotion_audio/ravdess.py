@@ -9,7 +9,7 @@ __all__ = ["LoadRavdess"]
 
 class LoadRavdess(ILoadSupervised):
     def __init__(self, modalities=None,
-                 folder_path="train_data/Folder_AudioEmotion/RAVDESS"):
+                 folder_path="data/train_data/Emotions_Voice/ravdess-emotional-speech-audio/audio_speech_actors_01-24"):
         if modalities is None:
             modalities = ["speech", "song"]
         self.folder_path = folder_path
@@ -46,26 +46,27 @@ class LoadRavdess(ILoadSupervised):
         return xs, ys
     
     def get_all_yielded(self):
-        for audio_name in os.listdir(self.folder_path):
-            if splitext(audio_name)[1].lower() == ".wav":
-                fullname = join(self.folder_path, audio_name)
-                try:
-                    rate, signal = wav.read(fullname)
-                    meta = splitext(audio_name)[0]
-                    meta = meta.split("-")
-                    meta = [int(e) for e in meta]
-                    y = self.classes[meta[2]-1]
-                    self.Metadata.append([
-                        rate,
-                        meta[1],  # 1=speech, 2=song
-                        meta[3],  # intensity 1=normal, 2=strong. no strong in neutral
-                        meta[4],  # statement
-                        meta[5],  # repetition 1 or 2
-                        meta[6],  # actor
-                        meta[6] % 2])  # gender, 0 = female, 1 = male
-                    yield signal, y
-                except Exception as e:
-                    print("error in reading ", audio_name, " error:", e)
+        for folder in os.listdir(self.folder_path):
+            for audio_name in os.listdir(folder):
+                if splitext(audio_name)[1].lower() == ".wav":
+                    fullname = join(self.folder_path, audio_name)
+                    try:
+                        rate, signal = wav.read(fullname)
+                        meta = splitext(audio_name)[0]
+                        meta = meta.split("-")
+                        meta = [int(e) for e in meta]
+                        y = self.classes[meta[2]-1]
+                        self.Metadata.append([
+                            rate,
+                            meta[1],  # 1=speech, 2=song
+                            meta[3],  # intensity 1=normal, 2=strong. no strong in neutral
+                            meta[4],  # statement
+                            meta[5],  # repetition 1 or 2
+                            meta[6],  # actor
+                            meta[6] % 2])  # gender, 0 = female, 1 = male
+                        yield signal, y
+                    except Exception as e:
+                        print("error in reading ", audio_name, " error:", e)
     
     def get_classes(self):
         return []

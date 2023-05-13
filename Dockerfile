@@ -1,12 +1,16 @@
-FROM python:3.10.4
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 WORKDIR /usr/src/app
 
 COPY _requirements.txt ./
-RUN pip install --upgrade --no-cache-dir -r _requirements.txt
 
-RUN pip list --format=freeze > reqs.txt
+RUN apt-get update && apt-get upgrade -y
+RUN apt install pip graphviz -y
+
+RUN pip install --upgrade --no-cache-dir -r _requirements.txt
 
 COPY . .
 
-CMD [ "python", "./call_test.py" ]
+#RUN python3 -m spacy download es_core_news_lg
+
+CMD [ "python3", "./call_test.py" ]

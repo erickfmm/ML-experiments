@@ -6,7 +6,7 @@ __all__ = ["LoadSpokenDigits"]
 
 
 class LoadSpokenDigits(ILoadSupervised):
-    def __init__(self, digits=None, path="train_data/free-spoken-digit/recordings"):
+    def __init__(self, digits=None, path="data/train_data/Audio/free-spoken-digit-dataset/recordings"):
         if digits is None:
             digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.digits = digits

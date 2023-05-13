@@ -27,39 +27,40 @@ def evaluate_clustering(dataset1: list[list[float]], n_clusters: int = 4,
                         original_labels: list = None, to_plot: bool = False):
     all_assignments = {}
     if original_labels is not None:
-        all_assignments["original"] = original_labels
-    all_assignments["furthest"] = ias.furthest_mine(dataset1, n_clusters)
-    all_assignments["random"] = ias.random_assignment(dataset1, n_clusters)
+        all_assignments["original"] = original_labels, None
+    all_assignments["furthest"] = ias.furthest_mine(dataset1, n_clusters), None
+    all_assignments["random"] = ias.random_assignment(dataset1, n_clusters), None
 
     km_model = KMeans(dataset1)
     km_model.initial_assignment = ias.random_assignment
-    all_assignments["kmeans random"] = km_model.cluster(n_clusters, 300)
+    all_assignments["kmeans random"] = km_model.cluster(n_clusters, 300), km_model.centroids
 
     km_model = KMeans(dataset1)
     km_model.initial_assignment = ias.furthest_mine
-    all_assignments["kmeans furthest"] = km_model.cluster(n_clusters, 300)
+    all_assignments["kmeans furthest"] = km_model.cluster(n_clusters, 300), km_model.centroids
 
-    all_assignments["affinity"] = clustering_sk.affinity_propagation(dataset1, False)
-    all_assignments["dbscan"] = clustering_sk.dbscan(dataset1)
-    all_assignments["dirichlet"] = clustering_sk.dirichlet(dataset1, n_clusters)
-    all_assignments["hierachical"] = clustering_sk.hierarchical(dataset1, n_clusters)
-    all_assignments["gaussian mixture"] = clustering_sk.gaussian_mixture(dataset1, n_clusters)
-    all_assignments["hierarchical connected"] = clustering_sk.hierarchical_connected(dataset1, n_clusters)
-    all_assignments["kmeans"] = clustering_sk.kmeans(dataset1, n_clusters)
-    all_assignments["kneighbours graph"] = clustering_sk.kneighbors_graph(dataset1, n_clusters)
-    all_assignments["mean shift"] = clustering_sk.mean_shift(dataset1)
+    all_assignments["affinity"] = clustering_sk.affinity_propagation(dataset1, False), None
+    all_assignments["dbscan"] = clustering_sk.dbscan(dataset1), None
+    all_assignments["dirichlet"] = clustering_sk.dirichlet(dataset1, n_clusters), None
+    all_assignments["hierachical"] = clustering_sk.hierarchical(dataset1, n_clusters), None
+    all_assignments["gaussian mixture"] = clustering_sk.gaussian_mixture(dataset1, n_clusters), None
+    all_assignments["hierarchical connected"] = clustering_sk.hierarchical_connected(dataset1, n_clusters), None
+    all_assignments["kmeans"] = clustering_sk.kmeans(dataset1, n_clusters), None
+    #all_assignments["kneighbours graph"] = clustering_sk.kneighbors_graph(dataset1, n_clusters), None
+    all_assignments["mean shift"] = clustering_sk.mean_shift(dataset1), None
     
     pp = pprint.PrettyPrinter(indent=4)
     result_metrics = {}
     for assignment in all_assignments:
-        result_metrics[assignment] = clustering_metrics.evaluate_all_metrics(dataset1, all_assignments[assignment])
+        print("calculating metrics...", assignment)
+        result_metrics[assignment] = clustering_metrics.evaluate_all_metrics(dataset1, all_assignments[assignment][0], all_assignments[assignment][1])
     
     pp.pprint(result_metrics)
     if to_plot:
         # clustering_sk.plot_clusters(dataset1, original_labels)
-        clustering_sk.plot_clusters(dataset1, all_assignments["furthest"])
-        clustering_sk.plot_clusters(dataset1, all_assignments["random"])
+        clustering_sk.plot_clusters(dataset1, all_assignments["furthest"][0])
+        clustering_sk.plot_clusters(dataset1, all_assignments["random"][0])
     return result_metrics, all_assignments
 
 
-evaluate_clustering(simple_dataset, 4, labels1, False)
+evaluate_clustering(simple_dataset, 4, labels1, to_plot=True)

@@ -9,7 +9,7 @@ class LoadEEGIndividualEmotions(ILoadSupervised):
     def __init__(self, channels=None):
         self.fs = 1024
         self.channels = channels if isinstance(channels, list) else None
-        self._path = "train_data/Folder_EEGEmotion/Dataset Individual Classification of Emotions Using EEG/"
+        self._path = "data/train_data/Emotions_EEG/Dataset Individual Classification of Emotions Using EEG/"
         self.tags = {
             '01': DiscreteEmotion.Sad.name,
             '05': DiscreteEmotion.Disgust.name,
