@@ -6,7 +6,6 @@ sys.path.append(abspath(join(dirname(__file__), '..')))
 
 from load_data.loader.downloadable.mnist_keras import LoadMnist
 from load_data.loader.downloadable.cifar10_keras import LoadCifar10
-from load_data.loader.basic.mnist_file import LoadMnist as LoadMnistFile
 from utils.keras_persistence.all_inside import save
 
 import numpy as np
@@ -27,14 +26,6 @@ if dataset_to_use == "cifar10":
 if dataset_to_use == "mnist":
     l_mnist = LoadMnist()
     (Xtrain, Ytrain), (Xtest, Ytest) = l_mnist.get_splited()
-
-if dataset_to_use == "fashion":
-    l_fashion = LoadMnistFile(mnist_path='train_data/Folder_Images_Supervised/fashionmnist')
-    (Xtrain, Ytrain), (Xtest, Ytest) = l_fashion.get_splited()
-    Xtrain = np.asarray(Xtrain)
-    Xtest = np.asarray(Xtest)
-    Ytrain = np.asarray(Ytrain)
-    Ytest = np.asarray(Ytest)
 
 n_classes = len(set(Ytrain))
 print("number of classes are: ", n_classes)

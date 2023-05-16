@@ -8,7 +8,7 @@ __all__ = ["LoadButterflySegment"]
 
 class LoadButterflySegment(ILoadSupervised):
     def __init__(self,
-                 folder_path="train_data/Folder_Images_Supervised/leedsbutterfly"):
+                 folder_path="data/train_data/Images_Supervised/butterfly-dataset/leedsbutterfly"):
         self.folder_path = folder_path
         pass
 

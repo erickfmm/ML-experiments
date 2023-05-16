@@ -5,7 +5,7 @@ __all__ = ["LoadNewsCategory"]
 
 
 class LoadNewsCategory(ILoadSupervised):
-    def __init__(self, file_path="train_data/Folder_NLPEnglish/news-category-dataset/News_Category_Dataset_v2.json"):
+    def __init__(self, file_path="data/train_data/NLP_ENG/news-category-dataset/News_Category_Dataset_v3.json"):
         self.file_path = file_path
         self.headers = ["headline", "short_description"]
         self.Metadata = []

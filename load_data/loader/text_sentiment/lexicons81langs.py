@@ -6,8 +6,7 @@ __all__ = ["LoadLexicons81langs"]
 
 class LoadLexicons81langs(ILoadSupervised):
 
-    def __init__(self, folder_path="train_data/Folder_NLPEspañol_Sentiment/"
-                                   "sentiment-lexicons-for-81-languages/sentiment-lexicons",
+    def __init__(self, folder_path="data/train_data/NLP_ENG_Sentiment/sentiment-lexicons-for-81-languages/sentiment-lexicons/sentiment-lexicons",
                  lang="es"):
         if lang not in LoadLexicons81langs.allowed_languages():
             raise Exception("language not allowed")

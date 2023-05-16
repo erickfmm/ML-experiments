@@ -1,13 +1,13 @@
 from load_data.ILoadUnsupervised import ILoadUnsupervised
 from os.path import join
 
-__all__ = ["LoadWMT11"]
+__all__ = ["LoadWMT"]
 
 
-class LoadWMT11(ILoadUnsupervised):
+class LoadWMT(ILoadUnsupervised):
     # datapath="train_data/Folder_NLPEspañol_Translation/WMT13 [ES-EN]/training"
-    def __init__(self, folder_path="train_data/Folder_NLPEspañol_Translation/WMT11_Translation/training",
-                 data_set="news-commentary-v6"):
+    def __init__(self, folder_path="data/train_data/NLP_ESP_Translation/wmt06",
+                 data_set="europarl.es-en.en", wmt_version="wmt06"):
         """
         nombre + ".es-en.en" y ".es-en.es"
         wmt11:
@@ -18,10 +18,16 @@ class LoadWMT11(ILoadUnsupervised):
             - europarl-v7.es-en
             - news-commentary-v8.es-en
             - undoc.2000.es-en
+        wmt06:
+            - europarl.es-en.en
         """
         self.folder_path = folder_path
-        self.filename_eng = data_set + ".es-en.en"
-        self.filename_es = data_set + ".es-en.es"
+        if wmt_version == "wmt06":
+            self.filename_eng = data_set + "/" + data_set
+            self.filename_es = data_set + "/" + data_set
+        elif wmt_version in ["wmt11", "wmt13"]:
+            self.filename_eng = data_set + ".es-en.en"
+            self.filename_es = data_set + ".es-en.es"
 
     def get_headers(self):
         return None
@@ -51,8 +57,8 @@ class LoadWMT11(ILoadUnsupervised):
                     yield eng_line.strip(), es_line.strip()
             except Exception as e:
                 print(e)
-                has_lines = False
-                eng_obj.close()
-                es_obj.close()
+                #has_lines = False
+                #eng_obj.close()
+                #es_obj.close()
         eng_obj.close()
         es_obj.close()

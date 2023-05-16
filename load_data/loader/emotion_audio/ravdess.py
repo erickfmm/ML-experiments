@@ -47,9 +47,9 @@ class LoadRavdess(ILoadSupervised):
     
     def get_all_yielded(self):
         for folder in os.listdir(self.folder_path):
-            for audio_name in os.listdir(folder):
+            for audio_name in os.listdir(join(self.folder_path, folder)):
                 if splitext(audio_name)[1].lower() == ".wav":
-                    fullname = join(self.folder_path, audio_name)
+                    fullname = join(self.folder_path, folder, audio_name)
                     try:
                         rate, signal = wav.read(fullname)
                         meta = splitext(audio_name)[0]

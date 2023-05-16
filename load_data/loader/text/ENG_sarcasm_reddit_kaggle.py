@@ -6,7 +6,7 @@ __all__ = ["LoadSarcasmRedditKaggle"]
 
 
 class LoadSarcasmRedditKaggle(ILoadSupervised):
-    def __init__(self, folder_path="train_data/Folder_NLPEnglish_Dialogs/sarcasm"):
+    def __init__(self, folder_path="data/train_data/NLP_ENG_Dialogs/sarcasm"):
         self.folder_path = folder_path
         self.classes = [0, 1]
         self.headers = []

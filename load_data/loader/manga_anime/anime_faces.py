@@ -7,7 +7,7 @@ __all__ = ["LoadAnimeFaces"]
 
 
 class LoadAnimeFaces(ILoadUnsupervised):
-    def __init__(self, folder_path="train_data/Folder_Manga_Anime/anime-faces"):
+    def __init__(self, folder_path="data/train_data/Manga_Anime/animefacedataset/images"):
         self.folder_path = folder_path
 
     def get_headers(self):

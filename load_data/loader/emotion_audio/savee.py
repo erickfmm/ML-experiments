@@ -8,7 +8,7 @@ __all__ = ["LoadSavee"]
 
 
 class LoadSavee(ILoadSupervised):
-    def __init__(self, folder_path="train_data/Folder_AudioEmotion/SAVEE"):
+    def __init__(self, folder_path="data/train_data/Emotions_Voice/savee-database"):
         self.folder_path = folder_path
         self.classes_dict = {
             "a": DiscreteEmotion.Angry,

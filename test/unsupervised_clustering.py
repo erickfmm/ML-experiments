@@ -8,11 +8,6 @@ from supervised.perceptron import Perceptron
 # data shared
 from load_data.loader.basic.andtable import LoadAndTable
 from load_data.loader.basic.xortable import LoadXorTable
-from load_data.loader.basic.titanic import LoadTitanic
-
-from load_data.loader.basic.mnist_file import LoadMnist
-from load_data.loader.recognition_human_actions_video import LoadRecognitionHumanActions
-
 
 from load_data.loader.downloadable.mnist_keras import LoadMnist
 from load_data.loader.downloadable.iris_sklearn import LoadIris

@@ -6,7 +6,7 @@ __all__ = ["LoadAnimeData"]
 
 
 class LoadAnimeData(ILoadSupervised):
-    def __init__(self, folder_path="train_data/Folder_Manga_Anime/anime-recommendations-database"):
+    def __init__(self, folder_path="data/train_data/Manga_Anime/anime-recommendations-database"):
         self.folder_path = folder_path
         self.TYPE = SupervisedType.Regression
 
@@ -19,7 +19,7 @@ class LoadAnimeData(ILoadSupervised):
         return xs, ys
 
     def get_all_yielded(self):
-        with open(join(self.folder_path, "anime.csv"), "r", encoding="utf-8") as file_obj:
+        with open(join(self.folder_path, "anime.csv"), "r", encoding="utf-8") as file_obj: #TODO: load rating.csv
             filereader = DictReader(file_obj)
             i = 0
             for row in filereader:

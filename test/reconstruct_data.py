@@ -14,10 +14,7 @@ from unsupervised.autoencoder_tf import reconstruct_data
 #from load_data.loader.basic.iris import LoadIris
 from load_data.loader.downloadable.iris_sklearn import LoadIris
 from load_data.loader.downloadable.mnist_keras import LoadMnist
-from load_data.loader.basic.glass import LoadGlass
-from load_data.loader.basic.segment import LoadSegment
-from load_data.loader.basic.titanic import LoadTitanic
-from load_data.loader.basic.vehicle import LoadVehicle
+
 
 print("all imported")
 

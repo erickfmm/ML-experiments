@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import load_data.loader.text.ENG_reddit_comments as rcs
+import load_data.loader.text._ENG_reddit_comments as rcs
 
 l = rcs.LoadRedditComments(onlyfiles=[])
 

@@ -89,6 +89,8 @@ class LoadBerlin(ILoadSupervised):
         xs = []
         ys = []
         for audio_filename in os.listdir(self.folder_name):
+            if not audio_filename.endswith(".wav"):
+                continue
             speaker_code = audio_filename[0:2]
             text_code = audio_filename[2:5]
             emotion_code = audio_filename[5]

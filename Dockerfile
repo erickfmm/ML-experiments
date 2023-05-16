@@ -2,12 +2,12 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 WORKDIR /usr/src/app
 
-COPY _requirements.txt ./
+COPY requirements.txt ./
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt install pip graphviz -y
 
-RUN pip install --upgrade --no-cache-dir -r _requirements.txt
+RUN pip install --upgrade --no-cache-dir -r requirements.txt
 
 COPY . .
 
