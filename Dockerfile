@@ -12,5 +12,6 @@ RUN pip install --upgrade --no-cache-dir -r requirements.txt
 COPY . .
 
 #RUN python3 -m spacy download es_core_news_lg
+#RUN python3 -m spacy download en_core_news_lg
 
 CMD [ "python3", "./call_test.py" ]

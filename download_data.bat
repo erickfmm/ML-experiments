@@ -1,5 +1,5 @@
 cd data/train_data/Audio
-REM download.bat
+CALL download.bat
 cd ../../..
 
 cd data/train_data/Emotions_Images
@@ -42,6 +42,6 @@ cd data/train_data/NLP_ESP
 CALL download.bat
 cd ../../..
 
-cd data/train_data/NLP_M
+cd data/train_data/NLP_Multilingual
 CALL download.bat
 
