@@ -69,22 +69,22 @@ class LemmaStemmaText:
         return distances, similarities
     
 
+
+def count_words(docs:  List[List[str]]):
+    words = set()
+    wc = dict()
+    for doc in docs:
+        for w in doc:
+            words.add(w)
+            if w in wc:
+                wc[w] += 1
+            else:
+                wc[w] = 1
+    return wc, words
+
 class Vectorize_Clustering:
     def __init__(self) -> None:
         pass
-
-    @staticmethod
-    def count_words(docs:  List[List[str]]):
-        words = set()
-        wc = dict()
-        for doc in docs:
-            for w in doc:
-                words.add(w)
-                if w in wc:
-                    wc[w] += 1
-                else:
-                    wc[w] = 1
-        return wc, words
 
     @staticmethod
     def concat_list_of_str(l : List[str]):

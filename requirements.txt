@@ -11,7 +11,7 @@ keras
 nltk
 gensim
 spacy
-
+wordcloud
 
 opencv-python
 
