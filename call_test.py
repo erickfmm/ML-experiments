@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import join
 import subprocess
-
+import sys
 
 test_files = listdir("test")
 
@@ -13,4 +13,4 @@ for test_file in test_files:
 which_idx = int(input("Id of file: "))
 
 #subprocess.run(["pip", "list", "--format=freeze", ">", "data/sample_data/reqs.txt" ])
-subprocess.run(["python3", join("test", test_files[which_idx])])
+subprocess.run([sys.executable, join("test", test_files[which_idx])])
