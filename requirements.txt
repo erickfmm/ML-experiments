@@ -12,6 +12,7 @@ nltk
 gensim
 spacy
 wordcloud
+pyldavis
 
 opencv-python
 

@@ -73,6 +73,7 @@ from load_data.loader.text._ES_diccionarios import LoadDictionaryRaeComplete
 from load_data.loader.text._ES_names_spain import LoadNamesSpain
 from load_data.loader.text._international_stopwords import LoadInternationalStopWords
 from load_data.loader.text.stopwords import LoadStopwords
+from load_data.loader.text.ES_wikipedia_corpus import LoadES_Wikipedia_Corpus
 
 from load_data.loader.text._vectorized_words_txt_mongodb import VectorizedWordsTxtMongoDB
 
@@ -80,6 +81,12 @@ from load_data.loader.text._vectorized_words_txt_mongodb import VectorizedWordsT
 
 from load_data.loader.text_sentiment._ES_lex_ElhPolar_V1 import LoadElhPolarEs
 from load_data.loader.text_sentiment.lexicons81langs import LoadLexicons81langs
+from load_data.loader.text_sentiment.ENG_1million_tweets import Load1MTweets
+from load_data.loader.text_sentiment.ENG_imdb_sentiment import LoadImdbSentiment
+from load_data.loader.text_sentiment.ENG_RedditTwitterSentiment import LoadRedditOrTwitterSentiment
+from load_data.loader.text_sentiment.ENG_Sentiment140 import LoadSentiment140
+from load_data.loader.text_sentiment.ENG_Steam import LoadSteam
+
 
 from load_data.loader.translation.wmt import LoadWMT
 
@@ -143,6 +150,11 @@ print("reddit sarcasm")
 l = LoadSarcasmRedditKaggle()
 _, _ = l.get_all()
 
+#it works, but it lasts too much time loading ¿maybe load in parts?
+#print("wikipedia spanish")
+#l = LoadES_Wikipedia_Corpus()
+#_ = l.get_all()
+
 print("stopwords 28")
 l = LoadStopwords()
 _ = l.get_all()
@@ -150,6 +162,28 @@ _ = l.get_all()
 print("sentiment lexicons 81 langs")
 l = LoadLexicons81langs()
 _,_ = l.get_all()
+
+print("sentiment")
+
+print("1M tweets")
+l = Load1MTweets()
+_,_ = l.get_all()
+print("imdb")
+l = LoadImdbSentiment()
+_,_ = l.get_all()
+print("reddit and twitter")
+l = LoadRedditOrTwitterSentiment(source="reddit")
+_,_ = l.get_all()
+print("twitter")
+l = LoadRedditOrTwitterSentiment(source="twitter")
+_,_ = l.get_all()
+print("sentiment 140")
+l = LoadSentiment140()
+_,_ = l.get_all()
+print("steam")
+l = LoadSteam()
+_,_ = l.get_all()
+
 
 print("wmt6")
 l = LoadWMT()

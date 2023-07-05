@@ -42,18 +42,26 @@ class LoadWMT(ILoadUnsupervised):
     
     def get_all_yielded(self):
         fullname_eng = join(self.folder_path, self.filename_eng)
-        eng_obj = open(fullname_eng, "r", encoding="utf-8")
+        eng_obj = open(fullname_eng, "r", encoding="utf-8", errors="ignore")
         fullname_es = join(self.folder_path, self.filename_es)
-        es_obj = open(fullname_es, "r", encoding="utf-8")
+        es_obj = open(fullname_es, "r", encoding="utf-8", errors="ignore")
         print(fullname_eng)
-        has_lines = True
-        while has_lines:
+        hasnt_lines = 0
+        while hasnt_lines < 10:
             try:
-                eng_line = eng_obj.readline()
-                es_line = es_obj.readline()
+                eng_line = ""
+                es_line = ""
+                try:
+                    eng_line = eng_obj.readline()
+                except:
+                    pass
+                try:
+                    es_line = es_obj.readline()
+                except:
+                    pass
                 if len(eng_line) == 0 and len(es_line) == 0:
-                    has_lines = False
-                else:
+                    hasnt_lines += 1
+                elif eng_line != "" and es_line != "":
                     yield eng_line.strip(), es_line.strip()
             except Exception as e:
                 print(e)
