@@ -55,7 +55,7 @@ class LDA_model:
             fh_all.write(str(words[i])+";")
         fh_all.write("\n")
         fh_all.flush()
-        probs_topic = {}
+        probs_topic = []
         i_topic = 0
         for t in topics:
             probs_topic.append([])
