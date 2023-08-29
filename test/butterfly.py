@@ -36,17 +36,16 @@ def save_as_pickle(new_size:int = 100, to_gray: bool = True):
             seg2 = seg2.convert("L")
         x_seg.append(np.asarray(seg2))
         y.append(btype)
-    with open("created_models/butterfly.pkl", "wb") as file_handle:
+    with open("data/created_models/butterfly.pkl", "wb") as file_handle:
         print("writing pickle xgray, type")
         pickle.dump({"x": x_gray,"y": y}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open("created_models/butterfly_segment.pkl", "wb") as file_handle:
+    with open("data/created_models/butterfly_segment.pkl", "wb") as file_handle:
         print("writing pickle xgray, xseg")
         pickle.dump({"x": x_gray,"y": x_seg}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def open_pickle(which_pkl:str) -> dict:
-    """Set docstring here.
-
+    """
     Parameters
     ----------
     which_pkl:str: 'butterfly' to open the pickle with "y" = types of butterfly or
@@ -57,8 +56,8 @@ def open_pickle(which_pkl:str) -> dict:
     Dict: A Dictionary with two keys: "x" (an array of images) 
     and "y" (an array of int if 'butterfly' or images if 'segment')
     """
-    path_to_pickle = "created_models/butterfly_segment.pkl" \
-        if which_pkl == "segment" else "created_models/butterfly.pkl"
+    path_to_pickle = "data/created_models/butterfly_segment.pkl" \
+        if which_pkl == "segment" else "data/created_models/butterfly.pkl"
     with open(path_to_pickle, "rb") as file_handler:
         return pickle.load(file_handler)
 

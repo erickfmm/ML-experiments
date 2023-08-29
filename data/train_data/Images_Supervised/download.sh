@@ -18,4 +18,4 @@ kaggle datasets download -d andrewmvd/animal-faces
 unzip animal-faces.zip -d animal-faces
 rm animal-faces.zip
 
-REM https://drive.google.com/drive/folders/1eGq8dWGL0I3rW2B9eJ_casH0_D3x7R73
+# https://drive.google.com/drive/folders/1eGq8dWGL0I3rW2B9eJ_casH0_D3x7R73

@@ -7,7 +7,7 @@ __all__ = ["LoadOASISImageEmotion",]
 
 
 class LoadOASISImageEmotion(ILoadSupervised):
-    def __init__(self, folder_path="train_data/Folder_ImageEmotion/oasis"):
+    def __init__(self, folder_path="data/train_data/Emotions_Images/OASIS"):
         self.folder_path = folder_path
         self.TYPE = SupervisedType.Regression
         self.Metadata = []

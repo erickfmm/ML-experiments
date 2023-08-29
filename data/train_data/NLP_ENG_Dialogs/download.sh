@@ -17,3 +17,7 @@ rm the-movie-dialog-dataset.zip
 kaggle datasets download -d rtatman/ubuntu-dialogue-corpus
 unzip ubuntu-dialogue-corpus.zip -d ubuntu-dialogue-corpus
 rm ubuntu-dialogue-corpus.zip
+
+kaggle datasets download -d unitednations/un-general-debates
+unzip un-general-debates.zip -d un-general-debates
+rm un-general-debates.zip

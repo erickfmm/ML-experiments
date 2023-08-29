@@ -8,9 +8,11 @@ scipy
 tensorflow
 keras
 
+bertopic
+
 nltk
 gensim
-spacy
+spacy==3.6.0
 wordcloud
 pyldavis
 
@@ -29,3 +31,5 @@ PyYAML
 pypng
 pydot
 FuzzyTM
+
+kaggle

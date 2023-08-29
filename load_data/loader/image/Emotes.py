@@ -9,7 +9,7 @@ __all__ = ["LoadTwitchEmotes"]
 class LoadTwitchEmotes(ILoadUnsupervised):
 
     def __init__(self,
-                 folder_path="train_data/Folder_Images_Unsupervised/Emotes/Emotes"):
+                 folder_path="data/train_data/Images_Unsupervised/twitch-emotes-images-dataset/Emotes"):
         self.folder_path = folder_path
         
     def get_headers(self):
@@ -19,7 +19,8 @@ class LoadTwitchEmotes(ILoadUnsupervised):
         for filename in listdir(self.folder_path):
             if splitext(filename)[1].lower() == ".jpg":
                 im = Image.open(join(self.folder_path, filename))
-                yield im
+                if im.size == (28,28):
+                    yield im
 
     def get_all(self):
         data = []

@@ -21,8 +21,9 @@ data/sample_data/**
 !data/sample_data
 
 !.gitkeep
-!download.bat
+!download.sh
 
+.kaggle
 **/Thumbs.db
 **/thumbs.db
 
