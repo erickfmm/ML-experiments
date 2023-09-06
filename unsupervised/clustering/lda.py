@@ -10,7 +10,7 @@ import pickle
 import pyLDAvis# Visualize the topics
 from io import StringIO
 
-from typing import List
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 
@@ -34,7 +34,7 @@ class LDA_model:
         coherence_model_lda = CoherenceModel(model=self.lda_model, texts=self.texts, dictionary=self.id2word, coherence='c_v', processes=1)
         return perplexity, coherence_model_lda
 
-    def get_word_topic_probability(self):
+    def get_word_topic_probability(self) -> Tuple[List[dict], List[dict], str]:
         ids_ = []
         words = []
         words_with_id = []
@@ -72,9 +72,9 @@ class LDA_model:
             i_topic += 1
         fh_all.flush()
         #return fh_all.read()
-        return probs_topic, words_with_id
+        return probs_topic, words_with_id, fh_all.read()
 
-    def get_doc_assignment(self, docs: List[List[str]]):
+    def get_doc_assignment(self, docs: List[List[str]]) -> List[dict]:
         assignments = []
         for doc in docs:
             bow_text = self.lda_model.id2word.doc2bow(doc)
