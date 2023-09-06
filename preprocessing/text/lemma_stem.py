@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
+import nltk
 import numpy as np
 import spacy
 import matplotlib.pyplot as plt #optional
@@ -9,32 +10,39 @@ class LemmaStemmaText:
     def __init__(self, lang="es",
                  blacklist_words = ["ser"],
                  not_touch_words = ["sige", "pme", "deprov", "sigpa", "sac", "simce", "faep", "sep", "superintendencia"],
-                 allow_postags = set(['NOUN', 'VERB', 'ADJ', 'ADV', 'PROPN'])):
+                 allow_postags = set(['NOUN', 'VERB', 'ADJ', 'ADV', 'PROPN']),
+                 excluded_terms_in_ner = None):
         if lang == "es":
             self.nlp = spacy.load('es_core_news_lg')
             self.stemmer = SnowballStemmer('spanish')
+            nltk.download('stopwords')
             self.stw = stopwords.words('spanish')
         if lang == "en":
             self.nlp = spacy.load('en_core_news_lg')
             self.stemmer = SnowballStemmer('english')
+            nltk.download('stopwords')
             self.stw = stopwords.words('english')
         self.blacklist = blacklist_words
         self.not_touch = not_touch_words
         self.allowed_postags = allow_postags
+        self.excluded_terms = excluded_terms_in_ner
 
     def string_to_doc(self, docstring):
         pass
 
-    def lemmatize_docstring(self, docstring: str) -> List[str]:
+    def lemmatize_docstring(self, docstring: str, to_get_ner=False) -> Tuple[List[str],List[str]]:
         doc_nlp = self.nlp(docstring.strip())
         lemmas = []
+        named_entities = []
         for tok in doc_nlp:
-            if tok.text not in self.stw and tok.text not in self.blacklist and (self.allowed_postags is None or tok.pos_ in self.allowed_postags):
-                if tok.text.lower() in self.not_touch:
+            if (self.stw is None or tok.text not in self.stw) and (self.blacklist is None or tok.text not in self.blacklist) and (self.allowed_postags is None or tok.pos_ in self.allowed_postags):
+                if self.not_touch is not None and tok.text.lower() in self.not_touch:
                     lemmas.append(tok.text.upper())
                 else:
                     lemmas.append(tok.lemma_.lower())
-        return lemmas
+                if to_get_ner and tok.ent_type_ is not None and tok.ent_type_ != "" and tok.ent_type_ != "PER" and (self.excluded_terms is None or tok.text.lower() not in self.excluded_terms):
+                    named_entities.append(tok.text.lower())
+        return lemmas, named_entities
     
     def stem_doc(self, doc: List[str]):
         doc_final = []
@@ -87,7 +95,7 @@ class Vectorize_Clustering:
         pass
 
     @staticmethod
-    def concat_list_of_str(l : List[str]):
+    def concat_list_of_str(l : List[str]) -> str:
         l2 = ''
         for x in l:
             l2 += str(x)+" "
@@ -95,7 +103,7 @@ class Vectorize_Clustering:
 
     from sklearn.preprocessing import normalize
     @staticmethod
-    def vectorize(text : str, nlp : spacy.language.Language):
+    def vectorize(text : str, nlp : spacy.language.Language) -> List[float]:
         # Get the SpaCy vector -- turning off other processing to speed things up
         return nlp(text, disable=['parser', 'tagger', 'ner']).vector
     #X = normalize(np.stack(vectorize(t.text) for t in full_documents))
@@ -119,7 +127,8 @@ class Vectorize_Clustering:
         from sklearn.decomposition import PCA
         pca = PCA(n_components=2)
         X2 = pca.fit_transform(X)
-        print("X2 shape is {}".format(X2.shape))
+        #print("X2 shape is {}".format(X2.shape))
+        return X2
 
     @staticmethod
     def cluster(X, n_clusters : int, random_seed=42):
