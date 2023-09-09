@@ -1,13 +1,13 @@
 import os
 import sys
 from os.path import dirname, join, abspath
-sys.path.append(abspath(join(dirname(__file__), '..')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
-from load_data.loader.text.get_txt_docs import LoadTXTsFolder
-from preprocessing.text.lemma_stem import LemmaStemmaText, Vectorize_Clustering
-from preprocessing.text.chunk_text import get_chunks
-from unsupervised.clustering.lda import LDA_model
+from mlexperiments.load_data.loader.text.get_txt_docs import LoadTXTsFolder
+from mlexperiments.preprocessing.text.lemma_stem import LemmaStemmaText, Vectorize_Clustering
+from mlexperiments.preprocessing.text.chunk_text import get_chunks
+from mlexperiments.unsupervised.clustering.lda import LDA_model
 ##########################################
 FOLDER = "data/created_models/pei/"
 if not os.path.exists(FOLDER):

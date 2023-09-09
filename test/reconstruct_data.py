@@ -1,7 +1,7 @@
 import os
 import sys
 from os.path import dirname, join, abspath
-sys.path.append(abspath(join(dirname(__file__), '..')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
 import numpy as np
@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from sklearn.model_selection import train_test_split
 
-from unsupervised.autoencoder_tf import reconstruct_data
+from mlexperiments.unsupervised.autoencoder_tf import reconstruct_data
 
 #from load_data.loader.basic.iris import LoadIris
-from load_data.loader.downloadable.iris_sklearn import LoadIris
-from load_data.loader.downloadable.mnist_keras import LoadMnist
+from mlexperiments.load_data.loader.downloadable.iris_sklearn import LoadIris
+from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
 
 
 print("all imported")

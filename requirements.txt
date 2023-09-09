@@ -12,7 +12,7 @@ bertopic
 
 nltk
 gensim
-spacy==3.6.0
+spacy
 wordcloud
 pyldavis
 
@@ -32,4 +32,4 @@ pypng
 pydot
 FuzzyTM
 
-kaggle
+opendatasets

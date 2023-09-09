@@ -1,18 +1,18 @@
 import os
 import sys
 from os.path import dirname, join, abspath
-sys.path.append(abspath(join(dirname(__file__), '..')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
 import pprint
 import numpy as np
 
-import unsupervised.clustering.cluster_sklearn as clustering_sk
+import mlexperiments.unsupervised.clustering.cluster_sklearn as clustering_sk
 
-import unsupervised.clustering.utils.initial_assignments as ias
-from unsupervised.clustering.kmeans import KMeans
-from unsupervised.clustering.utils.monte_carlo import montecarlo_clustering
-import unsupervised.clustering.utils.metrics as clustering_metrics
+import mlexperiments.unsupervised.clustering.utils.initial_assignments as ias
+from mlexperiments.unsupervised.clustering.kmeans import KMeans
+from mlexperiments.unsupervised.clustering.utils.monte_carlo import montecarlo_clustering
+import mlexperiments.unsupervised.clustering.utils.metrics as clustering_metrics
 
 labels1 = [int(i/1000) for i in range(4000)]
 np.random.seed(844)

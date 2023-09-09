@@ -1,12 +1,12 @@
 import os
 import sys
 from os.path import dirname, join, abspath
-sys.path.append(abspath(join(dirname(__file__), '..')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
-from load_data.loader.downloadable.mnist_keras import LoadMnist
-from load_data.loader.downloadable.cifar10_keras import LoadCifar10
-from utils.keras_persistence.all_inside import save
+from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
+from mlexperiments.load_data.loader.downloadable.cifar10_keras import LoadCifar10
+from mlexperiments.utils.keras_persistence.all_inside import save
 
 import numpy as np
 from keras.models import Sequential

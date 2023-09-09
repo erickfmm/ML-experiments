@@ -1,12 +1,13 @@
+import os
 import sys
 from os.path import dirname, join, abspath
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
+######################################################
 
-sys.path.append(abspath(join(dirname(__file__), '..')))
-
-from load_data.loader.image.butterfly_segment import LoadButterflySegment
-import utils.image.resize_image as resize
-import preprocessing.image2D.rgb_ypbpr as ypbpr
-import preprocessing.image2D.convolution as conv
+from mlexperiments.load_data.loader.image.butterfly_segment import LoadButterflySegment
+import mlexperiments.utils.image.resize_image as resize
+import mlexperiments.preprocessing.image2D.rgb_ypbpr as ypbpr
+import mlexperiments.preprocessing.image2D.convolution as conv
 import numpy as np
 import pickle
 

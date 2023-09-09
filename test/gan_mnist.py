@@ -1,10 +1,11 @@
 # taken from:
 # https://medium.com/sigmoid/a-brief-introduction-to-gans-and-how-to-code-them-2620ee465c30
 # https://github.com/sarvasvkulpati/intro_to_gans/blob/master/intro_to_gans.ipynb
+import os
 import sys
 from os.path import dirname, join, abspath
-
-sys.path.append(abspath(join(dirname(__file__), '..')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
+######################################################
 
 
 import numpy as np
@@ -126,8 +127,8 @@ def train(random_dim, random_gen, x_train, epochs=1, batch_size=128):
     return generator, discriminator, gan
 
 
-from load_data.loader.downloadable.mnist_keras import LoadMnist
-from utils.keras_persistence.all_inside import save, load
+from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
+from mlexperiments.utils.keras_persistence.all_inside import save, load
 import os
 import shutil
 

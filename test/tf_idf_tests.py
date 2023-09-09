@@ -1,14 +1,14 @@
 import os
 import sys
 from os.path import dirname, join, abspath
-sys.path.append(abspath(join(dirname(__file__), '..')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
 
-import utils.text.tf_idf.term_frequency as tf
-import utils.text.tf_idf.inverse_document_frequency as idf
-import utils.text.tf_idf.tf_idf_document as tf_idf_doc_funcs
-import utils.text.tf_idf.tf_idf_query as tf_idf_query_funcs
+import mlexperiments.preprocessing.text.tf_idf.term_frequency as tf
+import mlexperiments.preprocessing.text.tf_idf.inverse_document_frequency as idf
+import mlexperiments.preprocessing.text.tf_idf.tf_idf_document as tf_idf_doc_funcs
+import mlexperiments.preprocessing.text.tf_idf.tf_idf_query as tf_idf_query_funcs
 
 # text taken from sanish newsparlament dataset from wmt11, first 10 lines
 ss = []
