@@ -9,14 +9,19 @@ from mlexperiments.preprocessing.text.lemma_stem import LemmaStemmaText, Vectori
 from mlexperiments.preprocessing.text.chunk_text import get_chunks
 from mlexperiments.unsupervised.clustering.lda import LDA_model
 ##########################################
-FOLDER = "data/created_models/pei/"
+FOLDER = "data/created_models/convivencia/"
 if not os.path.exists(FOLDER):
     os.mkdir(FOLDER)
 
+if not os.path.exists(FOLDER+"ners/"):
+    os.mkdir(FOLDER+"ners/")
+if not os.path.exists(FOLDER+"lemmed/"):
+    os.mkdir(FOLDER+"lemmed/")
+
 ####################
 
-l = LoadTXTsFolder(to_catch_rbds=True)
-docs = l.get_all()
+l = LoadTXTsFolder("data/train_data/NLP_ESP/txt_files_convivencia", to_catch_rbds=True)
+docs = l.get_data()
 lemma_text = LemmaStemmaText(lang="es", blacklist_words=None, not_touch_words=None)
 
 lemmas_docs = []
@@ -35,10 +40,10 @@ for doc in docs:
     print(len(lemmas))
     print(len(_ners))
     lemmas_docs.append(lemmed_doc)
-    with open(f"{FOLDER}lemmed_{l.metadata[i_doc]}.txt", "w", encoding="utf-8") as fh:
+    with open(f"{FOLDER}lemmed/lemmed_{l.metadata[i_doc]}.txt", "w", encoding="utf-8") as fh:
         fh.write(lemmed_doc)
         fh.flush()
-    with open(f"{FOLDER}ners_{l.metadata[i_doc]}.txt", "w", encoding="utf-8") as fh:
+    with open(f"{FOLDER}ners/ners_{l.metadata[i_doc]}.txt", "w", encoding="utf-8") as fh:
         fh.write(ners_doc)
         fh.flush()
     ners.append(ners_doc)
@@ -67,7 +72,7 @@ plt.imshow(cloud, interpolation="bilinear")
 plt.axis("off")
 plt.title("Entidades")
 plt.savefig(f"{FOLDER}Named Entities.png")
-plt.show()
+#plt.show()
 
 
 
@@ -93,7 +98,7 @@ for wc in ners:
     plt.axis("off")
     plt.title("Entidades#"+str(l.metadata[i_articulo]))
     plt.savefig(f"{FOLDER}Entidades_{l.metadata[i_articulo]}.png")
-    plt.show()
+    #plt.show()
     i_articulo +=1
 
 
