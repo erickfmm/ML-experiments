@@ -2,6 +2,8 @@ from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
 from os.path import join, splitext
 from os import listdir
 from PIL import Image
+import opendatasets as od
+
 
 __all__ = ["LoadButterflySegment"]
 
@@ -45,3 +47,6 @@ class LoadButterflySegment:
         for im, seg, btype in self.get_all_yielded():
             data.append((im, seg, btype))
         return data
+    
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/veeralakrishna/butterfly-dataset", "data/train_data/Images_Supervised")

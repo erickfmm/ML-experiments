@@ -3,6 +3,8 @@ from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
 from mlexperiments.load_data.loader.util_emotions import DiscreteEmotion
 import os
 from os.path import join, splitext
+import opendatasets as od
+
 
 __all__ = ["LoadSavee"]
 
@@ -55,3 +57,6 @@ class LoadSavee(ILoadSupervised):
     
     def get_headers(self):
         return None  # self.headers
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/barelydedicated/savee-database", "data/train_data/Emotions_Voice")

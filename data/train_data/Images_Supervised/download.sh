@@ -2,10 +2,6 @@ kaggle datasets download -d puneet6060/intel-image-classification
 unzip intel-image-classification.zip -d intel-image-classification
 rm intel-image-classification.zip
 
-kaggle datasets download -d veeralakrishna/butterfly-dataset
-unzip butterfly-dataset.zip -d butterfly-dataset
-rm butterfly-dataset.zip
-
 kaggle datasets download -d jerzydziewierz/bee-vs-wasp
 unzip bee-vs-wasp.zip -d bee-vs-wasp
 rm bee-vs-wasp.zip

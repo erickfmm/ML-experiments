@@ -2,6 +2,8 @@ import scipy.io.wavfile as wav
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
 from mlexperiments.load_data.loader.util_emotions import DiscreteEmotion
 import os
+import opendatasets as od
+
 
 __all__ = ["LoadTESS"]
 
@@ -57,3 +59,6 @@ class LoadTESS(ILoadSupervised):
     
     def get_headers(self):
         return None  # self.headers
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/ejlok1/toronto-emotional-speech-set-tess", "data/train_data/Emotions_Voice")

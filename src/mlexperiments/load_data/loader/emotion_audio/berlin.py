@@ -2,6 +2,8 @@ import scipy.io.wavfile as wav
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
 from mlexperiments.load_data.loader.util_emotions import DiscreteEmotion
 import os
+import opendatasets as od
+
 
 __all__ = ["LoadBerlin"]
 
@@ -110,3 +112,6 @@ class LoadBerlin(ILoadSupervised):
     
     def get_headers(self):
         return ["audio"]
+    
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/piyushagni5/berlin-database-of-emotional-speech-emodb", "data/train_data/Emotions_Voice")
