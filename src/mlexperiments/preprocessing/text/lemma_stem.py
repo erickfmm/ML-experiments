@@ -15,12 +15,12 @@ class LemmaStemmaText:
         if lang == "es":
             self.nlp = spacy.load('es_core_news_lg')
             self.stemmer = SnowballStemmer('spanish')
-            nltk.download('stopwords')
+            #nltk.download('stopwords')
             self.stw = stopwords.words('spanish')
         if lang == "en":
             self.nlp = spacy.load('en_core_news_lg')
             self.stemmer = SnowballStemmer('english')
-            nltk.download('stopwords')
+            #nltk.download('stopwords')
             self.stw = stopwords.words('english')
         self.blacklist = blacklist_words
         self.not_touch = not_touch_words
