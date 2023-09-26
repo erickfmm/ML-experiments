@@ -1,5 +1,6 @@
 from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
 import csv
+import opendatasets as od
 
 __all__ = ["LoadOnuDebates"]
 
@@ -33,3 +34,6 @@ class LoadOnuDebates(ILoadUnsupervised):
             ])
         file_obj.close()
         return data
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/unitednations/un-general-debates", "data/train_data/NLP_ENG_Dialogs")

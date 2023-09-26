@@ -29,7 +29,7 @@ if __name__ ==  '__main__':
 
     ####################
 
-    l = LoadTXTsFolder("data/train_data/NLP_ESP/txt_files_convivencia", to_catch_rbds=True)
+    l = LoadTXTsFolder("data/train_data/NLP_ESP/education-reglamento-convivencia/txt_files_convivencia", to_catch_rbds=True)
     docs = l.get_data()
 
 

@@ -13,7 +13,3 @@ rm eng-spanish.zip
 kaggle datasets download -d lonnieqin/englishspanish-translation-dataset
 unzip englishspanish-translation-dataset.zip -d englishspanish-translation-dataset
 rm englishspanish-translation-dataset.zip
-
-kaggle datasets download -d warmth/wmt06
-unzip wmt06.zip -d wmt06
-rm wmt06.zip

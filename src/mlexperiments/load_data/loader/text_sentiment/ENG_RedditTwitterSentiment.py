@@ -1,6 +1,7 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 from os.path import join
+import opendatasets as od
 
 __all__ = ["LoadRedditOrTwitterSentiment"]
 
@@ -28,3 +29,6 @@ class LoadRedditOrTwitterSentiment(ILoadSupervised):
     
     def get_headers(self):
         return None
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/cosmos98/twitter-and-reddit-sentimental-analysis-dataset", "data/train_data/NLP_ENG_Sentiment")

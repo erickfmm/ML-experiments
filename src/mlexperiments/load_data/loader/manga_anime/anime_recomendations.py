@@ -1,6 +1,7 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 from csv import DictReader
 from os.path import join
+import opendatasets as od
 
 __all__ = ["LoadAnimeData"]
 
@@ -55,3 +56,6 @@ class LoadAnimeData(ILoadSupervised):
     
     def get_headers(self):
         return ["name", "genres", "type", "episodes", "members"]
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database", "data/train_data/Manga_Anime")

@@ -1,6 +1,7 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 from os.path import join
+import opendatasets as od
 
 __all__ = ["LoadSarcasmRedditKaggle"]
 
@@ -42,3 +43,6 @@ class LoadSarcasmRedditKaggle(ILoadSupervised):
     
     def get_headers(self):
         return self.headers
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/danofer/sarcasm", "data/train_data/NLP_ENG_Dialogs")

@@ -3,6 +3,7 @@ from os.path import join, splitext
 from os import listdir
 from PIL import Image
 import numpy as np
+import opendatasets as od
 
 __all__ = ["LoadTwitchEmotes"]
 
@@ -41,3 +42,6 @@ class LoadTwitchEmotes(ILoadUnsupervised):
         for im in self.get_data_yielded():
             data.append(im)
         return data
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/quantum360/twitch-emotes-images-dataset", "data/train_data/Images_Unsupervised")

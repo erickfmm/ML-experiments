@@ -1,7 +1,3 @@
-kaggle datasets download -d splcher/animefacedataset
-unzip animefacedataset.zip -d animefacedataset
-rm animefacedataset.zip
-
 kaggle datasets download -d aadilmalik94/animecharacterfaces
 unzip animecharacterfaces.zip -d animecharacterfaces
 rm animecharacterfaces.zip
@@ -9,10 +5,6 @@ rm animecharacterfaces.zip
 kaggle datasets download -d arnaud58/selfie2anime
 unzip selfie2anime.zip -d selfie2anime
 rm selfie2anime.zip
-
-kaggle datasets download -d CooperUnion/anime-recommendations-database
-unzip anime-recommendations-database.zip -d anime-recommendations-database
-rm anime-recommendations-database.zip
 
 kaggle datasets download -d hernan4444/anime-recommendation-database-2020
 unzip anime-recommendation-database-2020.zip -d anime-recommendation-database-2020

@@ -1,5 +1,6 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
 import csv
+import opendatasets as od
 
 __all__ = ["Load1MTweets"]
 
@@ -29,3 +30,6 @@ class Load1MTweets(ILoadSupervised):
     
     def get_headers(self):
         return None
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/tariqsays/sentiment-dataset-with-1-million-tweets", "data/train_data/NLP_ENG_Sentiment")

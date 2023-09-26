@@ -1,6 +1,7 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
 from os.path import join
+import opendatasets as od
 
 __all__ = ["LoadSteam"]
 
@@ -26,3 +27,6 @@ class LoadSteam(ILoadSupervised):
     
     def get_headers(self):
         return None
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/piyushagni5/sentiment-analysis-for-steam-reviews", "data/train_data/NLP_ENG_Sentiment")

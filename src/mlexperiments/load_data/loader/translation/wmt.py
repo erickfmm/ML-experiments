@@ -1,5 +1,6 @@
 from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
 from os.path import join
+import opendatasets as od
 
 __all__ = ["LoadWMT"]
 
@@ -70,3 +71,6 @@ class LoadWMT(ILoadUnsupervised):
                 #es_obj.close()
         eng_obj.close()
         es_obj.close()
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/warmth/wmt06", "data/train_data/NLP_ESP_Translation")

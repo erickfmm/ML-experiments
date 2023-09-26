@@ -1,14 +1,16 @@
 from typing import List
 from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
 import os
+import opendatasets as od
 
 __all__ = ["LoadTXTsFolder"]
 
 
 class LoadTXTsFolder(ILoadUnsupervised):
-    def __init__(self, folder_path="data/train_data/NLP_ESP/txt_files_pei", to_catch_rbds=False):
+    def __init__(self, which="pei", folder_path="data/train_data/NLP_ESP/education-pei/txt_files_pei", to_catch_rbds=False):
         self.folder_path = folder_path
         self.to_catch_rbds = to_catch_rbds
+        self.which = which
 
     def get_headers(self):
         return ["data"]
@@ -26,3 +28,11 @@ class LoadTXTsFolder(ILoadUnsupervised):
                     rbd = int(filename.replace(".pdf.txt", "").split("_")[3])
                     self.metadata.append(rbd)
         return docs
+
+    def download(self):
+        if self.which == "pei":
+            od.download("https://www.kaggle.com/datasets/erickfmm/education-pei", "data/train_data/NLP_ESP")
+        elif self.which == "convivencia":
+            od.download("https://www.kaggle.com/datasets/erickfmm/education-reglamento-convivencia", "data/train_data/NLP_ESP")
+        elif self.which == "evaluacion":
+            od.download("https://www.kaggle.com/datasets/erickfmm/education-reglamentos-de-evaluacin-txt", "data/train_data/NLP_ESP")

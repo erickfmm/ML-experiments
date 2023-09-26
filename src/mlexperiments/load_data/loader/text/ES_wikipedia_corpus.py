@@ -1,4 +1,5 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
+import opendatasets as od
 
 __all__ = ["LoadES_Wikipedia_Corpus"]
 
@@ -17,4 +18,6 @@ class LoadES_Wikipedia_Corpus(ILoadSupervised):
     
     def get_headers(self):
         return None
-    
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/jmorenobl/corpus-de-la-wikipedia-en-espaol", "data/train_data/NLP_ESP")

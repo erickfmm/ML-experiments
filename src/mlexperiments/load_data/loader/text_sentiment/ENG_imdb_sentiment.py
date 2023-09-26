@@ -1,5 +1,6 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import csv
+import opendatasets as od
 
 __all__ = ["LoadImdbSentiment"]
 
@@ -25,3 +26,6 @@ class LoadImdbSentiment(ILoadSupervised):
     
     def get_headers(self):
         return None
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/yasserh/imdb-movie-ratings-sentiment-analysis", "data/train_data/NLP_ENG_Sentiment")

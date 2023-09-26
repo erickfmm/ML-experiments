@@ -1,5 +1,6 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import json
+import opendatasets as od
 
 __all__ = ["LoadNewsCategory"]
 
@@ -44,3 +45,6 @@ class LoadNewsCategory(ILoadSupervised):
     
     def get_headers(self):
         return self.headers
+
+    def download(self):
+        od.download("https://www.kaggle.com/datasets/rmisra/news-category-dataset", "data/train_data/NLP_ENG")
