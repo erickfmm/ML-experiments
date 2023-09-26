@@ -14,7 +14,7 @@ maintainers = [
 description = "A bunch of ML Experiments"
 readme = "README.md"
 license = { file="LICENSE" }
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 keywords = [
   "machinelearning", "load-data"
 ]
@@ -25,11 +25,45 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
+  "scikit-learn",
+  "matplotlib",
+  "pandas",
+  "seaborn",
+  "scipy",
+  
+  "tensorflow",
+  "keras",
+  
+  "nltk",
+  "gensim",
+  "spacy",
+  "wordcloud",
+  "pyldavis",
+  
+  "opencv-python",
+  
+  "tqdm",
+  "pyedflib",
+  "pywavelets",
+  "librosa",
+  "pyemd",
+  "pims",
+  "mnist",
+  "Pillow",
+  "pymongo",
+  "PyYAML",
+  "pypng",
+  "pydot",
+  "FuzzyTM",
+  
+  "opendatasets"
+
 ]
 
 [project.optional-dependencies]
 test = [
-  "matplotlib",
+  "bertopic"
+
 ]
 
 [project.urls]
