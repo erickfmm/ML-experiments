@@ -35,5 +35,5 @@ class LoadOnuDebates(ILoadUnsupervised):
         file_obj.close()
         return data
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/unitednations/un-general-debates", "data/train_data/NLP_ENG_Dialogs")
+    def download(self, folder_path="data/train_data/NLP_ENG_Dialogs"):
+        od.download("https://www.kaggle.com/datasets/unitednations/un-general-debates", folder_path)

@@ -27,5 +27,5 @@ class LoadAnimeFaces(ILoadUnsupervised):
                 im = Image.open(fullname)  # TODO: 64x64x4 (to see if alpha channel is real)
                 yield im
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/splcher/animefacedataset", "data/train_data/Manga_Anime")
+    def download(self, folder_path="data/train_data/Manga_Anime"):
+        od.download("https://www.kaggle.com/datasets/splcher/animefacedataset", folder_path)

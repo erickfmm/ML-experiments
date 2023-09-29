@@ -31,5 +31,5 @@ class Load1MTweets(ILoadSupervised):
     def get_headers(self):
         return None
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/tariqsays/sentiment-dataset-with-1-million-tweets", "data/train_data/NLP_ENG_Sentiment")
+    def download(self, folder_path="data/train_data/NLP_ENG_Sentiment"):
+        od.download("https://www.kaggle.com/datasets/tariqsays/sentiment-dataset-with-1-million-tweets", folder_path)

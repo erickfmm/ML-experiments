@@ -46,5 +46,5 @@ class LoadNewsCategory(ILoadSupervised):
     def get_headers(self):
         return self.headers
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/rmisra/news-category-dataset", "data/train_data/NLP_ENG")
+    def download(self, folder_path="data/train_data/NLP_ENG"):
+        od.download("https://www.kaggle.com/datasets/rmisra/news-category-dataset", folder_path)

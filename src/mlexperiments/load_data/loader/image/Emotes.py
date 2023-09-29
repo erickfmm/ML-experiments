@@ -43,5 +43,5 @@ class LoadTwitchEmotes(ILoadUnsupervised):
             data.append(im)
         return data
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/quantum360/twitch-emotes-images-dataset", "data/train_data/Images_Unsupervised")
+    def download(self, folder_path="data/train_data/Images_Unsupervised"):
+        od.download("https://www.kaggle.com/datasets/quantum360/twitch-emotes-images-dataset", folder_path)

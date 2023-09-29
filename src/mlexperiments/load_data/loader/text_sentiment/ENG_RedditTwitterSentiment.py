@@ -30,5 +30,5 @@ class LoadRedditOrTwitterSentiment(ILoadSupervised):
     def get_headers(self):
         return None
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/cosmos98/twitter-and-reddit-sentimental-analysis-dataset", "data/train_data/NLP_ENG_Sentiment")
+    def download(self, folder_path="data/train_data/NLP_ENG_Sentiment"):
+        od.download("https://www.kaggle.com/datasets/cosmos98/twitter-and-reddit-sentimental-analysis-dataset", folder_path)

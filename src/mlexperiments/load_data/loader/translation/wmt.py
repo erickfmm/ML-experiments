@@ -72,5 +72,5 @@ class LoadWMT(ILoadUnsupervised):
         eng_obj.close()
         es_obj.close()
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/warmth/wmt06", "data/train_data/NLP_ESP_Translation")
+    def download(self, folder_path="data/train_data/NLP_ESP_Translation"):
+        od.download("https://www.kaggle.com/datasets/warmth/wmt06", folder_path)

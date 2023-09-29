@@ -57,5 +57,5 @@ class LoadAnimeData(ILoadSupervised):
     def get_headers(self):
         return ["name", "genres", "type", "episodes", "members"]
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database", "data/train_data/Manga_Anime")
+    def download(self, folder_path="data/train_data/Manga_Anime"):
+        od.download("https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database", folder_path)

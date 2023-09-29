@@ -44,5 +44,5 @@ class LoadSarcasmRedditKaggle(ILoadSupervised):
     def get_headers(self):
         return self.headers
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/danofer/sarcasm", "data/train_data/NLP_ENG_Dialogs")
+    def download(self, folder_path="data/train_data/NLP_ENG_Dialogs"):
+        od.download("https://www.kaggle.com/datasets/danofer/sarcasm", folder_path)

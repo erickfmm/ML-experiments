@@ -29,10 +29,10 @@ class LoadTXTsFolder(ILoadUnsupervised):
                     self.metadata.append(rbd)
         return docs
 
-    def download(self):
+    def download(self, folder_path="data/train_data/NLP_ESP"):
         if self.which == "pei":
-            od.download("https://www.kaggle.com/datasets/erickfmm/education-pei", "data/train_data/NLP_ESP")
+            od.download("https://www.kaggle.com/datasets/erickfmm/education-pei", folder_path)
         elif self.which == "convivencia":
-            od.download("https://www.kaggle.com/datasets/erickfmm/education-reglamento-convivencia", "data/train_data/NLP_ESP")
+            od.download("https://www.kaggle.com/datasets/erickfmm/education-reglamento-convivencia", folder_path)
         elif self.which == "evaluacion":
-            od.download("https://www.kaggle.com/datasets/erickfmm/education-reglamentos-de-evaluacin-txt", "data/train_data/NLP_ESP")
+            od.download("https://www.kaggle.com/datasets/erickfmm/education-reglamentos-de-evaluacin-txt", folder_path)

@@ -48,5 +48,5 @@ class LoadButterflySegment:
             data.append((im, seg, btype))
         return data
     
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/veeralakrishna/butterfly-dataset", "data/train_data/Images_Supervised")
+    def download(self, folder_path="data/train_data/Images_Supervised"):
+        od.download("https://www.kaggle.com/datasets/veeralakrishna/butterfly-dataset", folder_path)

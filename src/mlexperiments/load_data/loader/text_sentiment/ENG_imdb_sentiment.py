@@ -27,5 +27,5 @@ class LoadImdbSentiment(ILoadSupervised):
     def get_headers(self):
         return None
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/yasserh/imdb-movie-ratings-sentiment-analysis", "data/train_data/NLP_ENG_Sentiment")
+    def download(self, folder_path="data/train_data/NLP_ENG_Sentiment"):
+        od.download("https://www.kaggle.com/datasets/yasserh/imdb-movie-ratings-sentiment-analysis", folder_path)

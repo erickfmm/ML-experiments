@@ -29,5 +29,5 @@ class LoadSentiment140(ILoadSupervised):
     def get_headers(self):
         return None
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/kazanova/sentiment140", "data/train_data/NLP_ENG_Sentiment")
+    def download(self, folder_path="data/train_data/NLP_ENG_Sentiment"):
+        od.download("https://www.kaggle.com/datasets/kazanova/sentiment140", folder_path)

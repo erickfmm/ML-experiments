@@ -60,5 +60,5 @@ class LoadTESS(ILoadSupervised):
     def get_headers(self):
         return None  # self.headers
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/ejlok1/toronto-emotional-speech-set-tess", "data/train_data/Emotions_Voice")
+    def download(self, folder_path="data/train_data/Emotions_Voice"):
+        od.download("https://www.kaggle.com/datasets/ejlok1/toronto-emotional-speech-set-tess", folder_path)

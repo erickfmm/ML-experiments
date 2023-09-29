@@ -58,5 +58,5 @@ class LoadSavee(ILoadSupervised):
     def get_headers(self):
         return None  # self.headers
 
-    def download(self):
-        od.download("https://www.kaggle.com/datasets/barelydedicated/savee-database", "data/train_data/Emotions_Voice")
+    def download(self, folder_path="data/train_data/Emotions_Voice"):
+        od.download("https://www.kaggle.com/datasets/barelydedicated/savee-database", folder_path)
