@@ -41,26 +41,45 @@ def calc_differences(real_data, reconstructed_data):
 
 
 l_iris = LoadIris()
-Xs, Ys = l_iris.get_all()
+Xs, Ys = l_iris.get_X_Y()
 
 if True:
     l_mnist = LoadMnist()
-    Xs, Ys = l_mnist.get_all()
+    Xs, Ys = l_mnist.get_X_Y()
     X = []
     for xs_ in Xs:
-        X.append([int(x) for x2 in xs_ for x in x2])
-    Xs = X
+        X.append(np.asarray([x for x2 in xs_ for x in x2]))
+    Xs = np.asarray(X)
 print("loaded")
 
 X_train, X_test, y_train, y_test = train_test_split(Xs, Ys, test_size=0.3, random_state=0)
 
-codings, reconstructed = reconstruct_data(X_train, X_test, int(len(X_train[0])/2))
+codings, reconstructed = reconstruct_data(X_train, X_test, int(len(X_train[0])/(4*3)))
 print("got reconstructed")
 #calc_differences(X_test, reconstructed)
+#X_test_2d = [[x for x in x2] for xs_ in X_test for x2 in xs_]
+#reconstructed_2d = [[x for x in x2] for xs_ in reconstructed for x2 in xs_]
+rows, columns = 2,2
+fig = plt.figure(figsize=(rows, columns))
+fig.add_subplot(rows, columns, 1) 
+plt.axis('off') 
+plt.imshow(np.asarray(X_test[100]).reshape((28,28)), 'gray')#, '*-', c='g',)
+#plt.show()
+fig.add_subplot(rows, columns, 2) 
+plt.axis('off') 
+plt.imshow(np.asarray(reconstructed[100]).reshape((28,28)), 'gray')#,'.-', c='b')
 
-plt.plot(X_test, c='g')
-plt.plot(reconstructed, c='b')
-plt.plot(codings, c='r')
-custom_lines = [Line2D([0], [0], color='g', lw=4), Line2D([0], [0], color='b', lw=4)]
-plt.legend(custom_lines, ['original', 'reconstructed'])
+fig.add_subplot(rows, columns, 3) 
+plt.axis('off') 
+plt.imshow(np.asarray(X_test[50]).reshape((28,28)), 'gray')#,'.-', c='b')
+
+fig.add_subplot(rows, columns, 4) 
+plt.axis('off') 
+plt.imshow(np.asarray(reconstructed[50]).reshape((28,28)), 'gray')#,'.-', c='b')
+
 plt.show()
+#codings_2d = [[x for x in x2] for xs_ in codings for x2 in xs_]
+#plt.plot(codings[:5],'.', c='r')
+#custom_lines = [Line2D([0], [0], color='g', lw=4), Line2D([0], [0], color='b', lw=4)]
+#plt.legend(custom_lines, ['original', 'reconstructed'])
+#plt.show()

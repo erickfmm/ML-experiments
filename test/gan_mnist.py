@@ -14,15 +14,17 @@ from tqdm import tqdm  # progress bar
 
 from keras.layers import Input
 from keras.models import Model, Sequential
-from keras.layers.core import Dense, Dropout
-from keras.layers.activation import LeakyReLU
+from keras.layers import Dense, Dropout
+from keras.layers import LeakyReLU
 from keras.datasets import mnist
-from keras.optimizers import Adam
+from keras.optimizers.legacy import Adam
 from keras import initializers
+from tensorflow import Variable
 
 
 def get_optimizer():
-    return Adam(lr=0.0002, beta_1=0.5)
+    adam = Adam(learning_rate=0.01)
+    return adam
 
 
 def get_generator(optimizer, random_dim, dense_neurons=[256, 512, 1024, 784]):
@@ -143,7 +145,7 @@ class GanMnist:
 
     def get_data(self):
         l = LoadMnist()
-        return l.get_all()
+        return l.get_X_Y()
 
     def train(self, epochs=1, batch_size=128, to_save=False):
         x, y = self.get_data()
@@ -155,16 +157,16 @@ class GanMnist:
 
     def generate_image(self, noise=None):
         if noise is None:
-            noise = self.random_gen.normal(0, 1, size=[1, 100])
+            noise = self.random_gen.normal(0, 1, size=[1, self.random_dim])
         gen_img = self.generator.predict(noise)
         gen_img = gen_img.reshape(28,28)
         return gen_img
 
     def save(self):
         try:
-            base_folder = "created_models"
+            base_folder = "data/created_models"
             if not os.path.exists(base_folder):
-                os.mkdirs(base_folder)
+                os.mkdir(base_folder)
             newfolder = os.path.join(base_folder, "gan_mnist_v1")
             if not os.path.exists(newfolder):
                 os.mkdir(newfolder)
@@ -174,11 +176,11 @@ class GanMnist:
             save(self.generator, os.path.join(newfolder, "generator.keras_model"))
             save(self.discriminator, os.path.join(newfolder, "discriminator.keras_model"))
             save(self.gan, os.path.join(newfolder, "gan.keras_model"))
-        except:
-            print("error in saving")
+        except Exception as e:
+            print(f"error in saving: {e}")
 
     def load(self):
-        base_folder = "created_models"
+        base_folder = "data/created_models"
         newfolder = os.path.join(base_folder, "gan_mnist_v1")
         try:
             if os.path.exists(newfolder):
@@ -195,3 +197,60 @@ class GanMnist:
                 print("folder doesn't exists")
         except Exception as e:
             print("unknown error in loading ", e)
+
+
+
+def plot_figures(figures, nrows = 1, ncols=1):
+    """Plot a dictionary of figures.
+
+    Parameters
+    ----------
+    figures : <title, figure> dictionary
+    ncols : number of columns of subplots wanted in the display
+    nrows : number of rows of subplots wanted in the figure
+    """
+
+    fig, axeslist = plt.subplots(ncols=ncols, nrows=nrows)
+    for ind,title in zip(range(len(figures)), figures):
+        axeslist.ravel()[ind].imshow(figures[title], cmap='gray')
+        axeslist.ravel()[ind].set_title(title)
+        axeslist.ravel()[ind].set_axis_off()
+    plt.tight_layout() # optional
+if __name__ == "__main__":
+    g = GanMnist(3335, 10)
+    g.train(100, 1024)
+    g.save()
+    #g.load()
+    plot_figures({
+        1: g.generate_image(),
+        2: g.generate_image(),
+        3: g.generate_image(),
+        4: g.generate_image(),
+        5: g.generate_image(),
+        6: g.generate_image(),
+        7: g.generate_image(),
+        8: g.generate_image(),
+        9: g.generate_image(),
+        10: g.generate_image(),
+        11: g.generate_image(),
+        12: g.generate_image(),
+        13: g.generate_image(),
+        14: g.generate_image(),
+        15: g.generate_image(),
+        16: g.generate_image(),
+        17: g.generate_image(),
+        18: g.generate_image(),
+        19: g.generate_image(),
+        20: g.generate_image(),
+        21: g.generate_image(),
+        22: g.generate_image(),
+        23: g.generate_image(),
+        24: g.generate_image(),
+        25: g.generate_image(),
+        26: g.generate_image(),
+        27: g.generate_image(),
+        28: g.generate_image(),
+        29: g.generate_image(),
+        30: g.generate_image()
+    },5,6)
+    plt.show()

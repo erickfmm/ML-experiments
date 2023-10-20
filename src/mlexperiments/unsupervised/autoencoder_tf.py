@@ -1,7 +1,7 @@
 from os.path import join
 import numpy as np
 from tensorflow import keras
-from tensorflow.keras import layers
+from keras import layers
 # from sklearn import datasets
 # from sklearn.model_selection import train_test_split
 
@@ -19,19 +19,19 @@ def reconstruct_data(X_train, X_test, n_hidden=2, learning_rate=0.1, n_iteration
     n_output = n_input
     # TODO: Reimplement using keras
     input = keras.Input(shape=(n_input, ))
-    hidden = layers.Dense(n_hidden, activation='relu', name="hidden")
+    hidden = layers.Dense(n_hidden, activation='sigmoid', name="hidden")
     x = hidden(input)
-    output = layers.Dense(n_input, activation='relu')(x)
+    output = layers.Dense(n_input, activation='sigmoid')(x)
     model = keras.Model(inputs=input, outputs=output)
-    keras.utils.plot_model(model, join("created_models", "reconstructed_model.png"), show_shapes=True)
+    keras.utils.plot_model(model, join("data/created_models", "reconstructed_model.png"), show_shapes=True)
 
     model.compile(
         loss=keras.losses.MeanSquaredError(),
-        optimizer=keras.optimizers.SGD(),
+        optimizer=keras.optimizers.SGD(learning_rate=learning_rate),
         metrics=["mse"],
     )
-    model.fit(X_train, X_train, batch_size=2, epochs=3, validation_split=0.2)
-    model.save(join("created_models", "reconstructed.model"))
+    model.fit(X_train, X_train, batch_size=128, epochs=10, validation_split=0.2)
+    model.save(join("data/created_models", "reconstructed.model"))
     reconstructed = model.predict(X_test)
     
 

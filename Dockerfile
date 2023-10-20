@@ -17,7 +17,5 @@ RUN python3 -m spacy download es_core_news_lg
 
 COPY . .
 
-RUN mkdir /root/.kaggle
-COPY .kaggle /root/.kaggle
 
 CMD [ "python3", "./call_test.py" ]
