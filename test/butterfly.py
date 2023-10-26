@@ -82,18 +82,19 @@ def simple_classifier(x, y):
     model.add(layers.Conv2D(32, 5, activation="relu"))
     model.add(layers.MaxPooling2D(2))
     model.add(layers.Conv2D(32, 3, activation="relu"))
-    model.add(layers.MaxPooling2D(2))
-    model.summary() #only for printing purposes
+    model.add(layers.MaxPooling2D(3))
+    
 
     model.add(layers.GlobalMaxPooling2D())
     model.add(layers.Flatten())
     model.add(layers.Dense(10, activation='softmax'))
+    model.summary() #only for printing purposes
     model.compile(
         optimizer='adam',
         loss='categorical_crossentropy',
         metrics=['accuracy']
         )
-    model.fit(x, y, epochs=10, batch_size=32)
+    model.fit(x, y, epochs=20, batch_size=16)
     return model
 
 
@@ -115,9 +116,10 @@ if __name__ == "__main__":
     print(y[0])
     print("x shape: ", np.asarray(x).shape)
     print("y shape: ", np.asarray(y).shape)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=1992)
     model = simple_classifier(x_train, y_train)
     model.summary()
+    model.save("data/created_models/butterfly_classifier.keras")
     model.evaluate(x_test, y_test)
     y_pred = model.predict(x_test)
     y_pred=np.argmax(y_pred, axis=1)
