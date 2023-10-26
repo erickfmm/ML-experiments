@@ -36,7 +36,7 @@ def with_image_module(im: Image, desired_size: int) -> Image.Image:
 
     # im.thumbnail(new_size, Image.ANTIALIAS)
 
-    im = im.resize(new_size, Image.ANTIALIAS)
+    im = im.resize(new_size, Image.Resampling.LANCZOS)
     # create a new image and paste the resized on it
 
     new_im = Image.new("RGB", (desired_size, desired_size))

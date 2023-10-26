@@ -1,5 +1,7 @@
 import os
 import sys
+
+
 from os.path import dirname, join, abspath
 sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
@@ -9,16 +11,22 @@ import mlexperiments.utils.image.resize_image as resize
 import mlexperiments.preprocessing.image2D.rgb_ypbpr as ypbpr
 import mlexperiments.preprocessing.image2D.convolution as conv
 import numpy as np
+import pandas as pd
 import pickle
 
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 
+import seaborn as sn
+import matplotlib.pyplot as plt
 
-def save_as_pickle(new_size:int = 100, to_gray: bool = True):
+def save_as_pickle(new_size:int = 100, to_gray: bool = True, to_pickle=True):
     lb = LoadButterflySegment()
+    lb.download()
     # new_size = 100
     x_gray = []
     x_seg = []
@@ -37,12 +45,15 @@ def save_as_pickle(new_size:int = 100, to_gray: bool = True):
             seg2 = seg2.convert("L")
         x_seg.append(np.asarray(seg2))
         y.append(btype)
-    with open("data/created_models/butterfly.pkl", "wb") as file_handle:
-        print("writing pickle xgray, type")
-        pickle.dump({"x": x_gray,"y": y}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open("data/created_models/butterfly_segment.pkl", "wb") as file_handle:
-        print("writing pickle xgray, xseg")
-        pickle.dump({"x": x_gray,"y": x_seg}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if to_pickle:
+        with open("data/created_models/butterfly.pkl", "wb") as file_handle:
+            print("writing pickle xgray, type")
+            pickle.dump({"x": x_gray,"y": y}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open("data/created_models/butterfly_segment.pkl", "wb") as file_handle:
+            print("writing pickle xgray, xseg")
+            pickle.dump({"x": x_gray,"y": x_seg}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        return x_gray, x_seg, y
 
 
 def open_pickle(which_pkl:str) -> dict:
@@ -65,16 +76,57 @@ def open_pickle(which_pkl:str) -> dict:
 
 def simple_classifier(x, y):
     model = keras.Sequential()
+    model.add(keras.Input(shape=(100,100,3)))
+    model.add(layers.Conv2D(32, 5, activation="relu"))
+    model.add(layers.MaxPooling2D(2))
+    model.add(layers.Conv2D(32, 5, activation="relu"))
+    model.add(layers.MaxPooling2D(2))
     model.add(layers.Conv2D(32, 3, activation="relu"))
+    model.add(layers.MaxPooling2D(2))
+    model.summary() #only for printing purposes
+
+    model.add(layers.GlobalMaxPooling2D())
+    model.add(layers.Flatten())
+    model.add(layers.Dense(10, activation='softmax'))
+    model.compile(
+        optimizer='adam',
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+        )
+    model.fit(x, y, epochs=10, batch_size=32)
+    return model
 
 
 if __name__ == "__main__":
     print("running as main")
     import os
     print(os.getcwd())
-    # save_as_pickle()
-    x = []
-    y = []
-    with open_pickle("butterfly") as pklfile:
-        x = pklfile["x"]
-        y = pklfile["y"]
+    x, x_seg, y = save_as_pickle(new_size=100, to_gray=False, to_pickle=False)
+    #x = []
+    #y = []
+    #with open_pickle("butterfly") as pklfile:
+    #    x = pklfile["x"]
+    #    y = pklfile["y"]
+    print("cantidad de etiquetas: ", len(set(y)))
+    #y = keras.utils.to_categorical(y)
+    y = pd.get_dummies(y).astype('float32').values
+    x = np.asarray(x)
+    y = np.asarray(y)
+    print(y[0])
+    print("x shape: ", np.asarray(x).shape)
+    print("y shape: ", np.asarray(y).shape)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+    model = simple_classifier(x_train, y_train)
+    model.summary()
+    model.evaluate(x_test, y_test)
+    y_pred = model.predict(x_test)
+    y_pred=np.argmax(y_pred, axis=1)
+    y_test=np.argmax(y_test, axis=1)
+    confusion = confusion_matrix(y_test, y_pred, normalize='pred')
+    print(confusion)
+    df_cm = pd.DataFrame(confusion, range(10), range(10))
+    sn.set(font_scale=1.4) # for label size
+    sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}) # font size
+
+    plt.show()
+
