@@ -78,10 +78,13 @@ def simple_classifier(x, y):
     model = keras.Sequential()
     model.add(keras.Input(shape=(100,100,3)))
     model.add(layers.Conv2D(32, 5, activation="relu"))
+    model.add(layers.Dropout(0.1))
     model.add(layers.MaxPooling2D(2))
     model.add(layers.Conv2D(32, 5, activation="relu"))
+    model.add(layers.Dropout(0.1))
     model.add(layers.MaxPooling2D(2))
     model.add(layers.Conv2D(32, 3, activation="relu"))
+    model.add(layers.Dropout(0.1))
     model.add(layers.MaxPooling2D(3))
     
 
@@ -94,20 +97,10 @@ def simple_classifier(x, y):
         loss='categorical_crossentropy',
         metrics=['accuracy']
         )
-    model.fit(x, y, epochs=20, batch_size=16)
+    model.fit(x, y, epochs=100, batch_size=16)
     return model
 
-
-if __name__ == "__main__":
-    print("running as main")
-    import os
-    print(os.getcwd())
-    x, x_seg, y = save_as_pickle(new_size=100, to_gray=False, to_pickle=False)
-    #x = []
-    #y = []
-    #with open_pickle("butterfly") as pklfile:
-    #    x = pklfile["x"]
-    #    y = pklfile["y"]
+def simple_classifier_pipeline(x, y):
     print("cantidad de etiquetas: ", len(set(y)))
     #y = keras.utils.to_categorical(y)
     y = pd.get_dummies(y).astype('float32').values
@@ -132,3 +125,64 @@ if __name__ == "__main__":
 
     plt.show()
 
+def simple_segmentation(x, y):
+    input = keras.Input(shape=(100,100,3))
+    x1 = layers.Conv2D(32, 5, activation="relu", padding="same")(input)
+    x = layers.Dropout(0.1)(x1)
+    x = layers.MaxPooling2D((2,2), padding="same")(x)
+    x2 = layers.Conv2D(32, 5, activation="relu", padding="same")(x)
+    x = layers.Dropout(0.1)(x2)
+    x = layers.MaxPooling2D((2,2), padding="same")(x)
+    x3 = layers.Conv2D(32, 3, activation="relu", padding="same")(x)
+    x = layers.Dropout(0.1)(x3)
+    x = layers.MaxPooling2D((3,3), padding="same")(x)
+
+    x = layers.Conv2D(256, 3, activation="relu", padding="same")(x)
+
+    x = layers.UpSampling2D(size=(3,3))(x)
+    x3 = layers.ZeroPadding2D(padding=(1, 1))(x3)
+    x = layers.concatenate([x, x3], axis=-1)
+    x = layers.Conv2D(32, 3, activation="relu", padding="valid")(x)
+    x = layers.Dropout(0.1)(x)
+
+    x = layers.UpSampling2D(size=(2,2))(x)
+    #x2 = layers.ZeroPadding2D(2)(x2)
+    x = layers.concatenate([x, x2], axis=-1)
+    x = layers.Conv2D(32, 5, activation="relu", padding="valid")(x)
+    x = layers.Dropout(0.1)(x)
+
+    x = layers.UpSampling2D(size=(2,2))(x)
+    x = layers.ZeroPadding2D(padding=(4, 4))(x)
+    x = layers.concatenate([x, x1], axis=-1)
+    output = layers.Conv2D(3, 3, activation="relu", padding="same")(x)
+
+    model = keras.Model(inputs=input, outputs=output)
+    model.summary() #only for printing purposes
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+        )
+    model.fit(x, y, epochs=100, batch_size=16)
+    return model
+
+
+if __name__ == "__main__":
+    print("running as main")
+    import os
+    print(os.getcwd())
+    x, x_seg, y = save_as_pickle(new_size=100, to_gray=False, to_pickle=False)
+    x_seg = np.asarray(x_seg)
+    x_seg = np.nan_to_num(x_seg)
+    x = np.asarray(x)
+    x = np.nan_to_num(x)
+    print("len x ",len(x))
+    print("shape x", x.shape)
+    print("shape x_seg", x_seg.shape)
+    #x = tf.constant(x)
+    #x_seg = tf.constant(x_seg)
+    x_train, x_test, y_train, y_test = train_test_split(x, x_seg, test_size=0.33, random_state=1992)
+    #simple_classifier_pipeline(x, y)
+    print("x_train shape", x_train.shape)
+    print("y_train shape", y_train.shape)
+    model = simple_segmentation(x_train, y_train)
