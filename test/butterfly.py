@@ -125,9 +125,9 @@ def simple_classifier_pipeline(x, y):
 
     plt.show()
 
-def simple_segmentation(x, y):
-    input = keras.Input(shape=(100,100,3))
-    x1 = layers.Conv2D(32, 5, activation="relu", padding="same")(input)
+def simple_segmentation(x_input, y_input):
+    inputs = layers.Input(shape=(100,100,3))
+    x1 = layers.Conv2D(32, 5, activation="relu", padding="same")(inputs)
     x = layers.Dropout(0.1)(x1)
     x = layers.MaxPooling2D((2,2), padding="same")(x)
     x2 = layers.Conv2D(32, 5, activation="relu", padding="same")(x)
@@ -154,16 +154,16 @@ def simple_segmentation(x, y):
     x = layers.UpSampling2D(size=(2,2))(x)
     x = layers.ZeroPadding2D(padding=(4, 4))(x)
     x = layers.concatenate([x, x1], axis=-1)
-    output = layers.Conv2D(3, 3, activation="relu", padding="same")(x)
+    output = layers.Conv2D(3, 3, activation="sigmoid", padding="same")(x)
 
-    model = keras.Model(inputs=input, outputs=output)
+    model = keras.Model(inputs=[inputs], outputs=[output])
     model.summary() #only for printing purposes
     model.compile(
         optimizer='adam',
-        loss='sparse_categorical_crossentropy',
+        loss='binary_crossentropy',
         metrics=['accuracy']
         )
-    model.fit(x, y, epochs=100, batch_size=16)
+    model.fit(x_input, y_input, epochs=100, batch_size=16)
     return model
 
 
