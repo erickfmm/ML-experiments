@@ -16,8 +16,9 @@ class LoadImdbSentiment(ILoadSupervised):
         xs = []
         ys = []
         for row in reader:
-            xs.append(row[0])
-            ys.append(row[1])
+            if row[1] != 'label':
+                xs.append(row[0])
+                ys.append(int(row[1]))
         file_obj.close()
         return xs, ys
     

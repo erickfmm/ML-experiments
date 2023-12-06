@@ -18,9 +18,14 @@ class LoadRedditOrTwitterSentiment(ILoadSupervised):
         xs = []
         ys = []
         for row in reader:
-            if len(row) == 2:
+            if len(row) == 2 and row[1] != 'category':
                 xs.append(row[0])
-                ys.append(row[1])
+                y = int(row[1])
+                if y == -1:
+                    y = 0
+                elif y == 0:
+                    y = 0.5
+                ys.append(y)
         file_obj.close()
         return xs, ys
     

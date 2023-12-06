@@ -17,8 +17,9 @@ class LoadSteam(ILoadSupervised):
         xs = []
         ys = []
         for row in reader:
-            xs.append(row[3])
-            ys.append(row[4])
+            if row[4] != 'user_suggestion':
+                xs.append(row[3])
+                ys.append(int(row[4]))
         file_obj.close()
         return xs, ys
     

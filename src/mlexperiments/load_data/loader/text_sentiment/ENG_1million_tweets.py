@@ -19,9 +19,11 @@ class Load1MTweets(ILoadSupervised):
         for row in reader:
             if self.lang is not None and self.lang != row["Language"]:
                 continue
-            xs.append(row["Text"])
-            ys.append(row["Label"])
-            self.Metadata.append(row["Language"])
+            if row["Label"] in ['negative', 'positive']:
+                xs.append(row["Text"])
+                y = 0 if row["Label"] == 'negative' else 1
+                ys.append(y)
+                self.Metadata.append(row["Language"])
         file_obj.close()
         return xs, ys
     

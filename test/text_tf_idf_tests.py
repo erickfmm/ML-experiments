@@ -92,9 +92,9 @@ for w in words:
 
 
 plot_tf = True  # False
-plot_tf_idf_doc = False
-plot_tf_idf_query = False
-plot_idf = False  # True
+plot_tf_idf_doc = True
+plot_tf_idf_query = True
+plot_idf = True  # True
 
 mode_plot = "."  # "-"
 
