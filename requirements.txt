@@ -7,14 +7,16 @@ scipy
 
 tensorflow
 keras
+tensorflow-datasets==4.9.2
 
-bertopic
+#bertopic
 
 nltk
 gensim
 spacy
 wordcloud
-pyldavis
+pyldavis #for LDA Topic visualizations
+beautifulsoup4
 
 opencv-python
 

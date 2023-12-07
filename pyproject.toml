@@ -33,12 +33,14 @@ dependencies = [
   
   "tensorflow",
   "keras",
+  "tensorflow-datasets==4.9.2",
   
   "nltk",
   "gensim",
   "spacy",
   "wordcloud",
   "pyldavis",
+  "beautifulsoup4",
   
   "opencv-python",
   

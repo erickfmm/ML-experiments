@@ -154,16 +154,16 @@ def simple_segmentation(x_input, y_input):
     x = layers.UpSampling2D(size=(2,2))(x)
     x = layers.ZeroPadding2D(padding=(4, 4))(x)
     x = layers.concatenate([x, x1], axis=-1)
-    output = layers.Conv2D(3, 3, activation="tanh", padding="same")(x)
+    output = layers.Conv2D(3, 3, activation="sigmoid", padding="same")(x)
 
     model = keras.Model(inputs=[inputs], outputs=[output])
     model.summary() #only for printing purposes
     model.compile(
         optimizer='adam',
-        loss='binary_crossentropy',
+        loss='mean_squared_error',
         metrics=['accuracy']
         )
-    model.fit(x_input, y_input, epochs=10, batch_size=16)
+    model.fit(x_input, y_input, epochs=100, batch_size=16)
     return model
 
 

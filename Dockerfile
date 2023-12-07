@@ -14,6 +14,8 @@ RUN pip install --upgrade --no-cache-dir -r requirements.txt
 
 # RUN python3 -m spacy download en_core_news_lg
 RUN python3 -m spacy download es_core_news_lg
+RUN python3 -m spacy download es_core_news_sm
+RUN python3 -m spacy download en_core_web_sm
 
 COPY . .
 
