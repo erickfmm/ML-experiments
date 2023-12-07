@@ -182,12 +182,8 @@ def padding(X, max_len :int = None):
     from keras.preprocessing.sequence import pad_sequences
     if max_len is None:
         max_len = max([x for doc in X for x in doc])+1
+        #max_len = max([len(sentence) for sentence in X])
     X = pad_sequences(X, maxlen=max_len, padding="post", value=0)
-    #MAX_LEN = max([len(sentence) for sentence in data_inputs])
-    #data_inputs = tf.keras.preprocessing.sequence.pad_sequences(data_inputs,
-    #                                                        value=0,
-    #                                                        padding="post",
-    #                                                        maxlen=MAX_LEN)
     return X
 
 def idx_to_bow(X_idxs):
@@ -239,10 +235,13 @@ def create_run_copied_model(X, Y, vocab_size):
                                         activation="relu")
             self.pool = layers.GlobalMaxPool1D() # No tenemos variable de entrenamiento
                                                 # así que podemos usar la misma capa
-                                                # para cada paso de pooling
+                                                # para cada paso de pooling <- No
             self.dense_1 = layers.Dense(units=FFN_units, activation="relu")
             self.dropout = layers.Dropout(rate=dropout_rate)
-            if nb_classes == 2:
+            if nb_classes == 1:
+                self.last_dense = layers.Dense(units=1,
+                                            activation="sigmoid")
+            elif nb_classes == 2:
                 self.last_dense = layers.Dense(units=1,
                                             activation="sigmoid")
             else:
@@ -288,7 +287,7 @@ def create_run_copied_model(X, Y, vocab_size):
     EMB_DIM = 200
     NB_FILTERS = 100
     FFN_UNITS = 256
-    NB_CLASSES = len(Y[0])
+    NB_CLASSES = len(Y[0]) if type(Y[0]) == type([]) else 1
 
     DROPOUT_RATE = 0.2
 
@@ -303,7 +302,11 @@ def create_run_copied_model(X, Y, vocab_size):
             dropout_rate=DROPOUT_RATE)
     Dcnn = Dcnn.get_model(X)
     Dcnn.summary()
-    if NB_CLASSES == 2:
+    if NB_CLASSES == 1:
+        Dcnn.compile(loss="mean_squared_error",
+                    optimizer="adam",
+                    metrics=["accuracy"])
+    elif NB_CLASSES == 2:
         Dcnn.compile(loss="binary_crossentropy",
                     optimizer="adam",
                     metrics=["accuracy"])
@@ -365,14 +368,20 @@ def load_data(folder="data/created_models/text_sentiment/"):
 
 if __name__ == "__main__":
     X , Y = get_data()
-    X, Y = downsample(X, Y, 0.1)
+    X, Y = downsample(X, Y, 0.001)
     #For testing purposes
     #n_test = 100
     #import random
     #X = random.sample(X, n_test)
     #Y = random.sample(Y, n_test)
     #end testing code
-    Y, mappings = one_hot_encode(Y)
+    using_1_dim = True
+    if not using_1_dim:
+        Y, mappings = one_hot_encode(Y)
+    else:
+        mappings = None
+        import numpy as np
+        Y = np.asarray([float(y) for y in Y])
     print("Y OneHotEncoded, to clean")
     X = clean_data(X)
     print("cleaned, to tokenize")
