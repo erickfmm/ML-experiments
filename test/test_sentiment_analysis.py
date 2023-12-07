@@ -336,7 +336,11 @@ def generate_result(text_to_evaluate, model, length_to_padding, dictionary):
                                                  "lemmatizer", 
                                                  "ner"
                                                  ])
-    doc = dictionary.doc2idx([token.text for token in nlp(text_to_evaluate)])
+    from gensim.corpora import Dictionary
+    if type(dictionary) == Dictionary:
+        doc = dictionary.doc2idx([token.text for token in nlp(text_to_evaluate)])
+    else:
+        doc = dictionary.encode(text_to_evaluate)
     print("doc: ", doc)
     doc = [x for x in doc if x != -1]
     print("doc: ", doc)
@@ -352,16 +356,23 @@ def save_data(model, length_to_padding, dictionary):
     if not os.path.exists("data/created_models/text_sentiment/"):
         os.mkdir("data/created_models/text_sentiment/")
     model.save("data/created_models/text_sentiment/neural_net.keras")
-    dictionary.save("data/created_models/text_sentiment/dictionary")
+    from gensim.corpora import Dictionary
+    if type(dictionary) == Dictionary:
+        dictionary.save("data/created_models/text_sentiment/dictionary")
+    else:
+        pass #TODO: search a way to save
     with open("data/created_models/text_sentiment/param.txt", "w") as fobj:
         fobj.write(str(length_to_padding))
         fobj.flush()
 
-def load_data(folder="data/created_models/text_sentiment/"):
+def load_data(folder="data/created_models/text_sentiment/", using_gensim_dictionary=True):
     from tensorflow import keras
     from gensim.corpora import Dictionary
     model = keras.saving.load_model(os.path.join(folder, "neural_net.keras"))
-    dictionary = Dictionary.load(os.path.join(folder, "dictionary"))
+    if using_gensim_dictionary:
+        dictionary = Dictionary.load(os.path.join(folder, "dictionary"))
+    else:
+        pass #TODO: search a way to load
     with open(os.path.join(folder, "param.txt"), "r") as fobj:
         length_to_padding = int(fobj.read().strip())
     return model, length_to_padding, dictionary
@@ -392,7 +403,7 @@ if __name__ == "__main__":
     ##BoW
     #print("to bow")
     #X = idx_to_bow(X)
-    #X, tokenizer = tokenize_tfds(X)
+    #X, dictionary = tokenize_tfds(X)
     print("tokenized: ",X[0])
     #print("to pad")
     #X = padding(X)
