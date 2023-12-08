@@ -181,8 +181,8 @@ def padding(X, max_len :int = None):
     from tensorflow import keras
     from keras.preprocessing.sequence import pad_sequences
     if max_len is None:
-        max_len = max([x for doc in X for x in doc])+1
-        #max_len = max([len(sentence) for sentence in X])
+        #max_len = max([x for doc in X for x in doc])+1
+        max_len = max([len(sentence) for sentence in X])
     X = pad_sequences(X, maxlen=max_len, padding="post", value=0)
     return X
 
@@ -377,9 +377,9 @@ def load_data(folder="data/created_models/text_sentiment/", using_gensim_diction
         length_to_padding = int(fobj.read().strip())
     return model, length_to_padding, dictionary
 
-if __name__ == "__main__":
+def training_pipeline():
     X , Y = get_data()
-    X, Y = downsample(X, Y, 0.001)
+    X, Y = downsample(X, Y, 0.8)
     #For testing purposes
     #n_test = 100
     #import random
@@ -414,17 +414,33 @@ if __name__ == "__main__":
     print("lenX0_10: ", X[0][10])
     print("shapeX  :", X.shape)  
     #print("Erróneos", sum([1 if len(x2)!= len(X[0]) else 0 for x in X for x2 in x]))
-    model = create_run_copied_model(X, Y, len(X[0]))
-    text_to_evaluate = "This draw is horrible, i'm so sad this thing is happening right now"
+    model = create_run_copied_model(X, Y, max([x for doc in X for x in doc])+1)
+    text_to_evaluate = "I hate to be with these people in the funeral"
     result = generate_result(text_to_evaluate, model, length_to_padding, dictionary)
     print(f"result of evaluate: {text_to_evaluate}: ", result)
     print(mappings)
     #
     print("to save")
     save_data(model, length_to_padding, dictionary)
+
+def evaluation_pipeline():
     print("to load")
     model, length_to_padding, dictionary = load_data()
     print("testing loaded data")
-    result = generate_result(text_to_evaluate, model, length_to_padding, dictionary)
-    print(f"result of evaluate: {text_to_evaluate}: ", result)
-    print(mappings)
+    while True:
+        text_to_evaluate = input("Ingrese un texto para evaluar: ")
+        result = generate_result(text_to_evaluate, model, length_to_padding, dictionary)
+        print(f"result of evaluate: {text_to_evaluate}: ", result)
+        if text_to_evaluate == "exit":
+            break
+
+if __name__ == "__main__":
+    choose_pipeline = int(input("Ingrese el pipeline a ejecutar (1 para entrenar, y 2 para evaluar): "))
+    if choose_pipeline == 1:
+        training_pipeline()
+    elif choose_pipeline == 2:
+        evaluation_pipeline()
+    else:
+        import sys
+        sys.exit(0)    
+    
