@@ -291,8 +291,8 @@ def create_run_copied_model(X, Y, vocab_size):
 
     DROPOUT_RATE = 0.2
 
-    BATCH_SIZE = 32
-    NB_EPOCHS = 5
+    BATCH_SIZE = 256
+    NB_EPOCHS = 25
 
     Dcnn = DCNN(vocab_size=VOCAB_SIZE,
             emb_dim=EMB_DIM,
@@ -386,7 +386,7 @@ def training_pipeline():
     #X = random.sample(X, n_test)
     #Y = random.sample(Y, n_test)
     #end testing code
-    using_1_dim = True
+    using_1_dim = False
     if not using_1_dim:
         Y, mappings = one_hot_encode(Y)
     else:

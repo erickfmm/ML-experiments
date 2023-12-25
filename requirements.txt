@@ -35,3 +35,4 @@ pydot
 FuzzyTM
 
 opendatasets
+requests

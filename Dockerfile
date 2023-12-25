@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 WORKDIR /usr/src/app
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt install pip graphviz unzip -y
+RUN apt install pip graphviz unzip python3-tk -y
 
 COPY requirements.txt ./
 RUN pip install --upgrade --no-cache-dir -r requirements.txt

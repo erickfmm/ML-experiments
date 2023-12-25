@@ -1,5 +1,7 @@
 #!/bin/sh
 
+sudo apt-get install python3-tk
+
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
