@@ -41,7 +41,7 @@ random3 = RandomClass(3)
 tanh3 = TanhClass(3)
 print("to load...")
 lrand = LoadRandom(num_instances=1000, num_dimensions=5, min_value=0, max_value=1, fn=tanh3)
-x, y = lrand.get_all()
+x, y = lrand.get_X_Y()
 
 print("some calculations")
 rs = correlation_matrix.correlation_matrix(x)

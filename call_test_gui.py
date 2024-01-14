@@ -1,4 +1,6 @@
 import os
+import sys
+import io
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import scrolledtext
@@ -9,6 +11,18 @@ import queue
 import pygments.lexers
 from chlorophyll import CodeView
 from pygments.lexers import PythonLexer
+
+
+class TextRedirector(object):
+    def __init__(self, widget, tag="stdout"):
+        self.widget = widget
+        self.tag = tag
+
+    def write(self, string):
+        self.widget.configure(state="normal")
+        self.widget.insert(tk.END, string)
+        self.widget.configure(state="disabled")
+
 
 class CodeRunnerApp:
     def __init__(self, root):
@@ -44,8 +58,21 @@ class CodeRunnerApp:
         # Run and Stop Buttons
         self.run_button = tk.Button(root, text="Run Code", command=self.run_code)
         self.run_button.pack(side="left", padx=10)
-        self.stop_button = tk.Button(root, text="Stop Running", command=self.stop_running, state=tk.DISABLED)
+        self.stop_button = tk.Button(root, text="Stop Running", command=self.stop_running)
         self.stop_button.pack(side="left", padx=10)
+
+        # Create a queue for communication between threads
+        self.input_queue = queue.Queue()
+        self.output_queue = queue.Queue()
+
+        # Redirect sys.stdout, sys.stderr, and sys.stdin to the terminal
+        sys.stdout = self.TerminalOutput(self.output_queue)
+        sys.stderr = self.TerminalOutput(self.output_queue)
+        sys.stdin = self.TerminalInput(self.input_queue)
+
+        # Start a separate thread for the terminal emulator
+        self.terminal_thread = threading.Thread(target=self.run_terminal_emulator, daemon=True)
+        self.terminal_thread.start()
 
         # Initialize buttons in the first column
         self.load_buttons()
@@ -69,8 +96,8 @@ class CodeRunnerApp:
                 btn.pack(side="top", pady=5)
 
     def load_code(self, file_name):
-        file_path = os.path.join(self.folder_path, file_name)
-        with open(file_path, 'r') as file:
+        self.file_path = os.path.join(self.folder_path, file_name)
+        with open(self.file_path, 'r') as file:
             code_content = file.read()
 
         # Apply syntax highlighting using Pygments
@@ -81,49 +108,140 @@ class CodeRunnerApp:
         # Use Pygments to apply syntax highlighting
         # Use IDLE's colorizer to apply syntax highlighting
         self.code_text.insert(tk.END, code_content)
-
     def run_code(self):
         code_content = self.code_text.get(1.0, tk.END)
         self.terminal_text.delete(1.0, tk.END)
 
         try:
-            self.process = subprocess.Popen(["python", "-c", code_content], 
-                                            stdout=subprocess.PIPE, 
-                                            stderr=subprocess.PIPE, 
-                                            text=True, 
-                                            shell=True, 
-                                            bufsize=1,
-                                            universal_newlines=True)
+            # Redirect sys.stdout, sys.stderr, and sys.stdin to the terminal
+            sys.stdout = self.TerminalOutput(self.output_queue)
+            sys.stderr = self.TerminalOutput(self.output_queue)
+            sys.stdin = self.TerminalInput(self.input_queue)
 
-            self.stop_button.config(state=tk.NORMAL)
-
-            # Start a separate thread to read stdout and stderr in real-time
-            self.output_thread = threading.Thread(target=self.read_output, daemon=True)
-            self.output_thread.start()
+            # Start a separate thread for running the code and capturing output
+            self.subprocess_thread = threading.Thread(
+                target=self.run_subprocess,
+                args=([sys.executable, self.file_path],)
+            )
+            self.subprocess_thread.start()
+            
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
 
-    def read_output(self):
+    def run_terminal_emulator(self):
+        # Run a subprocess to emulate a terminal
+        self.process = subprocess.Popen(
+            [os.environ.get("SHELL", "/bin/bash")],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
+
+        # Start two threads for handling stdout and stderr
+        stdout_thread = threading.Thread(target=self.read_output, args=(self.process.stdout,))
+        stderr_thread = threading.Thread(target=self.read_output, args=(self.process.stderr,))
+        stdout_thread.start()
+        stderr_thread.start()
+
+        # Main loop for the terminal emulator
         while True:
-            line = self.process.stdout.readline()
-            if not line:
+            # Check if there is any input from the input queue
+            try:
+                input_data = self.input_queue.get_nowait()
+                self.process.stdin.write(input_data + '\n')
+                self.process.stdin.flush()
+            except queue.Empty:
+                pass
+
+            # Check if there is any output from the output queue
+            try:
+                output_data = self.output_queue.get_nowait()
+                self.terminal_text.insert(tk.END, output_data)
+                self.terminal_text.yview(tk.END)
+            except queue.Empty:
+                pass
+
+            # Check if the subprocess has terminated
+            return_code = self.process.poll()
+            if return_code is not None:
                 break
-            self.terminal_text.insert(tk.END, line)
-            self.terminal_text.yview(tk.END)
 
-        # Wait for the process to finish and get the remaining output
-        remaining_output, _ = self.process.communicate()
-        self.terminal_text.insert(tk.END, remaining_output)
+        # Cleanup: Restore original sys.stdin, sys.stdout, and sys.stderr
+        #sys.stdin = sys.__stdin__
+        #sys.stdout = sys.__stdout__
+        #sys.stderr = sys.__stderr__
 
-        # Enable the "Run Code" button and disable the "Stop Running" button
-        self.run_button.config(state=tk.NORMAL)
-        self.stop_button.config(state=tk.DISABLED)
+    def run_subprocess(self, command):
+        try:
+            # Run the code using subprocess.Popen and pass the redirected streams
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            # Start two threads for handling stdout and stderr
+            stdout_thread = threading.Thread(target=self.read_output, args=(process.stdout,))
+            stderr_thread = threading.Thread(target=self.read_output, args=(process.stderr,))
+            stdout_thread.start()
+            stderr_thread.start()
+
+            # Feed the subprocess stdin with an empty string
+            process.communicate("")
+
+            # Wait for both threads to finish
+            stdout_thread.join()
+            stderr_thread.join()
+
+        finally:
+            # Cleanup: Restore original sys.stdin, sys.stdout, and sys.stderr
+            sys.stdin = sys.__stdin__
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
+
+            # Notify the main thread that the subprocess has finished
+            self.root.after(0, self.subprocess_finished)
+
+    def read_output(self, stream):
+        for line in iter(stream.readline, ""):
+            self.output_queue.put(line)
+
+    def subprocess_finished(self):
+        # You can perform any cleanup or additional actions here
+        pass
 
     def stop_running(self):
         # Terminate the running process
-        if hasattr(self, 'process') and self.process.poll() is None:
-            self.process.terminate()
+        if hasattr(self, 'file_process') and self.file_process.poll() is None:
+            self.file_process.terminate()
+
+    class TerminalOutput(io.TextIOBase):
+        def __init__(self, output_queue):
+            self.output_queue = output_queue
+
+        def write(self, text):
+            self.output_queue.put(text)
+
+        def flush(self):
+            pass
+
+        def fileno(self):
+            return 1
+
+    class TerminalInput(io.TextIOBase):
+        def __init__(self, input_queue):
+            self.input_queue = input_queue
+
+        def readline(self):
+            return self.input_queue.get()
+        def fileno(self):
+            return 0
 
 if __name__ == "__main__":
     root = tk.Tk()
