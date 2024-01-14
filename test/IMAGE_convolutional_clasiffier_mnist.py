@@ -9,9 +9,10 @@ from mlexperiments.load_data.loader.downloadable.cifar10_keras import LoadCifar1
 from mlexperiments.utils.keras_persistence.all_inside import save
 
 import numpy as np
+from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Convolution2D, MaxPooling2D
-from keras.utils.np_utils import to_categorical
+from keras.utils import to_categorical
 
 #dataset_to_use = "cifar10"
 dataset_to_use = "mnist"
@@ -79,7 +80,7 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 print("start to train")
 # Entrenamiento
 # model.fit(Xtrain,Ytrain,epochs=15,batch_size=32,verbose=1,shuffle=True)
-model.fit(Xtrain,Ytrain,epochs=1,batch_size=2,verbose=1,shuffle=True)
+model.fit(Xtrain,Ytrain,epochs=10,batch_size=32,verbose=1,shuffle=True)
 
 
 score=model.evaluate(Xtest,Ytest,verbose=1)
