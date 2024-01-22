@@ -36,6 +36,7 @@ FuzzyTM
 
 opendatasets
 requests
+pygit2
 
 pygments
 chlorophyll 

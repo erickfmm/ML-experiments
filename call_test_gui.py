@@ -78,7 +78,7 @@ class CodeRunnerApp:
         self.load_buttons()
 
     def open_folder(self):
-        folder_path = filedialog.askdirectory(title="Open Folder")
+        folder_path = filedialog.askdirectory(title="Open Folder", initialdir="./test/")
         if folder_path:
             self.folder_path = folder_path
             self.load_buttons()
@@ -90,7 +90,9 @@ class CodeRunnerApp:
 
         # Create buttons for each .py file in the folder
         if hasattr(self, 'folder_path'):
-            py_files = [f for f in os.listdir(self.folder_path) if f.endswith(".py")]
+            list_of_files = os.listdir(self.folder_path)
+            list_of_files.sort()
+            py_files = [f for f in list_of_files if f.endswith(".py")]
             for file in py_files:
                 btn = tk.Button(self.button_frame, text=file, command=lambda f=file: self.load_code(f))
                 btn.pack(side="top", pady=5)
@@ -109,7 +111,7 @@ class CodeRunnerApp:
         # Use IDLE's colorizer to apply syntax highlighting
         self.code_text.insert(tk.END, code_content)
     def run_code(self):
-        code_content = self.code_text.get(1.0, tk.END)
+        #code_content = self.code_text.get(1.0, tk.END)
         self.terminal_text.delete(1.0, tk.END)
 
         try:

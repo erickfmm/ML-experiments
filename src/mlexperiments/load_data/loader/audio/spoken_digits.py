@@ -1,6 +1,7 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import scipy.io.wavfile as wav
 import os
+from pygit2 import clone_repository
 
 __all__ = ["LoadSpokenDigits"]
 
@@ -39,3 +40,6 @@ class LoadSpokenDigits(ILoadSupervised):
             rate, signal = wav.read(full_filename)
             self.metadata.append([name_segments[1], int(name_segments[2]), rate])
             yield signal, int(name_segments[0])
+    
+    def download(self, folder_path="data/train_data/Audio/free-spoken-digit-dataset"):
+        clone_repository("https://github.com/Jakobovski/free-spoken-digit-dataset.git", folder_path)

@@ -14,6 +14,7 @@ from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
 
 
 from mlexperiments.load_data.loader.audio.spoken_digits import LoadSpokenDigits
+from mlexperiments.load_data.loader.audio.birdsongs_from_europe import LoadBirdSongs
 
 from mlexperiments.load_data.loader.basic.andtable import LoadAndTable
 from mlexperiments.load_data.loader.basic.empty import LoadEmpty
@@ -71,19 +72,30 @@ _, _ = l.get_X_Y()
 
 
 print("downloadable")
-
+print("spoken digits")
+l = LoadSpokenDigits
+#l.download()
+#_, _ = l.get_X_Y()
+print("bird songs")
+l = LoadBirdSongs()
+l.download()
+_, _ = l.get_X_Y()
 
 print("emotion audio")
 print("berlin")
 l = LoadBerlin()
+l.download()
 _, _ = l.get_X_Y()
 print("ravdess")
 l = LoadRavdess()
+l.download()
 _, _ = l.get_X_Y()
 print("savee")
 l = LoadSavee()
+l.download()
 _, _ = l.get_X_Y()
 l = LoadTESS()
+l.download()
 _, _ = l.get_X_Y()
 
 print("emotion eeg")
@@ -92,23 +104,28 @@ _ , _ = l.get_X_Y()
 
 print("butterfly")
 l = LoadButterflySegment()
+l.download()
 _ = l.get_all()
 
 print("anime faces")
 l = LoadAnimeFaces()
+l.download()
 _ = l.get_data()
 
 print("anime recomendations")
 l = LoadAnimeData()
+l.download()
 _, _ = l.get_X_Y()
 
 print("text")
 print("news category")
 l = LoadNewsCategory()
+l.download()
 _,_ = l.get_X_Y()
 
 print("reddit sarcasm")
 l = LoadSarcasmRedditKaggle()
+l.download()
 _, _ = l.get_X_Y()
 
 #it works, but it lasts too much time loading ¿maybe load in parts?
@@ -128,35 +145,39 @@ print("sentiment")
 
 print("1M tweets")
 l = Load1MTweets()
+l.download()
 _,_ = l.get_X_Y()
 print("imdb")
 l = LoadImdbSentiment()
+l.download()
 _,_ = l.get_X_Y()
 print("reddit and twitter")
 l = LoadRedditOrTwitterSentiment(source="reddit")
+l.download()
 _,_ = l.get_X_Y()
 print("twitter")
 l = LoadRedditOrTwitterSentiment(source="twitter")
+l.download()
 _,_ = l.get_X_Y()
 print("sentiment 140")
 l = LoadSentiment140()
+l.download()
 _,_ = l.get_X_Y()
 print("steam")
 l = LoadSteam()
+l.download()
 _,_ = l.get_X_Y()
 
 
 print("wmt6")
 l = LoadWMT()
+l.download()
 _,_ = l.get_data()
 
 print("onu debates")
 l = LoadOnuDebates()
+l.download()
 _ = l.get_data()
-
-print("spoken digits")
-l = LoadSpokenDigits()
-_, _ = l.get_X_Y()
 
 print("oasis")
 l = LoadOASISImageEmotion()
@@ -165,6 +186,7 @@ _, _ = l.get_X_Y()
 
 print("twitch emotes")
 l = LoadTwitchEmotes()
+l.download()
 _ = l.get_data()
 
 
