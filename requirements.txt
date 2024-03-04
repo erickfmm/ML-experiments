@@ -40,3 +40,4 @@ pygit2
 
 pygments
 chlorophyll 
+tkterm
