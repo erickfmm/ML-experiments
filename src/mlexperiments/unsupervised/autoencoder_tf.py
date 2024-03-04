@@ -1,18 +1,9 @@
-from os.path import join
-import numpy as np
+from os.path import join, exists
+from os import mkdir
 from tensorflow import keras
 from keras import layers
-# from sklearn import datasets
-# from sklearn.model_selection import train_test_split
 
-
-# iris = datasets.load_iris()
-# dataX = iris.data
-# datay = iris.target
-# X_train, X_test, y_train, y_test = train_test_split(dataX, datay, test_size = 0.3, random_state=0)
-
-
-def reconstruct_data(X_train, X_test, n_hidden=2, learning_rate=0.1, n_iterations=1000):
+def MLP_reconstruct_data(X_train, X_test, n_hidden=2, epochs=10, name="reconstructed_model"):
     if len(X_train) < 1:
         raise ValueError("X has no length")
     n_input = len(X_train[0])
@@ -23,15 +14,17 @@ def reconstruct_data(X_train, X_test, n_hidden=2, learning_rate=0.1, n_iteration
     x = hidden(input)
     output = layers.Dense(n_input, activation='sigmoid')(x)
     model = keras.Model(inputs=input, outputs=output)
-    keras.utils.plot_model(model, join("data/created_models", "reconstructed_model.png"), show_shapes=True)
+    if not exists(join("data/created_models",name)):
+        mkdir(join("data/created_models",name))
+    #keras.utils.plot_model(model, join("data/created_models", name, "reconstructed_model.png"), show_shapes=True)
 
     model.compile(
-        loss=keras.losses.MeanSquaredError(),
-        optimizer=keras.optimizers.SGD(learning_rate=learning_rate),
-        metrics=["mse"],
+        loss="mean_squared_error",
+        optimizer='adam',
+        metrics=["accuracy"],
     )
-    model.fit(X_train, X_train, batch_size=128, epochs=10, validation_split=0.2)
-    model.save(join("data/created_models", "reconstructed.model"))
+    model.fit(X_train, X_train, batch_size=128, epochs=epochs, validation_split=0.2)
+    #model.save("data/created_models/"+name+"/reconstructed.model")
     reconstructed = model.predict(X_test)
     
 

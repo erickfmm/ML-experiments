@@ -20,15 +20,14 @@ def kmeans(dataset, n_clusters, max_iter=300, init='k-means++', n_init=10):
     return cluster.KMeans(n_clusters=n_clusters, max_iter=max_iter, init=init, n_init=n_init).fit_predict(dataset)
 
 
-def hierarchical(dataset, n_clusters=4, affinity='euclidean', linkage='ward'):
-    return cluster.AgglomerativeClustering(n_clusters=n_clusters, affinity=affinity,
+def hierarchical(dataset, n_clusters=4, linkage='ward'):
+    return cluster.AgglomerativeClustering(n_clusters=n_clusters,
                                            linkage=linkage).fit_predict(dataset)
 
 
-def hierarchical_connected(dataset, n_clusters, n_neighbors=5, include_self=False,
-                           affinity='euclidean', linkage='complete'):
+def hierarchical_connected(dataset, n_clusters, n_neighbors=5, include_self=False, linkage='complete'):
     connect = kneighbors_graph(dataset, n_neighbors=n_neighbors, include_self=include_self)
-    return cluster.AgglomerativeClustering(n_clusters=n_clusters, affinity=affinity,
+    return cluster.AgglomerativeClustering(n_clusters=n_clusters,
                                            linkage=linkage,connectivity=connect).fit_predict(dataset)
 
 

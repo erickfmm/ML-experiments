@@ -22,7 +22,7 @@ import numpy as np
 #data = LoadAndTable()
 data = LoadXorTable()
 #data = LoadTitanic()
-X, Y = data.get_all()
+X, Y = data.get_X_Y()
 
 #pr = Perceptron()
 #performance = pr.train(X, Y)

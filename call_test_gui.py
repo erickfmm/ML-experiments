@@ -1,12 +1,9 @@
 import os
 import sys
-import io
 import tkinter as tk
 from tkinter import filedialog
-from tkinter import scrolledtext
 from tkinter import messagebox
 
-import pygments.lexers
 from chlorophyll import CodeView
 from pygments.lexers import PythonLexer
 from tkterm import Terminal
