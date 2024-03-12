@@ -1,9 +1,9 @@
-from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
+from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
 import opendatasets as od
 
 __all__ = ["LoadES_Wikipedia_Corpus"]
 
-class LoadES_Wikipedia_Corpus(ILoadSupervised):
+class LoadES_Wikipedia_Corpus(ILoadUnsupervised):
     def __init__(self, file_path="data/train_data/NLP_ESP/corpus-de-la-wikipedia-en-espaol/eswiki-latest-pages-articles.txt"):
         self.file_path = file_path
     
