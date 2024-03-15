@@ -21,10 +21,11 @@ class LoadWikihowSpanish(ILoadSupervised):
     
     
     def get_X_Y_yielded(self):
-        obj = json.load(open(join(self.folder_path, "spanish.json"), "r", encoding="utf-8"))
-        for webpage in obj:
-            for section in obj[webpage]:
-                yield obj[webpage][section]["document"], obj[webpage][section]["summary"]
+        with open(join(self.folder_path, "spanish.json"), "r", encoding="utf-8") as fobj:
+            obj = json.load(fobj)
+            for webpage in obj:
+                for section in obj[webpage]:
+                    yield obj[webpage][section]["document"], obj[webpage][section]["summary"]
 
 
     def get_classes(self):

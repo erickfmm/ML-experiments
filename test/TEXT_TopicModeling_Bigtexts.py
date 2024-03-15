@@ -7,7 +7,8 @@ sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
 from mlexperiments.load_data.loader.text.get_txt_docs import LoadTXTsFolder
-
+from mlexperiments.load_data.loader.text.ES_wikihow import LoadWikihowSpanish
+from mlexperiments.load_data.loader.text.ES_Spanish_news import LoadSpanishNews
 
 from mlexperiments.unsupervised.clustering.lda import LDA_model
 
@@ -17,8 +18,11 @@ from time import sleep
 
 
 if __name__ ==  '__main__':
+    #dataset = "evaluacion"
+    dataset = "wikihow"
+    #dataset = "spanish_news"
     ##########################################
-    FOLDER = "data/created_models/convivencia/"
+    FOLDER = f"data/created_models/{dataset}/"
     if not os.path.exists(FOLDER):
         os.mkdir(FOLDER)
 
@@ -28,10 +32,18 @@ if __name__ ==  '__main__':
         os.mkdir(FOLDER+"lemmed/")
 
     ####################
-
-    l = LoadTXTsFolder("data/train_data/NLP_ESP/education-reglamento-convivencia/txt_files_convivencia", to_catch_rbds=True)
-    docs = l.get_data()
-
+    if dataset == "evaluacion":
+        l = LoadTXTsFolder("data/train_data/NLP_ESP/education-reglamento-evaluacion/txt_files_evaluacion", which="evaluacion", to_catch_rbds=True)
+        l.download()
+        docs = l.get_data()
+    elif dataset == "wikihow":
+        l = LoadWikihowSpanish()
+        l.download()
+        docs, _ = l.get_X_Y()
+    elif dataset == "spanish_news":
+        l = LoadSpanishNews()
+        l.download()
+        docs, _ = l.get_X_Y()
 
 
 
