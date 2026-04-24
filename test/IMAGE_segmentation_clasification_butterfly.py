@@ -14,9 +14,10 @@ import numpy as np
 import pandas as pd
 import pickle
 
-import tensorflow as tf
-from tensorflow import keras
-from keras import layers
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
 
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
@@ -74,49 +75,91 @@ def open_pickle(which_pkl:str) -> dict:
         return pickle.load(file_handler)
 
 
-def simple_classifier(x, y):
-    model = keras.Sequential()
-    model.add(keras.Input(shape=(100,100,3)))
-    model.add(layers.Conv2D(32, 5, activation="relu"))
-    model.add(layers.Dropout(0.1))
-    model.add(layers.MaxPooling2D(2))
-    model.add(layers.Conv2D(32, 5, activation="relu"))
-    model.add(layers.Dropout(0.1))
-    model.add(layers.MaxPooling2D(2))
-    model.add(layers.Conv2D(32, 3, activation="relu"))
-    model.add(layers.Dropout(0.1))
-    model.add(layers.MaxPooling2D(3))
-    
-
-    model.add(layers.GlobalMaxPooling2D())
-    model.add(layers.Flatten())
-    model.add(layers.Dense(10, activation='softmax'))
-    model.summary() #only for printing purposes
-    model.compile(
-        optimizer='adam',
-        loss='categorical_crossentropy',
-        metrics=['accuracy']
+class SimpleClassifier(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=5),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 32, kernel_size=5),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 32, kernel_size=3),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(3),
         )
-    model.fit(x, y, epochs=100, batch_size=16)
+        self.classifier = nn.Sequential(
+            nn.AdaptiveMaxPool2d(1),  # GlobalMaxPooling2D equivalent
+            nn.Flatten(),
+            nn.Linear(32, 10),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.classifier(x)
+        return x
+
+
+def train_classifier(x, y, epochs=100, batch_size=16):
+    model = SimpleClassifier()
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters())
+
+    # Print model summary
+    print(model)
+
+    x_t = torch.tensor(x, dtype=torch.float32).permute(0, 3, 1, 2)  # (N, C, H, W)
+    y_t = torch.tensor(y, dtype=torch.long)
+    dataset = TensorDataset(x_t, y_t)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    model.train()
+    for epoch in range(epochs):
+        total_loss = 0
+        correct = 0
+        total = 0
+        for batch_x, batch_y in loader:
+            optimizer.zero_grad()
+            outputs = model(batch_x)
+            loss = criterion(outputs, batch_y)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item() * len(batch_x)
+            _, predicted = torch.max(outputs, 1)
+            total += batch_y.size(0)
+            correct += (predicted == batch_y).sum().item()
+        if (epoch + 1) % 10 == 0:
+            print(f"Epoch {epoch+1}/{epochs} - loss: {total_loss/total:.4f} - accuracy: {correct/total:.4f}")
     return model
 
 def simple_classifier_pipeline(x, y):
     print("cantidad de etiquetas: ", len(set(y)))
-    #y = keras.utils.to_categorical(y)
-    y = pd.get_dummies(y).astype('float32').values
+    y_encoded = pd.get_dummies(y).astype('float32').values
+    y_labels = np.argmax(y_encoded, axis=1)
     x = np.asarray(x)
-    y = np.asarray(y)
-    print(y[0])
-    print("x shape: ", np.asarray(x).shape)
-    print("y shape: ", np.asarray(y).shape)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=1992)
-    model = simple_classifier(x_train, y_train)
-    model.summary()
-    model.save("data/created_models/butterfly_classifier.keras")
-    model.evaluate(x_test, y_test)
-    y_pred = model.predict(x_test)
-    y_pred=np.argmax(y_pred, axis=1)
-    y_test=np.argmax(y_test, axis=1)
+    print("x shape: ", x.shape)
+    print("y shape: ", y_labels.shape)
+    x_train, x_test, y_train, y_test = train_test_split(x, y_labels, test_size=0.33, random_state=1992)
+    model = train_classifier(x_train, y_train)
+    print(model)
+
+    # Evaluate
+    model.eval()
+    x_test_t = torch.tensor(x_test, dtype=torch.float32).permute(0, 3, 1, 2)
+    y_test_t = torch.tensor(y_test, dtype=torch.long)
+    with torch.no_grad():
+        outputs = model(x_test_t)
+        _, y_pred = torch.max(outputs, 1)
+        y_pred = y_pred.numpy()
+
+    # Save model
+    os.makedirs("data/created_models", exist_ok=True)
+    torch.save(model.state_dict(), "data/created_models/butterfly_classifier.pt")
+
     confusion = confusion_matrix(y_test, y_pred, normalize='pred')
     print(confusion)
     df_cm = pd.DataFrame(confusion, range(10), range(10))
@@ -125,50 +168,112 @@ def simple_classifier_pipeline(x, y):
 
     plt.show()
 
-def simple_segmentation(x_input, y_input):
-    inputs = layers.Input(shape=(100,100,3))
-    x1 = layers.Conv2D(32, 5, activation="relu", padding="same")(inputs)
-    x = layers.Dropout(0.1)(x1)
-    x = layers.MaxPooling2D((2,2), padding="same")(x)
-    x2 = layers.Conv2D(32, 5, activation="relu", padding="same")(x)
-    x = layers.Dropout(0.1)(x2)
-    x = layers.MaxPooling2D((2,2), padding="same")(x)
-    x3 = layers.Conv2D(32, 3, activation="relu", padding="same")(x)
-    x = layers.Dropout(0.1)(x3)
-    x = layers.MaxPooling2D((3,3), padding="same")(x)
-
-    x = layers.Conv2D(256, 3, activation="relu", padding="same")(x)
-
-    x = layers.UpSampling2D(size=(3,3))(x)
-    x3 = layers.ZeroPadding2D(padding=(1, 1))(x3)
-    x = layers.concatenate([x, x3], axis=-1)
-    x = layers.Conv2D(32, 3, activation="relu", padding="valid")(x)
-    x = layers.Dropout(0.1)(x)
-
-    x = layers.UpSampling2D(size=(2,2))(x)
-    #x2 = layers.ZeroPadding2D(2)(x2)
-    x = layers.concatenate([x, x2], axis=-1)
-    x = layers.Conv2D(32, 5, activation="relu", padding="valid")(x)
-    x = layers.Dropout(0.1)(x)
-
-    x = layers.UpSampling2D(size=(2,2))(x)
-    x = layers.ZeroPadding2D(padding=(4, 4))(x)
-    x = layers.concatenate([x, x1], axis=-1)
-    output = layers.Conv2D(3, 3, activation="sigmoid", padding="same")(x)
-
-    model = keras.Model(inputs=[inputs], outputs=[output])
-    model.summary() #only for printing purposes
-    model.compile(
-        optimizer='adam',
-        loss='mean_squared_error',
-        metrics=['accuracy']
+class SimpleSegmentation(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Encoder
+        self.enc1 = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=5, padding=2),
+            nn.ReLU(),
         )
-    model.fit(x_input, y_input, epochs=100, batch_size=16)
+        self.enc2 = nn.Sequential(
+            nn.Conv2d(32, 32, kernel_size=5, padding=2),
+            nn.ReLU(),
+        )
+        self.enc3 = nn.Sequential(
+            nn.Conv2d(32, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+        )
+        self.pool = nn.MaxPool2d(2, 2)
+        self.pool3 = nn.MaxPool2d(3, 3)
+        self.dropout = nn.Dropout(0.1)
+
+        # Bottleneck
+        self.bottleneck = nn.Conv2d(32, 256, kernel_size=3, padding=1)
+        self.relu = nn.ReLU()
+
+        # Decoder
+        self.up3 = nn.Upsample(scale_factor=3, mode='nearest')
+        self.dec3 = nn.Sequential(
+            nn.Conv2d(256 + 32, 32, kernel_size=3, padding=0),
+            nn.ReLU(),
+        )
+        self.up2 = nn.Upsample(scale_factor=2, mode='nearest')
+        self.dec2 = nn.Sequential(
+            nn.Conv2d(32 + 32, 32, kernel_size=5, padding=0),
+            nn.ReLU(),
+        )
+        self.up1 = nn.Upsample(scale_factor=2, mode='nearest')
+        self.dec1 = nn.Sequential(
+            nn.Conv2d(32 + 32, 3, kernel_size=3, padding=0),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, x):
+        # Encoder
+        x1 = self.dropout(self.enc1(x))       # (N, 32, 100, 100)
+        x = self.pool(x1)                      # (N, 32, 50, 50)
+        x2 = self.dropout(self.enc2(x))        # (N, 32, 50, 50)
+        x = self.pool(x2)                      # (N, 32, 25, 25)
+        x3 = self.dropout(self.enc3(x))        # (N, 32, 25, 25)
+        x = self.pool3(x3)                     # (N, 32, 8, 8)
+
+        # Bottleneck
+        x = self.relu(self.bottleneck(x))      # (N, 256, 8, 8)
+
+        # Decoder
+        x = self.up3(x)                        # (N, 256, 24, 24)
+        x3_crop = x3[:, :, 1:25, 1:25]         # crop to match
+        x = torch.cat([x, x3_crop], dim=1)     # (N, 288, 24, 24)
+        x = self.dropout(self.dec3(x))         # (N, 32, 22, 22)
+
+        x = self.up2(x)                        # (N, 32, 44, 44)
+        x2_crop = x2[:, :, 3:47, 3:47]
+        x = torch.cat([x, x2_crop], dim=1)
+        x = self.dropout(self.dec2(x))
+
+        x = self.up1(x)
+        # Pad to 100x100
+        x = nn.functional.pad(x, (4, 4, 4, 4))  # pad to 100x100
+        x1_crop = x1[:, :, :x.size(2), :x.size(3)]
+        x = torch.cat([x, x1_crop], dim=1)
+        x = self.dec1(x)
+        # Ensure output is 100x100
+        x = nn.functional.interpolate(x, size=(100, 100), mode='bilinear', align_corners=False)
+        return x
+
+
+def train_segmentation(x_input, y_input, epochs=100, batch_size=16):
+    model = SimpleSegmentation()
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters())
+
+    x_t = torch.tensor(x_input, dtype=torch.float32).permute(0, 3, 1, 2)  # (N, C, H, W)
+    y_t = torch.tensor(y_input, dtype=torch.float32).permute(0, 3, 1, 2)
+    dataset = TensorDataset(x_t, y_t)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    print(model)
+    model.train()
+    for epoch in range(epochs):
+        total_loss = 0
+        for batch_x, batch_y in loader:
+            optimizer.zero_grad()
+            outputs = model(batch_x)
+            loss = criterion(outputs, batch_y)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item() * len(batch_x)
+        if (epoch + 1) % 10 == 0:
+            print(f"Epoch {epoch+1}/{epochs} - loss: {total_loss/len(x_t):.4f}")
     return model
 
 
 def show_segmentation_interface(model, x_test, y_test):
-    pred = model.predict(x_test)
+    model.eval()
+    x_test_t = torch.tensor(x_test, dtype=torch.float32).permute(0, 3, 1, 2)
+    with torch.no_grad():
+        pred = model(x_test_t).permute(0, 2, 3, 1).numpy()  # back to (N, H, W, C)
     # Initialize the index variable
     global idx
     idx = 0
@@ -218,7 +323,9 @@ def show_segmentation_interface(model, x_test, y_test):
             image = Image.open(file_path)
             image = image.resize((100, 100))  # Resize the image to match model input size
             image = np.array(image) / 255.0  # Normalize the image
-            prediction = model.predict(np.expand_dims(image, axis=0))[0]
+            with torch.no_grad():
+                img_tensor = torch.tensor(np.expand_dims(image, axis=0), dtype=torch.float32).permute(0, 3, 1, 2)
+                prediction = model(img_tensor).permute(0, 2, 3, 1).numpy()[0]
             idx = 0  # Reset the index
             ax3.clear()
             ax3.imshow(image)
@@ -285,12 +392,15 @@ def segmentation_pipeline(x, x_seg):
     print("y_train shape", y_train.shape)
     print("x_test shape", x_test.shape)
     print("y_test shape", y_test.shape)
-    filepath = "data/created_models/butterfly_segmentation.keras"
+    filepath = "data/created_models/butterfly_segmentation.pt"
     if os.path.exists(filepath):
-        model = keras.saving.load_model(filepath)
+        model = SimpleSegmentation()
+        model.load_state_dict(torch.load(filepath, weights_only=True))
+        model.eval()
     else:
-        model = simple_segmentation(x_train, y_train)
-        model.save(filepath)
+        model = train_segmentation(x_train, y_train)
+        os.makedirs("data/created_models", exist_ok=True)
+        torch.save(model.state_dict(), filepath)
     show_segmentation_interface(model, x_test, y_test)
 
 if __name__ == "__main__":

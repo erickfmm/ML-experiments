@@ -170,21 +170,32 @@ def tokenize_with_gensim_spacy(X):
     return X_idxs, dictionary, nlp
 
 def tokenize_tfds(X):
-    import tensorflow_datasets as tfds
-    tokenizer = tfds.deprecated.text.SubwordTextEncoder.build_from_corpus(
-        X, target_vocab_size=2**16
-    )
-    X = [tokenizer.encode(sentence) for sentence in X]
-    return X, tokenizer
+    from tokenizers import Tokenizer
+    from tokenizers.models import WordLevel
+    from tokenizers.pre_tokenizers import Whitespace
+    tokenizer = Tokenizer(WordLevel(unk_token="[UNK]"))
+    tokenizer.pre_tokenizer = Whitespace()
+    # Build vocabulary from corpus
+    vocab = {"[PAD]": 0, "[UNK]": 1}
+    idx = 2
+    for sentence in X:
+        for word in sentence.split():
+            if word not in vocab:
+                vocab[word] = idx
+                idx += 1
+    tokenizer.model = WordLevel(vocab, unk_token="[UNK]")
+    X_encoded = [tokenizer.encode(sentence).ids for sentence in X]
+    return X_encoded, tokenizer
 
 def padding(X, max_len :int = None):
-    from tensorflow import keras
-    from keras.preprocessing.sequence import pad_sequences
+    import numpy as np
     if max_len is None:
-        #max_len = max([x for doc in X for x in doc])+1
         max_len = max([len(sentence) for sentence in X])
-    X = pad_sequences(X, maxlen=max_len, padding="post", value=0)
-    return X
+    padded = np.zeros((len(X), max_len), dtype=np.int32)
+    for i, seq in enumerate(X):
+        length = min(len(seq), max_len)
+        padded[i, :length] = seq[:length]
+    return padded
 
 def idx_to_bow(X_idxs):
     import numpy as np
@@ -202,11 +213,13 @@ def idx_to_bow(X_idxs):
 def create_run_copied_model(X, Y, vocab_size):
     from sklearn.metrics import confusion_matrix
     from sklearn.model_selection import train_test_split
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=1992)
-    import tensorflow as tf
-    from tensorflow import keras
-    from keras import Model, layers
-    class DCNN(Model):
+    import numpy as np
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    from torch.utils.data import DataLoader, TensorDataset
+
+    class DCNN(nn.Module):
 
         def __init__(self,
                     vocab_size,
@@ -215,82 +228,52 @@ def create_run_copied_model(X, Y, vocab_size):
                     FFN_units=512,
                     nb_classes=2,
                     dropout_rate=0.1,
-                    training=False,
                     name="dcnn"):
-            super(DCNN, self).__init__(name=name)
-
-            self.embedding = layers.Embedding(vocab_size,
-                                            emb_dim)
-            self.bigram = layers.Conv1D(filters=nb_filters,
-                                        kernel_size=2,
-                                        padding="valid",
-                                        activation="relu")
-            self.trigram = layers.Conv1D(filters=nb_filters,
-                                        kernel_size=3,
-                                        padding="valid",
-                                        activation="relu")
-            self.fourgram = layers.Conv1D(filters=nb_filters,
-                                        kernel_size=4,
-                                        padding="valid",
-                                        activation="relu")
-            self.pool = layers.GlobalMaxPool1D() # No tenemos variable de entrenamiento
-                                                # así que podemos usar la misma capa
-                                                # para cada paso de pooling <- No
-            self.dense_1 = layers.Dense(units=FFN_units, activation="relu")
-            self.dropout = layers.Dropout(rate=dropout_rate)
-            if nb_classes == 1:
-                self.last_dense = layers.Dense(units=1,
-                                            activation="sigmoid")
-            elif nb_classes == 2:
-                self.last_dense = layers.Dense(units=1,
-                                            activation="sigmoid")
+            super(DCNN, self).__init__()
+            self.embedding = nn.Embedding(vocab_size, emb_dim)
+            self.bigram = nn.Conv1d(in_channels=emb_dim, out_channels=nb_filters, kernel_size=2, padding="valid")
+            self.trigram = nn.Conv1d(in_channels=emb_dim, out_channels=nb_filters, kernel_size=3, padding="valid")
+            self.fourgram = nn.Conv1d(in_channels=emb_dim, out_channels=nb_filters, kernel_size=4, padding="valid")
+            self.pool = nn.AdaptiveMaxPool1d(1)
+            self.dense_1 = nn.Linear(3 * nb_filters, FFN_units)
+            self.dropout = nn.Dropout(p=dropout_rate)
+            if nb_classes <= 2:
+                self.last_dense = nn.Linear(FFN_units, 1)
             else:
-                self.last_dense = layers.Dense(units=nb_classes,
-                                            activation="softmax")
+                self.last_dense = nn.Linear(FFN_units, nb_classes)
+            self.nb_classes = nb_classes
 
-        def call(self, inputs, training):
-            x = self.embedding(inputs)
-            x_1 = self.bigram(x)
-            x_1 = self.pool(x_1)
-            x_2 = self.trigram(x)
-            x_2 = self.pool(x_2)
-            x_3 = self.fourgram(x)
-            x_3 = self.pool(x_3)
+        def forward(self, x):
+            # x: (batch_size, seq_len)
+            x = self.embedding(x)          # (batch_size, seq_len, emb_dim)
+            x = x.permute(0, 2, 1)         # (batch_size, emb_dim, seq_len) for Conv1d
 
-            #merged = tf.concat([x_1, x_2, x_3], axis=-1) # (batch_size, 3 * nb_filters)
-            merged = layers.concatenate([x_1, x_2, x_3], axis=-1)
-            merged = self.dense_1(merged)
-            merged = self.dropout(merged, training)
-            output = self.last_dense(merged)
+            x_1 = torch.relu(self.bigram(x))   # (batch_size, nb_filters, *)
+            x_1 = self.pool(x_1).squeeze(-1)   # (batch_size, nb_filters)
+            x_2 = torch.relu(self.trigram(x))
+            x_2 = self.pool(x_2).squeeze(-1)
+            x_3 = torch.relu(self.fourgram(x))
+            x_3 = self.pool(x_3).squeeze(-1)
 
-            return output
-        def get_model(self, X):
-            inputs = layers.Input(shape=X[0].shape)
-            x = self.embedding(inputs)
-            x_1 = self.bigram(x)
-            x_1 = layers.GlobalMaxPool1D()(x_1)
-            x_2 = self.trigram(x)
-            x_2 = layers.GlobalMaxPool1D()(x_2)
-            x_3 = self.fourgram(x)
-            x_3 = layers.GlobalMaxPool1D()(x_3)
-
-            #merged = tf.concat([x_1, x_2, x_3], axis=-1) # (batch_size, 3 * nb_filters)
-            merged = layers.concatenate([x_1, x_2, x_3], axis=-1)
-            merged = self.dense_1(merged)
+            merged = torch.cat([x_1, x_2, x_3], dim=-1)  # (batch_size, 3 * nb_filters)
+            merged = torch.relu(self.dense_1(merged))
             merged = self.dropout(merged)
             output = self.last_dense(merged)
-            model = keras.Model(inputs=[inputs], outputs=[output])
-            return model
-        
-    VOCAB_SIZE = vocab_size #len(X[0][0])+1 # 65540
+            if self.nb_classes <= 2:
+                output = torch.sigmoid(output)
+            else:
+                output = torch.softmax(output, dim=-1)
+            return output
 
+    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=1992)
+
+    VOCAB_SIZE = vocab_size
     EMB_DIM = 200
     NB_FILTERS = 100
     FFN_UNITS = 256
-    NB_CLASSES = len(Y[0]) if type(Y[0]) == type([]) else 1
+    NB_CLASSES = len(y_train[0]) if isinstance(y_train[0], (list, np.ndarray)) and len(y_train[0]) > 1 else 1
 
     DROPOUT_RATE = 0.2
-
     BATCH_SIZE = 256
     NB_EPOCHS = 25
 
@@ -300,33 +283,79 @@ def create_run_copied_model(X, Y, vocab_size):
             FFN_units=FFN_UNITS,
             nb_classes=NB_CLASSES,
             dropout_rate=DROPOUT_RATE)
-    Dcnn = Dcnn.get_model(X)
-    Dcnn.summary()
+    print(Dcnn)
+
+    # Prepare data
+    x_train_t = torch.tensor(np.array(x_train), dtype=torch.long)
+    x_test_t = torch.tensor(np.array(x_test), dtype=torch.long)
     if NB_CLASSES == 1:
-        Dcnn.compile(loss="mean_squared_error",
-                    optimizer="adam",
-                    metrics=["accuracy"])
-    elif NB_CLASSES == 2:
-        Dcnn.compile(loss="binary_crossentropy",
-                    optimizer="adam",
-                    metrics=["accuracy"])
+        y_train_t = torch.tensor(np.array(y_train, dtype=np.float32)).unsqueeze(1)
+        y_test_t = torch.tensor(np.array(y_test, dtype=np.float32)).unsqueeze(1)
     else:
-        Dcnn.compile(loss="categorical_crossentropy",
-                    optimizer="adam",
-                    metrics=["categorical_accuracy"])
-    #print(Dcnn.call(x_test[0:5], False))
-    #Dcnn.summary()
+        y_train_t = torch.tensor(np.array(y_train, dtype=np.float32))
+        y_test_t = torch.tensor(np.array(y_test, dtype=np.float32))
+
+    train_dataset = TensorDataset(x_train_t, y_train_t)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    test_dataset = TensorDataset(x_test_t, y_test_t)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
+
+    if NB_CLASSES <= 2:
+        criterion = nn.BCELoss()
+    else:
+        criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(Dcnn.parameters())
+
+    # Train
     print("to train")
-    Dcnn.fit(x_train,
-         y_train,
-         batch_size=BATCH_SIZE,
-         epochs=NB_EPOCHS)
+    Dcnn.train()
+    for epoch in range(NB_EPOCHS):
+        total_loss = 0
+        correct = 0
+        total = 0
+        for batch_x, batch_y in train_loader:
+            optimizer.zero_grad()
+            outputs = Dcnn(batch_x)
+            loss = criterion(outputs, batch_y)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item() * len(batch_x)
+            if NB_CLASSES <= 2:
+                preds = (outputs >= 0.5).float()
+                correct += (preds == batch_y).sum().item()
+            else:
+                _, preds = torch.max(outputs, 1)
+                _, targets = torch.max(batch_y, 1)
+                correct += (preds == targets).sum().item()
+            total += len(batch_y)
+        if (epoch + 1) % 5 == 0:
+            print(f"Epoch {epoch+1}/{NB_EPOCHS} - loss: {total_loss/len(x_train_t):.4f} - acc: {correct/total:.4f}")
+
+    # Evaluate
     print("to eval")
-    results = Dcnn.evaluate(x_test, y_test, batch_size=BATCH_SIZE)
-    print(results)
+    Dcnn.eval()
+    correct = 0
+    total = 0
+    total_loss = 0
+    with torch.no_grad():
+        for batch_x, batch_y in test_loader:
+            outputs = Dcnn(batch_x)
+            loss = criterion(outputs, batch_y)
+            total_loss += loss.item() * len(batch_x)
+            if NB_CLASSES <= 2:
+                preds = (outputs >= 0.5).float()
+                correct += (preds == batch_y).sum().item()
+            else:
+                _, preds = torch.max(outputs, 1)
+                _, targets = torch.max(batch_y, 1)
+                correct += (preds == targets).sum().item()
+            total += len(batch_y)
+    print(f"Test loss: {total_loss/len(x_test_t):.4f} - Test acc: {correct/total:.4f}")
     return Dcnn
 
 def generate_result(text_to_evaluate, model, length_to_padding, dictionary):
+    import numpy as np
+    import torch
     import spacy
     nlp = spacy.load("en_core_web_sm", disable=["tok2vec", 
                                                  "morphologizer", 
@@ -347,15 +376,19 @@ def generate_result(text_to_evaluate, model, length_to_padding, dictionary):
     X = padding([doc], length_to_padding)
     print("X padded: ", X)
     print("lenX0: ", len(X[0]))
-    result = model.predict(X)
+    model.eval()
+    with torch.no_grad():
+        X_t = torch.tensor(X, dtype=torch.long)
+        result = model(X_t).numpy()
         
     return result
 
 def save_data(model, length_to_padding, dictionary):
     import os
+    import torch
     if not os.path.exists("data/created_models/text_sentiment/"):
         os.mkdir("data/created_models/text_sentiment/")
-    model.save("data/created_models/text_sentiment/neural_net.keras")
+    torch.save(model.state_dict(), "data/created_models/text_sentiment/neural_net.pt")
     from gensim.corpora import Dictionary
     if type(dictionary) == Dictionary:
         dictionary.save("data/created_models/text_sentiment/dictionary")
@@ -366,9 +399,27 @@ def save_data(model, length_to_padding, dictionary):
         fobj.flush()
 
 def load_data(folder="data/created_models/text_sentiment/", using_gensim_dictionary=True):
-    from tensorflow import keras
+    import torch
     from gensim.corpora import Dictionary
-    model = keras.saving.load_model(os.path.join(folder, "neural_net.keras"))
+    # Need to know model params to reconstruct; load with weights_only=False for flexibility
+    state_dict = torch.load(os.path.join(folder, "neural_net.pt"), weights_only=True)
+    # Infer vocab_size from embedding layer
+    vocab_size = state_dict["embedding.weight"].shape[0]
+    emb_dim = state_dict["embedding.weight"].shape[1]
+    nb_filters = state_dict["bigram.weight"].shape[0]
+    ffn_units = state_dict["dense_1.weight"].shape[0]
+    nb_classes_raw = state_dict["last_dense.weight"].shape[0]
+    if nb_classes_raw == 1:
+        nb_classes = 2  # binary
+    else:
+        nb_classes = nb_classes_raw
+    model = DCNN(vocab_size=vocab_size,
+                 emb_dim=emb_dim,
+                 nb_filters=nb_filters,
+                 FFN_units=ffn_units,
+                 nb_classes=nb_classes)
+    model.load_state_dict(state_dict)
+    model.eval()
     if using_gensim_dictionary:
         dictionary = Dictionary.load(os.path.join(folder, "dictionary"))
     else:

@@ -1,2 +1,1 @@
-venv\Scripts\activate.bat
-python call_test.py
+uv run python call_test.py

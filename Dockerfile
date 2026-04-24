@@ -4,20 +4,19 @@ FROM ubuntu:22.04
 WORKDIR /usr/src/app
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt install pip graphviz unzip python3-tk -y
+RUN apt install graphviz unzip python3-tk -y
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 COPY requirements.txt ./
-RUN pip install --upgrade --no-cache-dir -r requirements.txt
+RUN uv venv && uv pip install --no-cache -r requirements.txt
 
-
-# ARG TF_ENABLE_ONEDNN_OPTS=0
-
-# RUN python3 -m spacy download en_core_news_lg
-RUN python3 -m spacy download es_core_news_lg
-RUN python3 -m spacy download es_core_news_sm
-RUN python3 -m spacy download en_core_web_sm
+RUN uv run python3 -m spacy download es_core_news_lg
+RUN uv run python3 -m spacy download es_core_news_sm
+RUN uv run python3 -m spacy download en_core_web_sm
 
 COPY . .
 
 
-CMD [ "python3", "./call_test.py" ]
+CMD [ "uv", "run", "python3", "./call_test.py" ]

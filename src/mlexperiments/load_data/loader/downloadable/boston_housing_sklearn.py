@@ -1,6 +1,8 @@
-from keras.datasets import boston_housing
-from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import numpy as np
+
+from sklearn.datasets import fetch_openml
+
+from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 
 __all__ = ["LoadBostonHousing"]
 
@@ -22,7 +24,13 @@ class LoadBostonHousing(ILoadSupervised):
                         "B        1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town",
                         "LSTAT    % lower status of the population",
                         "MEDV     Median value of owner-occupied homes in $1000's"]
+        self._data = None
     
+    def _ensure_loaded(self):
+        if self._data is None:
+            boston = fetch_openml(name="boston", version=1, as_frame=False)
+            self._data = boston
+
     def get_classes(self):
         return None
     
@@ -31,12 +39,16 @@ class LoadBostonHousing(ILoadSupervised):
 
     @staticmethod
     def get_splited(test_split=0.3, seed=42):
-        (x_train, y_train), (x_test, y_test) = boston_housing.load_data(test_split=test_split, seed=seed)
+        boston = fetch_openml(name="boston", version=1, as_frame=False)
+        from sklearn.model_selection import train_test_split
+        x_train, x_test, y_train, y_test = train_test_split(
+            boston.data, boston.target, test_size=test_split, random_state=seed
+        )
         return (x_train, y_train), (x_test, y_test)
     
     def get_X_Y(self):
-        (x_train, y_train), (_, _) = boston_housing.load_data(test_split=0)
-        return x_train, y_train
+        self._ensure_loaded()
+        return self._data.data, self._data.target
     
     def get_X_Y_yielded(self):
         xs, ys = self.get_X_Y()

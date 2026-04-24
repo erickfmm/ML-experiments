@@ -30,20 +30,20 @@ dependencies = [
   "pandas",
   "seaborn",
   "scipy",
-  
-  "tensorflow",
-  "keras",
-  "tensorflow-datasets==4.9.2",
-  
+
+  "torch",
+  "torchvision",
+  "tokenizers",
+
   "nltk",
   "gensim",
   "spacy",
   "wordcloud",
   "pyldavis",
   "beautifulsoup4",
-  
+
   "opencv-python",
-  
+
   "tqdm",
   "pyedflib",
   "pywavelets",
@@ -57,7 +57,7 @@ dependencies = [
   "pypng",
   "pydot",
   "FuzzyTM",
-  
+
   "opendatasets"
 
 ]

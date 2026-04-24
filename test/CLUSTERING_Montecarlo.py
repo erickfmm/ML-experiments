@@ -11,9 +11,9 @@ from mlexperiments.supervised.perceptron import Perceptron
 from mlexperiments.load_data.loader.basic.andtable import LoadAndTable
 from mlexperiments.load_data.loader.basic.xortable import LoadXorTable
 
-from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
+from mlexperiments.load_data.loader.downloadable.mnist_torch import LoadMnist
 from mlexperiments.load_data.loader.downloadable.iris_sklearn import LoadIris
-from mlexperiments.load_data.loader.downloadable.cifar10_keras import LoadCifar10
+from mlexperiments.load_data.loader.downloadable.cifar10_torch import LoadCifar10
 
 from mlexperiments.unsupervised.clustering.kmeans import KMeans
 from mlexperiments.unsupervised.clustering.utils.monte_carlo import montecarlo_clustering

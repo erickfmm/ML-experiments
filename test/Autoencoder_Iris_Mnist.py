@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from sklearn.model_selection import train_test_split
 
-from mlexperiments.unsupervised.autoencoder_tf import MLP_reconstruct_data
+from mlexperiments.unsupervised.autoencoder_pt import MLP_reconstruct_data
 
 #from mlexperiments.load_data.loader.downloadable.iris_sklearn import LoadIris
-from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
+from mlexperiments.load_data.loader.downloadable.mnist_torch import LoadMnist
 
 
 print("all imported")

@@ -5,12 +5,12 @@ sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
 print("testing imports")
-from mlexperiments.load_data.loader.downloadable.boston_housing_keras import LoadBostonHousing
-from mlexperiments.load_data.loader.downloadable.cifar100_keras import LoadCifar100
-from mlexperiments.load_data.loader.downloadable.cifar10_keras import LoadCifar10
-from mlexperiments.load_data.loader.downloadable.fashion_mnist_keras import LoadFashionMnist
+from mlexperiments.load_data.loader.downloadable.boston_housing_sklearn import LoadBostonHousing
+from mlexperiments.load_data.loader.downloadable.cifar100_torch import LoadCifar100
+from mlexperiments.load_data.loader.downloadable.cifar10_torch import LoadCifar10
+from mlexperiments.load_data.loader.downloadable.fashion_mnist_torch import LoadFashionMnist
 from mlexperiments.load_data.loader.downloadable.iris_sklearn import LoadIris
-from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
+from mlexperiments.load_data.loader.downloadable.mnist_torch import LoadMnist
 
 
 from mlexperiments.load_data.loader.audio.spoken_digits import LoadSpokenDigits

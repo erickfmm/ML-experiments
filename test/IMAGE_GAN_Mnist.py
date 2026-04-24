@@ -12,59 +12,59 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm  # progress bar
 
-from keras.layers import Input
-from keras.models import Model, Sequential
-from keras.layers import Dense, Dropout
-from keras.layers import LeakyReLU
-from keras.datasets import mnist
-from keras.optimizers.legacy import Adam
-from keras import initializers
-from tensorflow import Variable
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
 
-def get_optimizer():
-    adam = Adam(learning_rate=0.01)
-    return adam
+class Generator(nn.Module):
+    def __init__(self, random_dim, dense_neurons=None):
+        super().__init__()
+        if dense_neurons is None:
+            dense_neurons = [256, 512, 1024, 784]
+        self.model = nn.Sequential(
+            nn.Linear(random_dim, dense_neurons[0]),
+            nn.LeakyReLU(0.2),
+            nn.Linear(dense_neurons[0], dense_neurons[1]),
+            nn.LeakyReLU(0.2),
+            nn.Linear(dense_neurons[1], dense_neurons[2]),
+            nn.LeakyReLU(0.2),
+            nn.Linear(dense_neurons[2], dense_neurons[3]),
+            nn.Tanh(),
+        )
+
+    def forward(self, x):
+        return self.model(x)
 
 
-def get_generator(optimizer, random_dim, dense_neurons=[256, 512, 1024, 784]):
-    generator = Sequential()
-    generator.add(Dense(dense_neurons[0], input_dim=random_dim, kernel_initializer=initializers.RandomNormal(stddev=0.02)))
-    generator.add(LeakyReLU(0.2))
+class Discriminator(nn.Module):
+    def __init__(self, input_dim=784, dense_neurons=None):
+        super().__init__()
+        if dense_neurons is None:
+            dense_neurons = [1024, 512, 256]
+        self.model = nn.Sequential(
+            nn.Linear(input_dim, dense_neurons[0]),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(dense_neurons[0], dense_neurons[1]),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(dense_neurons[1], dense_neurons[2]),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(dense_neurons[2], 1),
+            nn.Sigmoid(),
+        )
 
-    generator.add(Dense(dense_neurons[1]))
-    generator.add(LeakyReLU(0.2))
-
-    generator.add(Dense(dense_neurons[2]))
-    generator.add(LeakyReLU(0.2))
-
-    generator.add(Dense(dense_neurons[3], activation='tanh'))
-    generator.compile(loss='binary_crossentropy', optimizer=optimizer)
-    return generator
-
-
-def get_discriminator(optimizer, input_dim=784, dense_neurons=[1024, 512, 256]):
-    discriminator = Sequential()
-    discriminator.add(Dense(dense_neurons[0], input_dim=784, kernel_initializer=initializers.RandomNormal(stddev=0.02)))
-    discriminator.add(LeakyReLU(0.2))
-    discriminator.add(Dropout(0.3))
-
-    discriminator.add(Dense(dense_neurons[1]))
-    discriminator.add(LeakyReLU(0.2))
-    discriminator.add(Dropout(0.3))
-
-    discriminator.add(Dense(dense_neurons[2]))
-    discriminator.add(LeakyReLU(0.2))
-    discriminator.add(Dropout(0.3))
-
-    discriminator.add(Dense(1, activation='sigmoid'))
-    discriminator.compile(loss='binary_crossentropy', optimizer=optimizer)
-    return discriminator
+    def forward(self, x):
+        return self.model(x)
 
 
 def plot_generated_images(epoch, generator, random_dim, random_gen, examples=100, dim=(10, 10), figsize=(10, 10), image_size=(28, 28)):
-    noise = random_gen.normal(0, 1, size=[examples, random_dim])
-    generated_images = generator.predict(noise)
+    generator.eval()
+    noise = torch.tensor(random_gen.normal(0, 1, size=[examples, random_dim]).astype(np.float32))
+    with torch.no_grad():
+        generated_images = generator(noise).numpy()
     generated_images = generated_images.reshape(examples, image_size[0], image_size[1])
 
     plt.figure(figsize=figsize)
@@ -76,72 +76,67 @@ def plot_generated_images(epoch, generator, random_dim, random_gen, examples=100
     plt.savefig('gan_generated_image_epoch_%d.png' % epoch)
 
 
-def get_gan_network(discriminator, random_dim, generator, optimizer):
-    # We initially set trainable to False since we only want to train either the
-    # generator or discriminator at a time
-    discriminator.trainable = False
-    # gan input (noise) will be 100-dimensional vectors
-    gan_input = Input(shape=(random_dim,))
-    # the output of the generator (an image)
-    x = generator(gan_input)
-    # get the output of the discriminator (probability if the image is real or not)
-    gan_output = discriminator(x)
-    gan = Model(inputs=gan_input, outputs=gan_output)
-    gan.compile(loss='binary_crossentropy', optimizer=optimizer)
-    return gan
-
-
 def train(random_dim, random_gen, x_train, epochs=1, batch_size=128):
-    # Split the training data into batches of size 128
-    batch_count = len(x_train) / batch_size
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Build our GAN netowrk
-    adam = get_optimizer()
-    generator = get_generator(adam, random_dim)
-    discriminator = get_discriminator(adam)
-    gan = get_gan_network(discriminator, random_dim, generator, adam)
+    # Build our GAN network
+    generator = Generator(random_dim).to(device)
+    discriminator = Discriminator().to(device)
+
+    criterion = nn.BCELoss()
+    opt_g = optim.Adam(generator.parameters(), lr=0.0002)
+    opt_d = optim.Adam(discriminator.parameters(), lr=0.0002)
+
+    x_train_t = torch.tensor(x_train.astype(np.float32), device=device)
+    dataset = torch.utils.data.TensorDataset(x_train_t)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     for e in range(1, epochs+1):
         print('-'*15, 'Epoch %d' % e, '-'*15)
-        for _ in tqdm(range(int(batch_count))): #tqdm(range(int(batch_count))):
-            # Get a random set of input noise and images
-            noise = random_gen.normal(0, 1, size=[batch_size, random_dim])
-            image_batch = x_train[random_gen.randint(0, len(x_train), size=batch_size)]
+        for (image_batch,) in tqdm(loader):
+            current_batch_size = image_batch.size(0)
 
-            # Generate fake MNIST images
-            generated_images = generator.predict(noise)
-            X = np.concatenate([image_batch, generated_images])
-
-            # Labels for generated and real data
-            y_dis = np.zeros(2*batch_size)
-            # One-sided label smoothing
-            y_dis[:batch_size] = 0.9
+            # Generate fake images
+            noise = torch.randn(current_batch_size, random_dim, device=device)
+            with torch.no_grad():
+                generated_images = generator(noise)
+            X = torch.cat([image_batch, generated_images])
+            y_dis = torch.zeros(2 * current_batch_size, device=device)
+            y_dis[:current_batch_size] = 0.9  # One-sided label smoothing
 
             # Train discriminator
-            discriminator.trainable = True
-            discriminator.train_on_batch(X, y_dis)
+            discriminator.train()
+            opt_d.zero_grad()
+            d_output = discriminator(X).squeeze()
+            d_loss = criterion(d_output, y_dis)
+            d_loss.backward()
+            opt_d.step()
 
             # Train generator
-            noise = random_gen.normal(0, 1, size=[batch_size, random_dim])
-            y_gen = np.ones(batch_size)
-            discriminator.trainable = False
-            gan.train_on_batch(noise, y_gen)
-    return generator, discriminator, gan
+            noise = torch.randn(current_batch_size, random_dim, device=device)
+            y_gen = torch.ones(current_batch_size, device=device)
+
+            opt_g.zero_grad()
+            g_output = generator(noise)
+            d_fake = discriminator(g_output).squeeze()
+            g_loss = criterion(d_fake, y_gen)
+            g_loss.backward()
+            opt_g.step()
+
+    return generator, discriminator
 
 
-from mlexperiments.load_data.loader.downloadable.mnist_keras import LoadMnist
-from mlexperiments.utils.keras_persistence.all_inside import save, load
-import os
+from mlexperiments.load_data.loader.downloadable.mnist_torch import LoadMnist
 import shutil
 
 
 class GanMnist:
     def __init__(self, seed=None, random_dim=100):
-        # np.random.seed(seed)
-        # The dimension of our random noise vector.
         self.random_dim = random_dim
         self.random_gen = np.random.RandomState(seed)
         self.input_dim = 784
+        self.generator = None
+        self.discriminator = None
 
     def get_data(self):
         l = LoadMnist()
@@ -149,17 +144,22 @@ class GanMnist:
 
     def train(self, epochs=1, batch_size=128, to_save=False):
         x, y = self.get_data()
-        x = x.reshape(x.shape[0], 784)
-        self.generator, self.discriminator, self.gan = train(self.random_dim, self.random_gen, x, epochs, batch_size)
+        x = x.reshape(x.shape[0], 784).astype(np.float32)
+        # Normalize to [-1, 1] for Tanh
+        x = (x / 255.0) * 2 - 1
+        self.generator, self.discriminator = train(self.random_dim, self.random_gen, x, epochs, batch_size)
         if to_save:
             self.save()
-        return self.generator, self.discriminator, self.gan
+        return self.generator, self.discriminator
 
     def generate_image(self, noise=None):
+        device = next(self.generator.parameters()).device
         if noise is None:
-            noise = self.random_gen.normal(0, 1, size=[1, self.random_dim])
-        gen_img = self.generator.predict(noise)
-        gen_img = gen_img.reshape(28,28)
+            noise = torch.tensor(self.random_gen.normal(0, 1, size=[1, self.random_dim]).astype(np.float32)).to(device)
+        self.generator.eval()
+        with torch.no_grad():
+            gen_img = self.generator(noise)
+        gen_img = gen_img.cpu().numpy().reshape(28, 28)
         return gen_img
 
     def save(self):
@@ -173,9 +173,8 @@ class GanMnist:
             else:
                 shutil.rmtree(newfolder, ignore_errors=True)
                 os.mkdir(newfolder)
-            save(self.generator, os.path.join(newfolder, "generator.keras_model"))
-            save(self.discriminator, os.path.join(newfolder, "discriminator.keras_model"))
-            save(self.gan, os.path.join(newfolder, "gan.keras_model"))
+            torch.save(self.generator.state_dict(), os.path.join(newfolder, "generator.pt"))
+            torch.save(self.discriminator.state_dict(), os.path.join(newfolder, "discriminator.pt"))
         except Exception as e:
             print(f"error in saving: {e}")
 
@@ -184,13 +183,15 @@ class GanMnist:
         newfolder = os.path.join(base_folder, "gan_mnist_v1")
         try:
             if os.path.exists(newfolder):
-                gen_filename = os.path.join(newfolder, "generator.keras_model")
-                disc_filename = os.path.join(newfolder, "discriminator.keras_model")
-                gan_filename = os.path.join(newfolder, "gan.keras_model")
-                if os.path.exists(gen_filename) and os.path.exists(disc_filename) and os.path.exists(gan_filename):
-                    self.generator = load(gen_filename)
-                    self.discriminator = load(disc_filename)
-                    self.gan = load(gan_filename)
+                gen_filename = os.path.join(newfolder, "generator.pt")
+                disc_filename = os.path.join(newfolder, "discriminator.pt")
+                if os.path.exists(gen_filename) and os.path.exists(disc_filename):
+                    self.generator = Generator(self.random_dim)
+                    self.generator.load_state_dict(torch.load(gen_filename, weights_only=True))
+                    self.generator.eval()
+                    self.discriminator = Discriminator()
+                    self.discriminator.load_state_dict(torch.load(disc_filename, weights_only=True))
+                    self.discriminator.eval()
                 else:
                     print("files doesn't exists")
             else:
