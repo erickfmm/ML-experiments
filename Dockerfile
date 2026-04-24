@@ -18,5 +18,7 @@ RUN uv run python3 -m spacy download en_core_web_sm
 
 COPY . .
 
-
-CMD [ "uv", "run", "python3", "./call_test.py" ]
+# Default: run the web GUI server
+# Access at http://localhost:3004
+EXPOSE 3004
+CMD [ "uv", "run", "python3", "./run_web_gui.py", "--host", "0.0.0.0", "--port", "3004" ]

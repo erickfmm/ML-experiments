@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Psychoacoustic Plots - ML Experiments{% endblock %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+    .plots-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+    .chart-card {
+        background: #2b2b2b;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .chart-card h3 {
+        margin: 0 0 12px 0;
+        color: #e0e0e0;
+        text-align: center;
+    }
+    .chart-card canvas {
+        width: 100% !important;
+        max-height: 350px;
+    }
+    .controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 12px 20px;
+        background: #2b2b2b;
+        border-bottom: 1px solid #444;
+    }
+    .controls label {
+        color: #ccc;
+        font-size: 14px;
+    }
+    .controls input {
+        background: #1a1a1a;
+        border: 1px solid #555;
+        color: #e0e0e0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        width: 80px;
+    }
+    .controls button {
+        padding: 6px 16px;
+        background: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .controls button:hover { background: #218838; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="controls">
+    <label>Min freq: <input type="number" id="min-val" value="0"></label>
+    <label>Max freq: <input type="number" id="max-val" value="20000"></label>
+    <label>Step: <input type="number" id="step-val" value="10"></label>
+    <label>Max Sone: <input type="number" id="max-sone" value="625"></label>
+    <button onclick="loadPlots()">🔄 Load Plots</button>
+</div>
+
+<div class="plots-grid">
+    <div class="chart-card">
+        <h3>Bark Scale vs Frequency</h3>
+        <canvas id="bark-chart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>ERB vs Frequency</h3>
+        <canvas id="erb-chart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>MEL Scale vs Frequency</h3>
+        <canvas id="mel-chart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Sone vs Phons</h3>
+        <canvas id="sone-chart"></canvas>
+    </div>
+</div>
+
+<script src="/static/js/psychoacoustic.js"></script>
+{% endblock %}

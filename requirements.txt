@@ -41,3 +41,7 @@ pygit2
 pygments
 chlorophyll 
 tkterm
+
+# Web GUI
+flask
+pywebview

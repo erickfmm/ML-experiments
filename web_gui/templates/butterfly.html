@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Butterfly Segmentation - ML Experiments{% endblock %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+    .butterfly-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+    .status-bar {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        background: #2b2b2b;
+        padding: 12px 16px;
+        border-radius: 6px;
+        border: 1px solid #444;
+    }
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #ccc;
+        font-size: 14px;
+    }
+    .status-indicator .dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .dot.green { background: #28a745; }
+    .dot.red { background: #dc3545; }
+    .dot.yellow { background: #ffc107; }
+    .actions-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .btn {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: background 0.15s;
+    }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-primary:hover { background: #0069d9; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-success:hover { background: #218838; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #c82333; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    .image-card {
+        background: #2b2b2b;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+    }
+    .image-card h4 {
+        margin: 0 0 8px 0;
+        color: #ccc;
+    }
+    .image-card img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 4px;
+    }
+    .image-card .placeholder {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-size: 14px;
+        border: 2px dashed #555;
+        border-radius: 4px;
+    }
+    .log-output {
+        background: #1a1a1a;
+        color: #0f0;
+        font-family: 'Consolas', monospace;
+        font-size: 13px;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #444;
+        max-height: 250px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    .upload-area {
+        border: 2px dashed #555;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        color: #aaa;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #007bff; }
+    .upload-area.dragover { border-color: #28a745; background: rgba(40,167,69,0.1); }
+    input[type="file"] { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="butterfly-layout">
+    <!-- Status -->
+    <div class="status-bar">
+        <div class="status-indicator">
+            <span class="dot" id="model-dot"></span>
+            <span id="model-status">Model: Checking...</span>
+        </div>
+        <div class="status-indicator">
+            <span class="dot" id="data-dot"></span>
+            <span id="data-status">Data: Checking...</span>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-bar">
+        <button class="btn btn-success" id="btn-save-pickle" onclick="savePickle()">📦 Save Data as Pickle</button>
+        <button class="btn btn-primary" id="btn-train-seg" onclick="trainSegmentation()">🧠 Train Segmentation</button>
+        <button class="btn btn-primary" id="btn-train-cls" onclick="trainClassifier()">🏷️ Train Classifier</button>
+    </div>
+
+    <!-- Log Output -->
+    <div class="log-output" id="log-output">Ready.</div>
+
+    <!-- Image Upload and Prediction -->
+    <h3 style="color:#e0e0e0; margin:0;">🔍 Predict Segmentation</h3>
+    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+        <p>📷 Click or drag an image here to predict segmentation</p>
+        <input type="file" id="file-input" accept="image/*" onchange="predictImage(event)">
+    </div>
+
+    <!-- Prediction Results -->
+    <div class="image-grid" id="prediction-results" style="display:none;">
+        <div class="image-card">
+            <h4>Original Image</h4>
+            <img id="img-original" src="" alt="Original">
+        </div>
+        <div class="image-card">
+            <h4>Predicted Segmentation</h4>
+            <img id="img-predicted" src="" alt="Predicted">
+        </div>
+        <div class="image-card">
+            <h4>Cropped Result</h4>
+            <img id="img-cropped" src="" alt="Cropped">
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/butterfly.js"></script>
+{% endblock %}
