@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import warnings
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 import nltk
@@ -7,25 +8,72 @@ import spacy
 import matplotlib.pyplot as plt #optional
 
 class LemmaStemmaText:
+    _LANGUAGE_CONFIG = {
+        "es": {
+            "default_spacy_model": "es_core_news_sm",
+            "stemmer_language": "spanish",
+            "stopwords_language": "spanish",
+        },
+        "en": {
+            "default_spacy_model": "en_core_web_sm",
+            "stemmer_language": "english",
+            "stopwords_language": "english",
+        },
+    }
+
     def __init__(self, lang="es",
                  blacklist_words = ["ser"],
                  not_touch_words = ["sige", "pme", "deprov", "sigpa", "sac", "simce", "faep", "sep", "superintendencia"],
                  allow_postags = set(['NOUN', 'VERB', 'ADJ', 'ADV', 'PROPN']),
-                 excluded_terms_in_ner = None):
-        if lang == "es":
-            self.nlp = spacy.load('es_core_news_lg')
-            self.stemmer = SnowballStemmer('spanish')
-            #nltk.download('stopwords')
-            self.stw = stopwords.words('spanish')
-        if lang == "en":
-            self.nlp = spacy.load('en_core_news_lg')
-            self.stemmer = SnowballStemmer('english')
-            #nltk.download('stopwords')
-            self.stw = stopwords.words('english')
-        self.blacklist = blacklist_words
-        self.not_touch = not_touch_words
-        self.allowed_postags = allow_postags
-        self.excluded_terms = excluded_terms_in_ner
+                 excluded_terms_in_ner = None,
+                 spacy_model: str | None = None):
+        if lang not in self._LANGUAGE_CONFIG:
+            raise ValueError(f"Unsupported language: {lang}")
+
+        cfg = self._LANGUAGE_CONFIG[lang]
+        if spacy_model is None:
+            self.model_name = cfg["default_spacy_model"]
+        else:
+            self.model_name = spacy_model.strip()
+            if not self.model_name:
+                raise ValueError("spaCy model name cannot be empty.")
+        self.nlp = self._load_spacy_pipeline(self.model_name)
+        self.stemmer = SnowballStemmer(cfg["stemmer_language"])
+        self.stw = set(self._load_stopwords(cfg["stopwords_language"]))
+        self.blacklist = set(blacklist_words) if blacklist_words is not None else None
+        self.not_touch = set(not_touch_words) if not_touch_words is not None else set()
+        self.allowed_postags = allow_postags if self._supports_pos_tags() else None
+        self.excluded_terms = set(excluded_terms_in_ner) if excluded_terms_in_ner is not None else None
+        self.has_lemmatizer = self.nlp.has_pipe("lemmatizer")
+        self.has_ner = self.nlp.has_pipe("ner")
+
+    @staticmethod
+    def _load_stopwords(language: str):
+        try:
+            return stopwords.words(language)
+        except LookupError:
+            try:
+                nltk.download("stopwords", quiet=True)
+                return stopwords.words(language)
+            except LookupError:
+                warnings.warn(
+                    f"NLTK stopwords for '{language}' are unavailable; continuing without stopword filtering.",
+                    RuntimeWarning,
+                )
+                return []
+
+    @staticmethod
+    def _load_spacy_pipeline(model_name: str):
+        try:
+            return spacy.load(model_name)
+        except OSError as exc:
+            raise RuntimeError(
+                f"spaCy model '{model_name}' is not installed or cannot be loaded. "
+                f"Install that exact model and rerun the pipeline. Original error: {exc}"
+            ) from exc
+
+    def _supports_pos_tags(self) -> bool:
+        return any(self.nlp.has_pipe(pipe_name) for pipe_name in ("tagger", "morphologizer", "parser"))
 
     def string_to_doc(self, docstring):
         pass
@@ -35,19 +83,23 @@ class LemmaStemmaText:
         lemmas = []
         named_entities = []
         for tok in doc_nlp:
-            if (self.stw is None or tok.text not in self.stw) and (self.blacklist is None or tok.text not in self.blacklist) and (self.allowed_postags is None or tok.pos_ in self.allowed_postags):
-                if self.not_touch is not None and tok.text.lower() in self.not_touch:
+            token_text = tok.text.lower()
+            if tok.is_space or tok.is_punct:
+                continue
+            if (self.stw is None or token_text not in self.stw) and (self.blacklist is None or token_text not in self.blacklist) and (self.allowed_postags is None or tok.pos_ in self.allowed_postags):
+                if token_text in self.not_touch:
                     lemmas.append(tok.text.upper())
                 else:
-                    lemmas.append(tok.lemma_.lower())
-                if to_get_ner and tok.ent_type_ is not None and tok.ent_type_ != "" and tok.ent_type_ != "PER" and (self.excluded_terms is None or tok.text.lower() not in self.excluded_terms):
-                    named_entities.append(tok.text.lower())
+                    lemma = tok.lemma_.lower() if self.has_lemmatizer and tok.lemma_ else token_text
+                    lemmas.append(lemma)
+                if to_get_ner and self.has_ner and tok.ent_type_ is not None and tok.ent_type_ != "" and tok.ent_type_ != "PER" and (self.excluded_terms is None or token_text not in self.excluded_terms):
+                    named_entities.append(token_text)
         return lemmas, named_entities
     
     def stem_doc(self, doc: List[str]):
         doc_final = []
         for word in doc:
-            if word not in self.stw and word not in self.blacklist:
+            if word not in self.stw and (self.blacklist is None or word not in self.blacklist):
                 if word in self.not_touch:
                     doc_final.append(word)
                     continue

@@ -747,10 +747,14 @@ def api_tfidf_bigtext():
 def api_topic_modeling_run():
     """Run TEXT_TopicModeling_Bigtexts.py with env-var parameters."""
     data = request.get_json(force=True)
+    spacy_model = str(data.get("spacy_model", "es_core_news_sm")).strip()
+    if not spacy_model:
+        return jsonify({"error": "spaCy model is required."}), 400
     run_id, err = _run_test_script("TEXT_TopicModeling_Bigtexts.py", {
         "ML_DATASET": data.get("dataset", "wikihow"),
         "ML_N_TOPICS": str(data.get("n_topics", 20)),
         "ML_MAX_THREADS": str(data.get("maxthreads", 16)),
+        "ML_SPACY_MODEL": spacy_model,
     })
     if err:
         return jsonify({"error": err}), 400
@@ -795,7 +799,13 @@ def api_gan_train():
 def api_gan_status():
     """Check if a trained GAN model file exists."""
     model_dir = os.path.join(BASE_DIR, "data", "created_models")
-    for name in ("gan_generator.pth", "gan_generator.pt", "gan_discriminator.pth"):
+    for name in (
+        "gan_generator.pth",
+        "gan_generator.pt",
+        "gan_discriminator.pth",
+        os.path.join("gan_mnist_v1", "generator.pt"),
+        os.path.join("gan_mnist_v1", "discriminator.pt"),
+    ):
         p = os.path.join(model_dir, name)
         if os.path.isfile(p):
             return jsonify({"exists": True})
@@ -811,7 +821,11 @@ def api_gan_generate():
     # Check if model exists
     model_dir = os.path.join(BASE_DIR, "data", "created_models")
     model_path = None
-    for name in ("gan_generator.pth", "gan_generator.pt"):
+    for name in (
+        "gan_generator.pth",
+        "gan_generator.pt",
+        os.path.join("gan_mnist_v1", "generator.pt"),
+    ):
         p = os.path.join(model_dir, name)
         if os.path.isfile(p):
             model_path = p
@@ -842,7 +856,7 @@ if isinstance(checkpoint, dict) and 'state_dict' in checkpoint:
     random_dim = checkpoint.get('random_dim', 100)
 elif isinstance(checkpoint, dict):
     state_dict = checkpoint
-    random_dim = 100
+    random_dim = state_dict.get('model.0.weight').shape[1] if 'model.0.weight' in state_dict else 100
 else:
     state_dict = None
     random_dim = 100

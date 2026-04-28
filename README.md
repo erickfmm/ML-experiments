@@ -61,6 +61,9 @@ source .venv/bin/activate        # Linux/macOS
 # 2. Install dependencies
 pip install -r requirements.txt
 
+# 2b. Install the exact spaCy model you plan to use for Spanish topic modeling
+python -m spacy download es_core_news_lg
+
 # 3a. Launch web server (default: http://0.0.0.0:3004)
 python run_web_gui.py
 
@@ -95,6 +98,8 @@ docker_run_gui.bat        # Windows
 ```
 
 The Docker image uses `uv` for fast dependency installation and automatically starts the web GUI on port `3004`.
+
+The topic-modeling pipeline loads the exact spaCy model you configure. If that model is not installed, the run fails with a clear error instead of silently switching to a different pipeline.
 
 ### Option 3 — CLI (simple file picker)
 

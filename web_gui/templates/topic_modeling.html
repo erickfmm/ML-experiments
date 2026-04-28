@@ -77,6 +77,10 @@
                         <label>Threads</label>
                         <input type="number" id="topic-threads" value="16" min="1" max="64">
                     </div>
+                    <div class="form-group">
+                        <label>spaCy Model</label>
+                        <input type="text" id="topic-spacy-model" value="es_core_news_sm" placeholder="es_core_news_sm">
+                    </div>
                 </div>
                 <div style="margin-top: 14px; display: flex; gap: 10px;">
                     <button class="btn btn-run" id="topic-run-btn" onclick="runTopicModeling()">▶ Run Topic Modeling</button>
@@ -183,11 +187,12 @@ async function runTopicModeling() {
         dataset: document.getElementById('topic-dataset').value,
         n_topics: parseInt(document.getElementById('topic-n-topics').value),
         maxthreads: parseInt(document.getElementById('topic-threads').value),
+        spacy_model: document.getElementById('topic-spacy-model').value.trim(),
     };
     const res = await fetch("/api/topic_modeling/run", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(params) });
     const data = await res.json();
     if (data.error) { appendOutput('topic-output', "Error: " + data.error + "\n"); setStatus('topic','error'); return; }
-    appendOutput('topic-output', `--- Topic Modeling (LDA, ${params.n_topics} topics, ${params.dataset}) ---\n`);
+    appendOutput('topic-output', `--- Topic Modeling (LDA, ${params.n_topics} topics, ${params.dataset}, model=${params.spacy_model}) ---\n`);
     runs[data.run_id] = setInterval(() => pollOutput(data.run_id, 'topic-output', 'topic'), 400);
     runPrefixMap[data.run_id] = 'topic';
 }

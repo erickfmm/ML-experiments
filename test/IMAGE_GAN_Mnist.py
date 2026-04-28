@@ -17,6 +17,24 @@ import torch.nn as nn
 import torch.optim as optim
 
 
+def _get_env_int(name, default):
+    value = os.getenv(name)
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Invalid integer for {name}: {value!r}. Using default {default}.")
+        return default
+
+
+def _get_env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None or value == "":
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Generator(nn.Module):
     def __init__(self, random_dim, dense_neurons=None):
         super().__init__()
@@ -165,16 +183,30 @@ class GanMnist:
     def save(self):
         try:
             base_folder = "data/created_models"
-            if not os.path.exists(base_folder):
-                os.mkdir(base_folder)
+            os.makedirs(base_folder, exist_ok=True)
+
             newfolder = os.path.join(base_folder, "gan_mnist_v1")
             if not os.path.exists(newfolder):
                 os.mkdir(newfolder)
             else:
                 shutil.rmtree(newfolder, ignore_errors=True)
                 os.mkdir(newfolder)
+
+            generator_checkpoint = {
+                "state_dict": self.generator.state_dict(),
+                "random_dim": self.random_dim,
+            }
+            discriminator_checkpoint = {
+                "state_dict": self.discriminator.state_dict(),
+            }
+
+            # Legacy paths kept for backwards compatibility.
             torch.save(self.generator.state_dict(), os.path.join(newfolder, "generator.pt"))
             torch.save(self.discriminator.state_dict(), os.path.join(newfolder, "discriminator.pt"))
+
+            # Flat files used by the web GUI endpoints.
+            torch.save(generator_checkpoint, os.path.join(base_folder, "gan_generator.pth"))
+            torch.save(discriminator_checkpoint, os.path.join(base_folder, "gan_discriminator.pth"))
         except Exception as e:
             print(f"error in saving: {e}")
 
@@ -182,20 +214,42 @@ class GanMnist:
         base_folder = "data/created_models"
         newfolder = os.path.join(base_folder, "gan_mnist_v1")
         try:
-            if os.path.exists(newfolder):
-                gen_filename = os.path.join(newfolder, "generator.pt")
-                disc_filename = os.path.join(newfolder, "discriminator.pt")
-                if os.path.exists(gen_filename) and os.path.exists(disc_filename):
-                    self.generator = Generator(self.random_dim)
-                    self.generator.load_state_dict(torch.load(gen_filename, weights_only=True))
-                    self.generator.eval()
-                    self.discriminator = Discriminator()
-                    self.discriminator.load_state_dict(torch.load(disc_filename, weights_only=True))
-                    self.discriminator.eval()
-                else:
-                    print("files doesn't exists")
+            gen_candidates = [
+                os.path.join(base_folder, "gan_generator.pth"),
+                os.path.join(base_folder, "gan_generator.pt"),
+                os.path.join(newfolder, "generator.pt"),
+            ]
+            disc_candidates = [
+                os.path.join(base_folder, "gan_discriminator.pth"),
+                os.path.join(base_folder, "gan_discriminator.pt"),
+                os.path.join(newfolder, "discriminator.pt"),
+            ]
+
+            gen_filename = next((path for path in gen_candidates if os.path.exists(path)), None)
+            disc_filename = next((path for path in disc_candidates if os.path.exists(path)), None)
+
+            if not gen_filename or not disc_filename:
+                print("GAN model files don't exist")
+                return
+
+            gen_checkpoint = torch.load(gen_filename, map_location="cpu", weights_only=False)
+            if isinstance(gen_checkpoint, dict) and "state_dict" in gen_checkpoint:
+                gen_state_dict = gen_checkpoint["state_dict"]
+                random_dim = int(gen_checkpoint.get("random_dim", self.random_dim))
             else:
-                print("folder doesn't exists")
+                gen_state_dict = gen_checkpoint
+                random_dim = gen_state_dict["model.0.weight"].shape[1]
+
+            disc_checkpoint = torch.load(disc_filename, map_location="cpu", weights_only=False)
+            disc_state_dict = disc_checkpoint["state_dict"] if isinstance(disc_checkpoint, dict) and "state_dict" in disc_checkpoint else disc_checkpoint
+
+            self.random_dim = random_dim
+            self.generator = Generator(self.random_dim)
+            self.generator.load_state_dict(gen_state_dict)
+            self.generator.eval()
+            self.discriminator = Discriminator()
+            self.discriminator.load_state_dict(disc_state_dict)
+            self.discriminator.eval()
         except Exception as e:
             print("unknown error in loading ", e)
 
@@ -218,8 +272,22 @@ def plot_figures(figures, nrows = 1, ncols=1):
         axeslist.ravel()[ind].set_axis_off()
     plt.tight_layout() # optional
 if __name__ == "__main__":
-    g = GanMnist(3335, 10)
-    g.train(100, 1024)
+    seed = _get_env_int("ML_SEED", 3335)
+    random_dim = _get_env_int("ML_RANDOM_DIM", 100)
+    epochs = _get_env_int("ML_EPOCHS", 100)
+    batch_size = _get_env_int("ML_BATCH_SIZE", 128)
+    running_from_web = any(
+        key in os.environ for key in ("ML_SEED", "ML_RANDOM_DIM", "ML_EPOCHS", "ML_BATCH_SIZE")
+    )
+    show_plot = _get_env_bool("ML_SHOW_PLOT", default=(not running_from_web and bool(os.getenv("DISPLAY"))))
+
+    print(
+        f"Starting GAN training with seed={seed}, random_dim={random_dim}, "
+        f"epochs={epochs}, batch_size={batch_size}"
+    )
+
+    g = GanMnist(seed, random_dim)
+    g.train(epochs, batch_size)
     g.save()
     #g.load()
     plot_figures({
@@ -254,4 +322,7 @@ if __name__ == "__main__":
         29: g.generate_image(),
         30: g.generate_image()
     },5,6)
-    plt.show()
+    if show_plot:
+        plt.show()
+    else:
+        plt.close('all')
