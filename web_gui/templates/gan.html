@@ -78,6 +78,7 @@
             </div>
             <div style="margin-top: 14px; display: flex; gap: 10px;">
                 <button class="btn btn-run" id="run-btn" onclick="startTraining()">▶ Train GAN</button>
+                <button class="btn btn-stop" id="stop-btn" onclick="stopRun()">⏹ Stop</button>
                 <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput()">🗑️ Clear</button>
             </div>
         </div>
@@ -112,6 +113,8 @@ function setStatus(s) {
     document.getElementById("status-dot").className = "status-dot " + s;
     document.getElementById("status-text").textContent = {idle:"Idle",running:"Running…",done:"Done",error:"Error"}[s]||s;
     document.getElementById("run-btn").disabled = s === "running";
+    const stopBtn = document.getElementById("stop-btn");
+    if (stopBtn) stopBtn.classList.toggle("visible", s === "running");
 }
 function appendOutput(t) { const el = document.getElementById("output"); el.textContent += t; el.scrollTop = el.scrollHeight; }
 function clearOutput() { document.getElementById("output").textContent = ""; }
@@ -127,6 +130,15 @@ function clearOutput() { document.getElementById("output").textContent = ""; }
         else { dot.className = "dot missing"; label.textContent = "No trained model found — train first"; }
     } catch(e) { document.getElementById("model-label").textContent = "Status unavailable"; }
 })();
+
+async function stopRun() {
+    if (!currentRunId) return;
+    await fetch(`/api/kill/${currentRunId}`, { method: "POST" });
+    clearInterval(pollTimer);
+    appendOutput(`\n--- Stopped by user ---\n`);
+    currentRunId = null;
+    setStatus("idle");
+}
 
 async function poll() {
     if (!currentRunId) return;

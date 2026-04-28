@@ -84,6 +84,7 @@
                 </div>
                 <div style="margin-top: 14px; display: flex; gap: 10px;">
                     <button class="btn btn-run" id="bench-run-btn" onclick="startBenchmark()">▶ Run Benchmarks</button>
+                    <button class="btn btn-stop" id="bench-stop-btn" onclick="stopRun('bench')">⏹ Stop</button>
                     <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('bench-output')">🗑️ Clear</button>
                 </div>
             </div>
@@ -118,6 +119,7 @@
                 </div>
                 <div style="margin-top: 14px; display: flex; gap: 10px;">
                     <button class="btn btn-run" id="mc-run-btn" onclick="startMonteCarlo()">▶ Run Monte Carlo</button>
+                    <button class="btn btn-stop" id="mc-stop-btn" onclick="stopRun('mc')">⏹ Stop</button>
                     <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('mc-output')">🗑️ Clear</button>
                 </div>
             </div>
@@ -134,6 +136,7 @@
 
 <script>
 let runs = {};
+let runPrefixMap = {};  // runId -> prefix
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -151,6 +154,8 @@ function setStatus(prefix, state) {
     const labels = { idle:"Idle", running:"Running…", done:"Done", error:"Error" };
     txt.textContent = labels[state] || state;
     document.getElementById(`${prefix}-run-btn`).disabled = state === "running";
+    const stopBtn = document.getElementById(`${prefix}-stop-btn`);
+    if (stopBtn) stopBtn.classList.toggle("visible", state === "running");
 }
 
 function appendOutput(id, text) {
@@ -161,6 +166,18 @@ function appendOutput(id, text) {
 
 function clearOutput(id) { document.getElementById(id).textContent = ""; }
 
+async function stopRun(prefix) {
+    // Find the runId associated with this prefix
+    const runId = Object.keys(runPrefixMap).find(rid => runPrefixMap[rid] === prefix);
+    if (!runId) return;
+    await fetch(`/api/kill/${runId}`, { method: "POST" });
+    clearInterval(runs[runId]);
+    delete runs[runId];
+    delete runPrefixMap[runId];
+    setStatus(prefix, "idle");
+    appendOutput(prefix === 'bench' ? 'bench-output' : 'mc-output', "\n--- Stopped by user ---\n");
+}
+
 async function poll(runId, outputId, prefix) {
     if (!runId) return;
     const res = await fetch(`/api/output/${runId}`);
@@ -170,6 +187,7 @@ async function poll(runId, outputId, prefix) {
         clearInterval(runs[runId]);
         setStatus(prefix, "done");
         delete runs[runId];
+        delete runPrefixMap[runId];
     }
 }
 
@@ -187,6 +205,7 @@ async function startBenchmark() {
     if (data.error) { appendOutput('bench-output', "Error: " + data.error + "\n"); setStatus('bench','error'); return; }
     appendOutput('bench-output', `--- Clustering Benchmarks (K=${params.n_clusters}, ${params.samples} samples) ---\n`);
     runs[data.run_id] = setInterval(() => poll(data.run_id, 'bench-output', 'bench'), 400);
+    runPrefixMap[data.run_id] = 'bench';
 }
 
 async function startMonteCarlo() {
@@ -202,6 +221,7 @@ async function startMonteCarlo() {
     if (data.error) { appendOutput('mc-output', "Error: " + data.error + "\n"); setStatus('mc','error'); return; }
     appendOutput('mc-output', `--- Monte Carlo KMeans (${params.runs} runs, K=${params.n_clusters}) ---\n`);
     runs[data.run_id] = setInterval(() => poll(data.run_id, 'mc-output', 'mc'), 400);
+    runPrefixMap[data.run_id] = 'mc';
 }
 </script>
 {% endblock %}

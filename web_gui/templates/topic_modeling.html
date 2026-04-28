@@ -80,6 +80,7 @@
                 </div>
                 <div style="margin-top: 14px; display: flex; gap: 10px;">
                     <button class="btn btn-run" id="topic-run-btn" onclick="runTopicModeling()">▶ Run Topic Modeling</button>
+                    <button class="btn btn-stop" id="topic-stop-btn" onclick="stopRun('topic')">⏹ Stop</button>
                     <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('topic-output')">🗑️ Clear</button>
                 </div>
             </div>
@@ -114,6 +115,7 @@
                 </div>
                 <div style="margin-top: 14px; display: flex; gap: 10px;">
                     <button class="btn btn-run" id="wc-run-btn" onclick="runWordClouds()">☁️ Generate Word Clouds</button>
+                    <button class="btn btn-stop" id="wc-stop-btn" onclick="stopRun('wc')">⏹ Stop</button>
                     <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('wc-output')">🗑️ Clear</button>
                 </div>
             </div>
@@ -130,6 +132,7 @@
 
 <script>
 let runs = {};
+let runPrefixMap = {};  // runId -> prefix
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -148,17 +151,30 @@ function setStatus(prefix, s) {
     if(txt) txt.textContent = {idle:"Idle",running:"Running…",done:"Done",error:"Error"}[s]||s;
     const btn = document.getElementById(`${prefix}-run-btn`);
     if(btn) btn.disabled = s === "running";
+    const stopBtn = document.getElementById(`${prefix}-stop-btn`);
+    if(stopBtn) stopBtn.classList.toggle("visible", s === "running");
 }
 
 function appendOutput(id, t) { const el = document.getElementById(id); el.textContent += t; el.scrollTop = el.scrollHeight; }
 function clearOutput(id) { document.getElementById(id).textContent = ""; }
+
+async function stopRun(prefix) {
+    const runId = Object.keys(runPrefixMap).find(rid => runPrefixMap[rid] === prefix);
+    if (!runId) return;
+    await fetch(`/api/kill/${runId}`, { method: "POST" });
+    clearInterval(runs[runId]);
+    delete runs[runId];
+    delete runPrefixMap[runId];
+    setStatus(prefix,'idle');
+    appendOutput(prefix === 'topic' ? 'topic-output' : 'wc-output', "\n--- Stopped by user ---\n");
+}
 
 async function pollOutput(runId, outputId, prefix) {
     if (!runId) return;
     const res = await fetch(`/api/output/${runId}`);
     const data = await res.json();
     if (data.lines?.length) data.lines.forEach(l => appendOutput(outputId, l));
-    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(runs[runId]); setStatus(prefix,'done'); delete runs[runId]; }
+    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(runs[runId]); setStatus(prefix,'done'); delete runs[runId]; delete runPrefixMap[runId]; }
 }
 
 async function runTopicModeling() {
@@ -173,6 +189,7 @@ async function runTopicModeling() {
     if (data.error) { appendOutput('topic-output', "Error: " + data.error + "\n"); setStatus('topic','error'); return; }
     appendOutput('topic-output', `--- Topic Modeling (LDA, ${params.n_topics} topics, ${params.dataset}) ---\n`);
     runs[data.run_id] = setInterval(() => pollOutput(data.run_id, 'topic-output', 'topic'), 400);
+    runPrefixMap[data.run_id] = 'topic';
 }
 
 async function runWordClouds() {
@@ -187,6 +204,7 @@ async function runWordClouds() {
     if (data.error) { appendOutput('wc-output', "Error: " + data.error + "\n"); setStatus('wc','error'); return; }
     appendOutput('wc-output', `--- Generating Word Clouds (${params.max_words} max words) ---\n`);
     runs[data.run_id] = setInterval(() => pollOutput(data.run_id, 'wc-output', 'wc'), 400);
+    runPrefixMap[data.run_id] = 'wc';
 }
 </script>
 {% endblock %}

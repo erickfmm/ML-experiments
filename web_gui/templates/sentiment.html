@@ -116,6 +116,7 @@
                 </div>
                 <div style="margin-top: 14px; display: flex; gap: 10px;">
                     <button class="btn btn-run" id="train-run-btn" onclick="startTraining()">▶ Train Model</button>
+                    <button class="btn btn-stop" id="train-stop-btn" onclick="stopRun()">⏹ Stop</button>
                     <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('train-output')">🗑️ Clear</button>
                 </div>
             </div>
@@ -175,10 +176,21 @@ function setStatus(prefix, s) {
     if (txt) txt.textContent = {idle:"Idle",running:"Running…",done:"Done",error:"Error"}[s]||s;
     const btn = document.getElementById(`${prefix}-run-btn`);
     if (btn) btn.disabled = s === "running";
+    const stopBtn = document.getElementById(`${prefix}-stop-btn`);
+    if (stopBtn) stopBtn.classList.toggle("visible", s === "running");
 }
 
 function appendOutput(id, t) { const el = document.getElementById(id); el.textContent += t; el.scrollTop = el.scrollHeight; }
 function clearOutput(id) { document.getElementById(id).textContent = ""; }
+
+async function stopRun() {
+    if (!currentRunId) return;
+    await fetch(`/api/kill/${currentRunId}`, { method: "POST" });
+    clearInterval(pollTimer);
+    appendOutput('train-output', "\n--- Stopped by user ---\n");
+    currentRunId = null;
+    setStatus('train','idle');
+}
 
 async function poll() {
     if (!currentRunId) return;

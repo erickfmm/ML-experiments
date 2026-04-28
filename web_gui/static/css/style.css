@@ -50,3 +50,8 @@ html, body {
 ::-webkit-scrollbar-track { background: #1a1a1a; }
 ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+/* ── Stop Button ────────────────────────────────────────────── */
+.btn-stop { background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; padding: 8px 20px; transition: background 0.15s; display: none; }
+.btn-stop:hover { background: #c82333; }
+.btn-stop.visible { display: inline-flex; align-items: center; gap: 6px; }

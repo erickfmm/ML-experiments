@@ -62,6 +62,8 @@ function clearLog() {
 // ── Polling ─────────────────────────────────────────────────────
 function startPolling(runId) {
     currentRunId = runId;
+    const stopBtn = document.getElementById("btn-stop");
+    if (stopBtn) stopBtn.classList.add("visible");
     pollTimer = setInterval(async () => {
         try {
             const res = await fetch(`/api/output/${runId}`);
@@ -72,6 +74,7 @@ function startPolling(runId) {
                 if (last && last.includes("[Process exited")) {
                     clearInterval(pollTimer);
                     currentRunId = null;
+                    if (stopBtn) stopBtn.classList.remove("visible");
                     checkStatus();
                     disableButtons(false);
                 }
@@ -82,9 +85,24 @@ function startPolling(runId) {
     }, 500);
 }
 
+// ── Stop ────────────────────────────────────────────────────────
+async function stopRun() {
+    if (!currentRunId) return;
+    await fetch(`/api/kill/${currentRunId}`, { method: "POST" });
+    clearInterval(pollTimer);
+    appendLog("\n--- Stopped by user ---\n");
+    currentRunId = null;
+    const stopBtn = document.getElementById("btn-stop");
+    if (stopBtn) stopBtn.classList.remove("visible");
+    disableButtons(false);
+    checkStatus();
+}
+
 // ── Buttons ─────────────────────────────────────────────────────
 function disableButtons(disabled) {
-    document.querySelectorAll(".btn").forEach(b => b.disabled = disabled);
+    document.querySelectorAll(".btn").forEach(b => {
+        if (b.id !== "btn-stop") b.disabled = disabled;
+    });
 }
 
 // ── 1. Download Dataset ─────────────────────────────────────────

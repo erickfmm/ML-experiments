@@ -79,6 +79,9 @@
     .btn-run:hover { background: #218838; }
     .btn-run.running { background: #dc3545; }
     .btn-run.running:hover { background: #c82333; }
+    .btn-stop { background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; padding: 5px 14px; transition: background 0.15s; display: none; }
+    .btn-stop:hover { background: #c82333; }
+    .btn-stop.visible { display: inline-block; }
     .btn-save { background: #007bff; color: #fff; }
     .btn-save:hover { background: #0069d9; }
     .btn-clear { background: #6c757d; color: #fff; }
@@ -132,6 +135,7 @@
             </span>
             <div class="actions">
                 <button class="btn btn-clear" onclick="clearOutput()">🗑️ Clear</button>
+                <button class="btn btn-stop" id="stop-btn" onclick="stopRun()">⏹ Stop</button>
                 <button class="btn btn-run" id="run-btn" onclick="toggleRun()">▶ Run</button>
             </div>
         </div>

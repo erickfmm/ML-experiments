@@ -69,17 +69,17 @@ async function saveFile() {
 }
 
 // ── Run / Stop ──────────────────────────────────────────────────
-async function toggleRun() {
-    const btn = document.getElementById("run-btn");
+async function stopRun() {
+    if (!currentRunId) return;
+    await fetch(`/api/kill/${currentRunId}`, { method: "POST" });
+    appendOutput(`\n--- Stopped ---\n`);
+    setStatus("idle");
+    currentRunId = null;
+    clearInterval(pollTimer);
+}
 
-    if (currentRunId) {
-        // Stop
-        await fetch(`/api/kill/${currentRunId}`, { method: "POST" });
-        setStatus("idle");
-        currentRunId = null;
-        clearInterval(pollTimer);
-        return;
-    }
+async function toggleRun() {
+    if (currentRunId) { stopRun(); return; }
 
     if (!currentFile) { alert("Select a file first."); return; }
 
@@ -132,13 +132,16 @@ function clearOutput() {
 function setStatus(state) {
     const dot = document.getElementById("status-dot");
     const btn = document.getElementById("run-btn");
+    const stopBtn = document.getElementById("stop-btn");
     dot.className = "status-dot " + state;
     if (state === "running") {
-        btn.textContent = "⏹ Stop";
-        btn.classList.add("running");
-    } else {
+        btn.disabled = true;
         btn.textContent = "▶ Run";
-        btn.classList.remove("running");
+        stopBtn.classList.add("visible");
+    } else {
+        btn.disabled = false;
+        btn.textContent = "▶ Run";
+        stopBtn.classList.remove("visible");
     }
 }
 
