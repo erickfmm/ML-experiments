@@ -8,7 +8,11 @@
         flex-direction: column;
         gap: 16px;
         padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
+
+    /* ── Status Bar ──────────────────────────────────── */
     .status-bar {
         display: flex;
         gap: 16px;
@@ -34,6 +38,47 @@
     .dot.green { background: #28a745; }
     .dot.red { background: #dc3545; }
     .dot.yellow { background: #ffc107; }
+    .dot.blue { background: #17a2b8; }
+
+    /* ── Section Cards ───────────────────────────────── */
+    .card {
+        background: #2b2b2b;
+        border: 1px solid #444;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: #333;
+        border-bottom: 1px solid #444;
+        cursor: pointer;
+        user-select: none;
+    }
+    .card-header:hover { background: #3a3a3a; }
+    .card-header h3 {
+        margin: 0;
+        color: #e0e0e0;
+        font-size: 16px;
+    }
+    .card-header .toggle-icon {
+        color: #888;
+        font-size: 18px;
+        transition: transform 0.2s;
+    }
+    .card-header.collapsed .toggle-icon {
+        transform: rotate(-90deg);
+    }
+    .card-body {
+        padding: 16px;
+    }
+    .card-body.collapsed {
+        display: none;
+    }
+
+    /* ── Buttons ─────────────────────────────────────── */
     .actions-bar {
         display: flex;
         gap: 10px;
@@ -46,7 +91,10 @@
         cursor: pointer;
         font-weight: 600;
         font-size: 14px;
-        transition: background 0.15s;
+        transition: background 0.15s, opacity 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
     .btn-primary { background: #007bff; color: #fff; }
     .btn-primary:hover { background: #0069d9; }
@@ -54,14 +102,67 @@
     .btn-success:hover { background: #218838; }
     .btn-danger { background: #dc3545; color: #fff; }
     .btn-danger:hover { background: #c82333; }
+    .btn-warning { background: #ffc107; color: #212529; }
+    .btn-warning:hover { background: #e0a800; }
+    .btn-info { background: #17a2b8; color: #fff; }
+    .btn-info:hover { background: #138496; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Hyperparameter Grid ─────────────────────────── */
+    .hp-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .hp-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .hp-field label {
+        color: #aaa;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .hp-field input, .hp-field select {
+        background: #1a1a1a;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #e0e0e0;
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+    .hp-field input:focus, .hp-field select:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    /* ── Log Output ──────────────────────────────────── */
+    .log-output {
+        background: #1a1a1a;
+        color: #0f0;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 13px;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #444;
+        max-height: 250px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    /* ── Image Grid ──────────────────────────────────── */
     .image-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 16px;
     }
     .image-card {
-        background: #2b2b2b;
+        background: #222;
         border: 1px solid #444;
         border-radius: 8px;
         padding: 12px;
@@ -70,6 +171,7 @@
     .image-card h4 {
         margin: 0 0 8px 0;
         color: #ccc;
+        font-size: 14px;
     }
     .image-card img {
         max-width: 100%;
@@ -86,19 +188,8 @@
         border: 2px dashed #555;
         border-radius: 4px;
     }
-    .log-output {
-        background: #1a1a1a;
-        color: #0f0;
-        font-family: 'Consolas', monospace;
-        font-size: 13px;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #444;
-        max-height: 250px;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        word-break: break-all;
-    }
+
+    /* ── Upload Area ─────────────────────────────────── */
     .upload-area {
         border: 2px dashed #555;
         border-radius: 8px;
@@ -106,60 +197,210 @@
         text-align: center;
         color: #aaa;
         cursor: pointer;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, background 0.2s;
     }
     .upload-area:hover { border-color: #007bff; }
     .upload-area.dragover { border-color: #28a745; background: rgba(40,167,69,0.1); }
     input[type="file"] { display: none; }
+
+    /* ── Progress ────────────────────────────────────── */
+    .progress-bar-container {
+        background: #1a1a1a;
+        border-radius: 4px;
+        overflow: hidden;
+        height: 6px;
+        margin-top: 8px;
+    }
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #28a745);
+        border-radius: 4px;
+        transition: width 0.3s;
+        width: 0%;
+    }
+    .progress-bar.indeterminate {
+        width: 30%;
+        animation: indeterminate 1.5s infinite;
+    }
+    @keyframes indeterminate {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
+    }
+
+    /* ── Section titles ──────────────────────────────── */
+    .section-title {
+        color: #e0e0e0;
+        margin: 8px 0 4px 0;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .section-subtitle {
+        color: #888;
+        margin: 0 0 12px 0;
+        font-size: 13px;
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+        .image-grid { grid-template-columns: 1fr; }
+        .hp-grid { grid-template-columns: 1fr 1fr; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="butterfly-layout">
-    <!-- Status -->
+
+    <!-- ═══ Status Bar ═══ -->
     <div class="status-bar">
         <div class="status-indicator">
-            <span class="dot" id="model-dot"></span>
-            <span id="model-status">Model: Checking...</span>
+            <span class="dot" id="dataset-dot"></span>
+            <span id="dataset-status">Dataset: Checking...</span>
         </div>
         <div class="status-indicator">
-            <span class="dot" id="data-dot"></span>
-            <span id="data-status">Data: Checking...</span>
+            <span class="dot" id="pickle-dot"></span>
+            <span id="pickle-status">Pickle: Checking...</span>
+        </div>
+        <div class="status-indicator">
+            <span class="dot" id="seg-model-dot"></span>
+            <span id="seg-model-status">Segmentation: Checking...</span>
+        </div>
+        <div class="status-indicator">
+            <span class="dot" id="cls-model-dot"></span>
+            <span id="cls-model-status">Classifier: Checking...</span>
         </div>
     </div>
 
-    <!-- Actions -->
-    <div class="actions-bar">
-        <button class="btn btn-success" id="btn-save-pickle" onclick="savePickle()">📦 Save Data as Pickle</button>
-        <button class="btn btn-primary" id="btn-train-seg" onclick="trainSegmentation()">🧠 Train Segmentation</button>
-        <button class="btn btn-primary" id="btn-train-cls" onclick="trainClassifier()">🏷️ Train Classifier</button>
-    </div>
-
-    <!-- Log Output -->
-    <div class="log-output" id="log-output">Ready.</div>
-
-    <!-- Image Upload and Prediction -->
-    <h3 style="color:#e0e0e0; margin:0;">🔍 Predict Segmentation</h3>
-    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
-        <p>📷 Click or drag an image here to predict segmentation</p>
-        <input type="file" id="file-input" accept="image/*" onchange="predictImage(event)">
-    </div>
-
-    <!-- Prediction Results -->
-    <div class="image-grid" id="prediction-results" style="display:none;">
-        <div class="image-card">
-            <h4>Original Image</h4>
-            <img id="img-original" src="" alt="Original">
+    <!-- ═══ 1. Dataset ═══ -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <h3>📂 Dataset</h3>
+            <span class="toggle-icon">▼</span>
         </div>
-        <div class="image-card">
-            <h4>Predicted Segmentation</h4>
-            <img id="img-predicted" src="" alt="Predicted">
-        </div>
-        <div class="image-card">
-            <h4>Cropped Result</h4>
-            <img id="img-cropped" src="" alt="Cropped">
+        <div class="card-body">
+            <p class="section-subtitle">Download the Leeds Butterfly Dataset from Kaggle and convert to pickle for training.</p>
+            <div class="hp-grid" style="margin-bottom:12px;">
+                <div class="hp-field">
+                    <label>Image Size (px)</label>
+                    <input type="number" id="hp-image-size" value="100" min="32" max="512">
+                </div>
+            </div>
+            <div class="actions-bar">
+                <button class="btn btn-info" id="btn-download" onclick="downloadDataset()">⬇️ Download Dataset</button>
+                <button class="btn btn-success" id="btn-save-pickle" onclick="savePickle()">📦 Generate Pickle</button>
+            </div>
+            <div class="progress-bar-container" id="download-progress-container" style="display:none;">
+                <div class="progress-bar indeterminate" id="download-progress"></div>
+            </div>
         </div>
     </div>
+
+    <!-- ═══ 2. Train Segmentation ═══ -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <h3>🧠 Train Segmentation Model</h3>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="card-body">
+            <p class="section-subtitle">U-Net style encoder-decoder that produces pixel-wise segmentation masks.</p>
+            <div class="hp-grid">
+                <div class="hp-field">
+                    <label>Epochs</label>
+                    <input type="number" id="seg-epochs" value="100" min="1" max="1000">
+                </div>
+                <div class="hp-field">
+                    <label>Batch Size</label>
+                    <input type="number" id="seg-batch-size" value="16" min="1" max="128">
+                </div>
+                <div class="hp-field">
+                    <label>Learning Rate</label>
+                    <input type="number" id="seg-lr" value="0.001" min="0.0001" max="1" step="0.0001">
+                </div>
+                <div class="hp-field">
+                    <label>Test Split</label>
+                    <input type="number" id="seg-test-split" value="0.33" min="0.1" max="0.5" step="0.01">
+                </div>
+            </div>
+            <div class="actions-bar">
+                <button class="btn btn-primary" id="btn-train-seg" onclick="trainSegmentation()">🧠 Train Segmentation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ 3. Train Classifier ═══ -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <h3>🏷️ Train Classifier Model</h3>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="card-body">
+            <p class="section-subtitle">CNN classifier that predicts butterfly species (10 classes).</p>
+            <div class="hp-grid">
+                <div class="hp-field">
+                    <label>Epochs</label>
+                    <input type="number" id="cls-epochs" value="100" min="1" max="1000">
+                </div>
+                <div class="hp-field">
+                    <label>Batch Size</label>
+                    <input type="number" id="cls-batch-size" value="16" min="1" max="128">
+                </div>
+                <div class="hp-field">
+                    <label>Learning Rate</label>
+                    <input type="number" id="cls-lr" value="0.001" min="0.0001" max="1" step="0.0001">
+                </div>
+                <div class="hp-field">
+                    <label>Test Split</label>
+                    <input type="number" id="cls-test-split" value="0.33" min="0.1" max="0.5" step="0.01">
+                </div>
+            </div>
+            <div class="actions-bar">
+                <button class="btn btn-primary" id="btn-train-cls" onclick="trainClassifier()">🏷️ Train Classifier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Log Output ═══ -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <h3>📋 Log Output</h3>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <div class="log-output" id="log-output">Ready.</div>
+        </div>
+    </div>
+
+    <!-- ═══ 4. Predict ═══ -->
+    <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <h3>🔍 Predict Segmentation</h3>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="card-body">
+            <p class="section-subtitle">Upload an image to generate a segmentation mask using the trained model.</p>
+            <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                <p>📷 Click or drag an image here to predict segmentation</p>
+                <input type="file" id="file-input" accept="image/*" onchange="predictImage(event)">
+            </div>
+
+            <!-- Prediction Results -->
+            <div class="image-grid" id="prediction-results" style="display:none; margin-top:16px;">
+                <div class="image-card">
+                    <h4>Original Image</h4>
+                    <img id="img-original" src="" alt="Original">
+                </div>
+                <div class="image-card">
+                    <h4>Predicted Segmentation</h4>
+                    <img id="img-predicted" src="" alt="Predicted">
+                </div>
+                <div class="image-card">
+                    <h4>Cropped Result</h4>
+                    <img id="img-cropped" src="" alt="Cropped">
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="/static/js/butterfly.js"></script>

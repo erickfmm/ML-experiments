@@ -25,6 +25,18 @@ from sklearn.model_selection import train_test_split
 import seaborn as sn
 import matplotlib.pyplot as plt
 
+
+# ═══════════════════════════════════════════════════════════════════
+#  Hyperparameters from environment (set by the web GUI)
+# ═══════════════════════════════════════════════════════════════════
+
+def get_env_int(key, default):
+    return int(os.environ.get(key, default))
+
+def get_env_float(key, default):
+    return float(os.environ.get(key, default))
+
+
 def save_as_pickle(new_size:int = 100, to_gray: bool = True, to_pickle=True):
     lb = LoadButterflySegment()
     lb.download()
@@ -104,13 +116,14 @@ class SimpleClassifier(nn.Module):
         return x
 
 
-def train_classifier(x, y, epochs=100, batch_size=16):
+def train_classifier(x, y, epochs=100, batch_size=16, learning_rate=0.001):
     model = SimpleClassifier()
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Print model summary
     print(model)
+    print(f"Hyperparameters: epochs={epochs}, batch_size={batch_size}, lr={learning_rate}")
 
     x_t = torch.tensor(x, dtype=torch.float32).permute(0, 3, 1, 2)  # (N, C, H, W)
     y_t = torch.tensor(y, dtype=torch.long)
@@ -136,15 +149,15 @@ def train_classifier(x, y, epochs=100, batch_size=16):
             print(f"Epoch {epoch+1}/{epochs} - loss: {total_loss/total:.4f} - accuracy: {correct/total:.4f}")
     return model
 
-def simple_classifier_pipeline(x, y):
+def simple_classifier_pipeline(x, y, epochs=100, batch_size=16, learning_rate=0.001, test_split=0.33):
     print("cantidad de etiquetas: ", len(set(y)))
     y_encoded = pd.get_dummies(y).astype('float32').values
     y_labels = np.argmax(y_encoded, axis=1)
     x = np.asarray(x)
     print("x shape: ", x.shape)
     print("y shape: ", y_labels.shape)
-    x_train, x_test, y_train, y_test = train_test_split(x, y_labels, test_size=0.33, random_state=1992)
-    model = train_classifier(x_train, y_train)
+    x_train, x_test, y_train, y_test = train_test_split(x, y_labels, test_size=test_split, random_state=1992)
+    model = train_classifier(x_train, y_train, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate)
     print(model)
 
     # Evaluate
@@ -159,6 +172,7 @@ def simple_classifier_pipeline(x, y):
     # Save model
     os.makedirs("data/created_models", exist_ok=True)
     torch.save(model.state_dict(), "data/created_models/butterfly_classifier.pt")
+    print("✅ Classifier model saved to data/created_models/butterfly_classifier.pt")
 
     confusion = confusion_matrix(y_test, y_pred, normalize='pred')
     print(confusion)
@@ -243,10 +257,10 @@ class SimpleSegmentation(nn.Module):
         return x
 
 
-def train_segmentation(x_input, y_input, epochs=100, batch_size=16):
+def train_segmentation(x_input, y_input, epochs=100, batch_size=16, learning_rate=0.001):
     model = SimpleSegmentation()
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     x_t = torch.tensor(x_input, dtype=torch.float32).permute(0, 3, 1, 2)  # (N, C, H, W)
     y_t = torch.tensor(y_input, dtype=torch.float32).permute(0, 3, 1, 2)
@@ -254,6 +268,7 @@ def train_segmentation(x_input, y_input, epochs=100, batch_size=16):
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     print(model)
+    print(f"Hyperparameters: epochs={epochs}, batch_size={batch_size}, lr={learning_rate}")
     model.train()
     for epoch in range(epochs):
         total_loss = 0
@@ -377,7 +392,7 @@ def show_segmentation_interface(model, x_test, y_test):
     # Start the Tkinter main loop
     root.mainloop()
 
-def segmentation_pipeline(x, x_seg):
+def segmentation_pipeline(x, x_seg, epochs=100, batch_size=16, learning_rate=0.001, test_split=0.33):
     x_seg = np.asarray(x_seg)
     x_seg = np.nan_to_num(x_seg)
     x = np.asarray(x)
@@ -387,7 +402,7 @@ def segmentation_pipeline(x, x_seg):
     print("shape x_seg", x_seg.shape)
     x = x/255.0
     x_seg = x_seg/255.0
-    x_train, x_test, y_train, y_test = train_test_split(x, x_seg, test_size=0.33, random_state=1992)
+    x_train, x_test, y_train, y_test = train_test_split(x, x_seg, test_size=test_split, random_state=1992)
     print("x_train shape", x_train.shape)
     print("y_train shape", y_train.shape)
     print("x_test shape", x_test.shape)
@@ -398,13 +413,117 @@ def segmentation_pipeline(x, x_seg):
         model.load_state_dict(torch.load(filepath, weights_only=True))
         model.eval()
     else:
-        model = train_segmentation(x_train, y_train)
+        model = train_segmentation(x_train, y_train, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate)
         os.makedirs("data/created_models", exist_ok=True)
         torch.save(model.state_dict(), filepath)
+    print("✅ Segmentation model saved to", filepath)
     show_segmentation_interface(model, x_test, y_test)
 
+
+def run_download():
+    """Download the butterfly dataset only."""
+    print("Downloading butterfly dataset...")
+    lb = LoadButterflySegment()
+    lb.download()
+    print("✅ Download complete.")
+
+
+def run_save_pickle():
+    """Generate pickle files from downloaded dataset."""
+    image_size = get_env_int("BUTTERFLY_IMAGE_SIZE", 100)
+    print(f"Generating pickle files (image size: {image_size}px)...")
+    save_as_pickle(new_size=image_size, to_gray=False, to_pickle=True)
+    print("✅ Pickle files generated.")
+
+
+def run_train_segmentation():
+    """Train segmentation model with hyperparameters from env."""
+    epochs = get_env_int("BUTTERFLY_EPOCHS", 100)
+    batch_size = get_env_int("BUTTERFLY_BATCH_SIZE", 16)
+    learning_rate = get_env_float("BUTTERFLY_LR", 0.001)
+    test_split = get_env_float("BUTTERFLY_TEST_SPLIT", 0.33)
+
+    print(f"Loading segmentation data...")
+    data = open_pickle("segment")
+    x = np.asarray(data["x"])
+    x_seg = np.asarray(data["y"])
+    x = np.nan_to_num(x)
+    x_seg = np.nan_to_num(x_seg)
+    print("len x ", len(x))
+    print("shape x", x.shape)
+    print("shape x_seg", x_seg.shape)
+    x = x / 255.0
+    x_seg = x_seg / 255.0
+    x_train, x_test, y_train, y_test = train_test_split(x, x_seg, test_size=test_split, random_state=1992)
+    print("x_train shape", x_train.shape)
+    print("y_train shape", y_train.shape)
+
+    model = train_segmentation(x_train, y_train, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate)
+    os.makedirs("data/created_models", exist_ok=True)
+    filepath = "data/created_models/butterfly_segmentation.pt"
+    torch.save(model.state_dict(), filepath)
+    print(f"✅ Segmentation model saved to {filepath}")
+
+
+def run_train_classifier():
+    """Train classifier model with hyperparameters from env."""
+    epochs = get_env_int("BUTTERFLY_EPOCHS", 100)
+    batch_size = get_env_int("BUTTERFLY_BATCH_SIZE", 16)
+    learning_rate = get_env_float("BUTTERFLY_LR", 0.001)
+    test_split = get_env_float("BUTTERFLY_TEST_SPLIT", 0.33)
+
+    print(f"Loading classifier data...")
+    data = open_pickle("butterfly")
+    x = np.asarray(data["x"])
+    y = data["y"]
+
+    # If grayscale, expand to 3 channels for the classifier
+    if len(x.shape) == 3:
+        x = np.stack([x, x, x], axis=-1)
+    x = x / 255.0 if x.max() > 1.0 else x
+
+    print("cantidad de etiquetas: ", len(set(y)))
+    y_encoded = pd.get_dummies(y).astype('float32').values
+    y_labels = np.argmax(y_encoded, axis=1)
+    print("x shape: ", x.shape)
+    print("y shape: ", y_labels.shape)
+
+    x_train, x_test, y_train, y_test = train_test_split(x, y_labels, test_size=test_split, random_state=1992)
+    model = train_classifier(x_train, y_train, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate)
+
+    # Evaluate
+    model.eval()
+    x_test_t = torch.tensor(x_test, dtype=torch.float32).permute(0, 3, 1, 2)
+    y_test_t = torch.tensor(y_test, dtype=torch.long)
+    with torch.no_grad():
+        outputs = model(x_test_t)
+        _, y_pred = torch.max(outputs, 1)
+        y_pred = y_pred.numpy()
+
+    # Save model
+    os.makedirs("data/created_models", exist_ok=True)
+    torch.save(model.state_dict(), "data/created_models/butterfly_classifier.pt")
+    print("✅ Classifier model saved to data/created_models/butterfly_classifier.pt")
+
+    confusion = confusion_matrix(y_test, y_pred, normalize='pred')
+    print("Confusion matrix:")
+    print(confusion)
+
+
 if __name__ == "__main__":
-    print("running as main")
-    x, x_seg, y = save_as_pickle(new_size=100, to_gray=False, to_pickle=False)
-    #simple_classifier_pipeline(x, y)
-    segmentation_pipeline(x, x_seg)
+    task = os.environ.get("BUTTERFLY_TASK", "")
+
+    if task == "download":
+        run_download()
+    elif task == "save_pickle":
+        run_save_pickle()
+    elif task == "train_segmentation":
+        run_train_segmentation()
+    elif task == "train_classifier":
+        run_train_classifier()
+    else:
+        # Original behavior: run full pipeline interactively
+        print("running as main (full pipeline)")
+        x, x_seg, y = save_as_pickle(new_size=100, to_gray=False, to_pickle=False)
+        #simple_classifier_pipeline(x, y)
+        segmentation_pipeline(x, x_seg)

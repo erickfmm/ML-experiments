@@ -212,27 +212,36 @@ def psychoacoustic_data():
 @app.route("/api/butterfly/status", methods=["GET"])
 def butterfly_status():
     """Check if butterfly model and data exist."""
-    model_path = os.path.join(BASE_DIR, "data", "created_models", "butterfly_segmentation.pt")
-    data_path = os.path.join(BASE_DIR, "data", "created_models", "butterfly_segment.pkl")
+    base = os.path.join(BASE_DIR, "data")
+    model_seg = os.path.join(base, "created_models", "butterfly_segmentation.pt")
+    model_cls = os.path.join(base, "created_models", "butterfly_classifier.pt")
+    data_seg = os.path.join(base, "created_models", "butterfly_segment.pkl")
+    data_cls = os.path.join(base, "created_models", "butterfly.pkl")
+    dataset_dir = os.path.join(base, "train_data", "Images_Supervised", "butterfly-dataset", "leedsbutterfly")
     return jsonify({
-        "model_exists": os.path.isfile(model_path),
-        "data_exists": os.path.isfile(data_path),
-        "model_path": model_path,
-        "data_path": data_path,
+        "dataset_exists": os.path.isdir(dataset_dir),
+        "data_exists": os.path.isfile(data_seg),
+        "data_cls_exists": os.path.isfile(data_cls),
+        "seg_model_exists": os.path.isfile(model_seg),
+        "cls_model_exists": os.path.isfile(model_cls),
     })
 
 
-@app.route("/api/butterfly/train_classifier", methods=["POST"])
-def butterfly_train_classifier():
-    """Run the butterfly classifier training script."""
+def _run_butterfly_task(task, extra_env=None):
+    """Helper: run the butterfly training script with a given task and env vars."""
     test_file = "IMAGE_segmentation_clasification_butterfly.py"
     filepath = os.path.join(TEST_DIR, test_file)
+    if not os.path.isfile(filepath):
+        return None, "Training script not found"
+
     run_id = str(uuid.uuid4())[:8]
     _outputs[run_id] = []
 
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
-    env["BUTTERFLY_TASK"] = "train_classifier"
+    env["BUTTERFLY_TASK"] = task
+    if extra_env:
+        env.update(extra_env)
 
     proc = subprocess.Popen(
         [sys.executable, "-u", filepath],
@@ -250,37 +259,58 @@ def butterfly_train_classifier():
         _outputs[rid].append(f"\n[Process exited with code {proc.returncode}]")
 
     threading.Thread(target=_reader, args=(proc, run_id), daemon=True).start()
+    return run_id, None
+
+
+@app.route("/api/butterfly/download", methods=["POST"])
+def butterfly_download():
+    """Download the butterfly dataset from Kaggle."""
+    run_id, err = _run_butterfly_task("download")
+    if err:
+        return jsonify({"error": err}), 500
+    return jsonify({"run_id": run_id})
+
+
+@app.route("/api/butterfly/save_pickle", methods=["POST"])
+def butterfly_save_pickle():
+    """Convert dataset to pickle files."""
+    params = request.get_json(force=True, silent=True) or {}
+    image_size = params.get("image_size", 100)
+    run_id, err = _run_butterfly_task("save_pickle", {"BUTTERFLY_IMAGE_SIZE": str(image_size)})
+    if err:
+        return jsonify({"error": err}), 500
+    return jsonify({"run_id": run_id})
+
+
+@app.route("/api/butterfly/train_classifier", methods=["POST"])
+def butterfly_train_classifier():
+    """Run the butterfly classifier training script."""
+    params = request.get_json(force=True, silent=True) or {}
+    extra = {
+        "BUTTERFLY_EPOCHS": str(params.get("epochs", 100)),
+        "BUTTERFLY_BATCH_SIZE": str(params.get("batch_size", 16)),
+        "BUTTERFLY_LR": str(params.get("learning_rate", 0.001)),
+        "BUTTERFLY_TEST_SPLIT": str(params.get("test_split", 0.33)),
+    }
+    run_id, err = _run_butterfly_task("train_classifier", extra)
+    if err:
+        return jsonify({"error": err}), 500
     return jsonify({"run_id": run_id})
 
 
 @app.route("/api/butterfly/train_segmentation", methods=["POST"])
 def butterfly_train_segmentation():
     """Run the butterfly segmentation training script."""
-    test_file = "IMAGE_segmentation_clasification_butterfly.py"
-    filepath = os.path.join(TEST_DIR, test_file)
-    run_id = str(uuid.uuid4())[:8]
-    _outputs[run_id] = []
-
-    env = os.environ.copy()
-    env["PYTHONUNBUFFERED"] = "1"
-    env["BUTTERFLY_TASK"] = "train_segmentation"
-
-    proc = subprocess.Popen(
-        [sys.executable, "-u", filepath],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        cwd=BASE_DIR,
-        env=env,
-    )
-    _processes[run_id] = proc
-
-    def _reader(proc, rid):
-        for line in iter(proc.stdout.readline, ""):
-            _outputs[rid].append(line)
-        proc.wait()
-        _outputs[rid].append(f"\n[Process exited with code {proc.returncode}]")
-
-    threading.Thread(target=_reader, args=(proc, run_id), daemon=True).start()
+    params = request.get_json(force=True, silent=True) or {}
+    extra = {
+        "BUTTERFLY_EPOCHS": str(params.get("epochs", 100)),
+        "BUTTERFLY_BATCH_SIZE": str(params.get("batch_size", 16)),
+        "BUTTERFLY_LR": str(params.get("learning_rate", 0.001)),
+        "BUTTERFLY_TEST_SPLIT": str(params.get("test_split", 0.33)),
+    }
+    run_id, err = _run_butterfly_task("train_segmentation", extra)
+    if err:
+        return jsonify({"error": err}), 500
     return jsonify({"run_id": run_id})
 
 
