@@ -2,7 +2,7 @@ import scipy.io.wavfile as wav
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised
 from mlexperiments.load_data.loader.util_emotions import DiscreteEmotion
 import os
-import opendatasets as od
+from mlexperiments.load_data.loader import kaggle_downloader as od
 
 
 __all__ = ["LoadBerlin"]

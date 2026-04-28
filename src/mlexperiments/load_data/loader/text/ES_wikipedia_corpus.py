@@ -1,5 +1,5 @@
 from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
-import opendatasets as od
+from mlexperiments.load_data.loader import kaggle_downloader as od
 
 __all__ = ["LoadES_Wikipedia_Corpus"]
 

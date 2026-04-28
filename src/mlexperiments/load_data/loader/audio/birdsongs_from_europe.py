@@ -1,7 +1,7 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import librosa
 import os
-import opendatasets as od
+from mlexperiments.load_data.loader import kaggle_downloader as od
 
 __all__ = ["LoadBirdSongs"]
 

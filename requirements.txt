@@ -34,7 +34,8 @@ pypng
 pydot
 FuzzyTM
 
-opendatasets
+kagglehub
+python-dotenv
 requests
 pygit2
 

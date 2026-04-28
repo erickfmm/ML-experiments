@@ -1,6 +1,6 @@
 from mlexperiments.load_data.ILoadSupervised import ILoadSupervised, SupervisedType
 import json
-import opendatasets as od
+from mlexperiments.load_data.loader import kaggle_downloader as od
 
 __all__ = ["LoadNewsCategory"]
 

@@ -1,7 +1,7 @@
 from typing import List
 from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
 import os
-import opendatasets as od
+from mlexperiments.load_data.loader import kaggle_downloader as od
 
 __all__ = ["LoadTXTsFolder"]
 

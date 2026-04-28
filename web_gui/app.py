@@ -7,6 +7,14 @@ import uuid
 
 from flask import Flask, render_template, request, jsonify, send_from_directory
 
+# Load .env at startup
+try:
+    from dotenv import load_dotenv
+    _root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    load_dotenv(os.path.join(_root, ".env"), override=False)
+except ImportError:
+    pass
+
 app = Flask(
     __name__,
     template_folder=os.path.join(os.path.dirname(__file__), "templates"),
@@ -43,6 +51,12 @@ def psychoacoustic():
 def butterfly():
     """Butterfly segmentation page."""
     return render_template("butterfly.html")
+
+
+@app.route("/settings")
+def settings():
+    """Settings page – Kaggle API token configuration."""
+    return render_template("settings.html")
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -397,6 +411,75 @@ def butterfly_predict():
         })
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  API – Settings / Kaggle Token
+# ══════════════════════════════════════════════════════════════════════
+
+
+@app.route("/api/kaggle-token", methods=["GET"])
+def get_kaggle_token():
+    """Return whether a Kaggle API token is configured (never expose the value)."""
+    token = os.environ.get("KAGGLE_API_TOKEN", "").strip()
+    return jsonify({
+        "configured": bool(token),
+        "masked": f"{'*' * (len(token) - 4)}{token[-4:]}" if len(token) > 4 else ("****" if token else ""),
+    })
+
+
+@app.route("/api/kaggle-token", methods=["POST"])
+def save_kaggle_token():
+    """Save the Kaggle API token to the .env file."""
+    data = request.get_json(force=True)
+    token = data.get("token", "").strip()
+    if not token:
+        return jsonify({"error": "Token cannot be empty"}), 400
+
+    env_path = os.path.join(BASE_DIR, ".env")
+
+    # Read existing .env content
+    lines: list[str] = []
+    if os.path.isfile(env_path):
+        with open(env_path, "r", encoding="utf-8") as fh:
+            lines = fh.readlines()
+
+    # Update or append KAGGLE_API_TOKEN
+    found = False
+    for i, line in enumerate(lines):
+        if line.strip().startswith("KAGGLE_API_TOKEN="):
+            lines[i] = f"KAGGLE_API_TOKEN={token}\n"
+            found = True
+            break
+    if not found:
+        # Ensure there's a newline before appending
+        if lines and not lines[-1].endswith("\n"):
+            lines[-1] += "\n"
+        lines.append(f"KAGGLE_API_TOKEN={token}\n")
+
+    with open(env_path, "w", encoding="utf-8") as fh:
+        fh.writelines(lines)
+
+    # Update the current process environment
+    os.environ["KAGGLE_API_TOKEN"] = token
+
+    return jsonify({"status": "saved"})
+
+
+@app.route("/api/kaggle-token", methods=["DELETE"])
+def delete_kaggle_token():
+    """Remove the Kaggle API token from the .env file."""
+    env_path = os.path.join(BASE_DIR, ".env")
+
+    if os.path.isfile(env_path):
+        with open(env_path, "r", encoding="utf-8") as fh:
+            lines = fh.readlines()
+        lines = [l for l in lines if not l.strip().startswith("KAGGLE_API_TOKEN=")]
+        with open(env_path, "w", encoding="utf-8") as fh:
+            fh.writelines(lines)
+
+    os.environ.pop("KAGGLE_API_TOKEN", None)
+    return jsonify({"status": "deleted"})
 
 
 # ══════════════════════════════════════════════════════════════════════

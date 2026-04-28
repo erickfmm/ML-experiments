@@ -2,7 +2,7 @@ from mlexperiments.load_data.ILoadUnsupervised import ILoadUnsupervised
 from os import listdir
 from os.path import join, splitext
 from PIL import Image
-import opendatasets as od
+from mlexperiments.load_data.loader import kaggle_downloader as od
 
 __all__ = ["LoadAnimeFaces"]
 
