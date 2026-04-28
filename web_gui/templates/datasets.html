@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+{% block title %}Datasets - ML Experiments{% endblock %}
+{% block head %}
+<style>
+    .datasets-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: calc(100vh - 80px);
+    }
+    .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .toolbar .btn {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.15s;
+    }
+    .btn-download-all { background: #28a745; color: #fff; }
+    .btn-download-all:hover { background: #218838; }
+    .btn-download-selected { background: #007bff; color: #fff; }
+    .btn-download-selected:hover { background: #0069d9; }
+    .btn-refresh { background: #6c757d; color: #fff; }
+    .btn-refresh:hover { background: #5a6268; }
+    .btn-select-all { background: #444; color: #e0e0e0; border: 1px solid #555; }
+    .btn-select-all:hover { background: #555; }
+    .toolbar .spacer { flex: 1; }
+    .status-summary {
+        font-size: 13px;
+        color: #aaa;
+    }
+    .kaggle-warning {
+        background: #7f3300;
+        border: 1px solid #b35200;
+        color: #ffc107;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .kaggle-warning a { color: #ffc107; text-decoration: underline; }
+    .kaggle-warning .btn { padding: 4px 12px; font-size: 12px; background: #ffc107; color: #333; border-radius: 4px; border: none; cursor: pointer; }
+
+    .content-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        overflow-y: auto;
+        flex: 1;
+        padding: 0 8px;
+    }
+
+    @media (max-width: 1200px) {
+        .content-area {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .category-card {
+        background: #2b2b2d;
+        border: 1px solid #444;
+        border-radius: 8px;
+        overflow: visible;
+        transition: border-color 0.15s;
+    }
+    .category-card.selected { border-color: #1a6baa; }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        gap: 12px;
+        background: #333;
+        cursor: pointer;
+        user-select: none;
+    }
+    .category-header:hover { background: #3a3a3a; }
+
+    .category-header input[type="checkbox"] {
+        width: 18px; height: 18px;
+        accent-color: #1a6baa;
+        cursor: pointer;
+    }
+
+    .category-icon {
+        font-size: 24px;
+    }
+
+    .category-title {
+        flex: 1;
+        font-weight: 600;
+        color: #e0e0e0;
+        font-size: 16px;
+    }
+
+    .category-badge {
+        font-size: 12px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .category-progress {
+        height: 4px;
+        background: #1e1e1e;
+    }
+
+    .category-progress-fill {
+        height: 100%;
+        background: #28a745;
+        transition: width 0.3s;
+    }
+
+    .sub-datasets {
+        padding: 12px 20px 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sub-dataset {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: #1e1e1e;
+        font-size: 14px;
+        color: #ccc;
+    }
+
+    .sub-dataset .status-icon {
+        font-size: 16px;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .sub-dataset .name {
+        flex: 1;
+        font-size: 14px;
+    }
+
+    .sub-dataset .type-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: #444;
+        color: #aaa;
+        text-transform: uppercase;
+    }
+
+    .sub-dataset .download-btn {
+        background: none;
+        border: 1px solid #555;
+        color: #aaa;
+        padding: 3px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.15s;
+    }
+
+    .sub-dataset .download-btn:hover {
+        border-color: #1a6baa;
+        color: #1a6baa;
+    }
+
+    .sub-dataset.downloaded .status-icon {
+        color: #28a745;
+    }
+
+    .sub-dataset:not(.downloaded) .status-icon {
+        color: #555;
+    }
+
+    .output-panel {
+        background: #1a1a1a;
+        border: 1px solid #444;
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 180px;
+        max-height: 300px;
+    }
+    .output-header {
+        background: #333;
+        padding: 8px 12px;
+        font-weight: bold;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+    }
+    .output-area {
+        flex: 1;
+        color: #0f0;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 12px;
+        padding: 10px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    .output-area .line-error { color: #f44; }
+    .status-dot {
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    .status-dot.idle { background: #6c757d; }
+    .status-dot.running { background: #ffc107; animation: pulse 1s infinite; }
+    .status-dot.done { background: #28a745; }
+    .status-dot.error { background: #dc3545; }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+    .loading-spinner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        color: #888;
+        font-size: 16px;
+        gap: 10px;
+    }
+    .loading-spinner .spinner {
+        width: 24px; height: 24px;
+        border: 3px solid #444;
+        border-top: 3px solid #1a6baa;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="datasets-layout">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="btn btn-select-all" onclick="toggleSelectAll()">☑ Select All</button>
+        <button class="btn btn-download-selected" onclick="downloadSelected()" id="btnDownloadSelected">⬇ Download Selected</button>
+        <button class="btn btn-download-all" onclick="downloadAll()">⬇ Download All</button>
+        <button class="btn btn-refresh" onclick="loadDatasets()">🔄 Refresh</button>
+        <div class="spacer"></div>
+        <span class="status-summary" id="statusSummary">Loading...</span>
+    </div>
+
+    <!-- Kaggle warning (shown if no token) -->
+    <div class="kaggle-warning" id="kaggleWarning" style="display:none;">
+        ⚠️ <span>Kaggle API token not configured. Some datasets require it. <a href="/settings">Configure in Settings</a></span>
+    </div>
+
+    <!-- Output panel -->
+    <div class="output-panel">
+        <div class="output-header">
+            <span><span class="status-dot idle" id="outputDot"></span> Download Log</span>
+            <span id="outputRunInfo"></span>
+        </div>
+        <div class="output-area" id="outputArea">Ready to download datasets...</div>
+    </div>
+
+    <!-- Dataset cards -->
+    <div class="content-area" id="datasetsGrid">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            Loading datasets...
+        </div>
+    </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────
+let allDatasets = [];
+let selectedCategories = new Set();
+let currentRunId = null;
+let outputPollTimer = null;
+
+// ── Category icons mapping ─────────────────────────────────────────
+const CATEGORY_ICONS = {
+    'Audio': '🔊',
+    'Emotions_EEG': '🧠',
+    'Emotions_Images': '🖼️',
+    'Emotions_Voice': '🎙️',
+    'Images_Supervised': '📷',
+    'Images_Unsupervised': '🌌',
+    'Manga_Anime': '🎌',
+    'NLP_ENG': '📝',
+    'NLP_ENG_Dialogs': '💬',
+    'NLP_ENG_Sentiment': '❤️',
+    'NLP_ESP': '🇪🇸',
+    'NLP_ESP_Translation': '🔀',
+    'NLP_Multilingual': '🌍',
+};
+
+// ── Init ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadDatasets();
+    checkKaggleToken();
+});
+
+async function checkKaggleToken() {
+    try {
+        const resp = await fetch('/api/kaggle-token');
+        const data = await resp.json();
+        document.getElementById('kaggleWarning').style.display = data.configured ? 'none' : 'flex';
+    } catch (e) { /* ignore */ }
+}
+
+async function loadDatasets() {
+    const grid = document.getElementById('datasetsGrid');
+    grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div>Loading datasets...</div>';
+
+    try {
+        const resp = await fetch('/api/datasets');
+        allDatasets = await resp.json();
+        renderDatasets();
+        updateSummary();
+    } catch (e) {
+        grid.innerHTML = '<div class="empty-state">Error loading datasets: ' + e.message + '</div>';
+    }
+}
+
+function renderDatasets() {
+    const grid = document.getElementById('datasetsGrid');
+
+    if (allDatasets.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No datasets found. Ensure data/train_data/ contains download.sh scripts.</div>';
+        return;
+    }
+
+    grid.innerHTML = allDatasets.map(cat => renderCategoryCard(cat)).join('');
+}
+
+function renderCategoryCard(cat) {
+    const icon = CATEGORY_ICONS[cat.category] || '📁';
+    const pct = cat.total > 0 ? Math.round(cat.downloaded / cat.total * 100) : 0;
+    const isSelected = selectedCategories.has(cat.category);
+
+    let badgeClass = 'badge-empty';
+    let badgeText = `${cat.downloaded}/${cat.total}`;
+    if (cat.downloaded === cat.total && cat.total > 0) {
+        badgeClass = 'badge-complete';
+    } else if (cat.downloaded > 0) {
+        badgeClass = 'badge-partial';
+    }
+
+    return `
+    <div class="category-card ${isSelected ? 'selected' : ''}" id="card-${cat.category}">
+        <div class="category-header" onclick="toggleCategory('${cat.category}', event)">
+            <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                   onclick="event.stopPropagation(); toggleCategory('${cat.category}', event)"
+                   id="cb-${cat.category}">
+            <span class="category-icon">${icon}</span>
+            <span class="category-title">${cat.category.replace(/_/g, ' ')}</span>
+            <span class="category-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="category-progress">
+            <div class="category-progress-fill" style="width: ${pct}%"></div>
+        </div>
+        <div class="sub-datasets">
+            ${cat.sub_datasets.map(sd => renderSubDataset(sd, cat.category)).join('')}
+        </div>
+    </div>`;
+}
+
+function renderSubDataset(sd, category) {
+    const statusIcon = sd.downloaded ? '✅' : '⬜';
+    const cls = sd.downloaded ? 'downloaded' : '';
+    const typeLabel = sd.type === 'kaggle' ? 'kaggle' : 'url';
+
+    return `
+    <div class="sub-dataset ${cls}">
+        <span class="status-icon">${statusIcon}</span>
+        <span class="name">${sd.name}</span>
+        <span class="type-badge">${typeLabel}</span>
+        ${!sd.downloaded ? `<button class="download-btn" onclick="downloadSingle('${category}', '${sd.handle}', event)">⬇ Download</button>` : ''}
+    </div>`;
+}
+
+// ── Selection ──────────────────────────────────────────────────────
+function toggleCategory(category, event) {
+    if (selectedCategories.has(category)) {
+        selectedCategories.delete(category);
+    } else {
+        selectedCategories.add(category);
+    }
+    renderDatasets();
+    updateSummary();
+}
+
+function toggleSelectAll() {
+    if (selectedCategories.size === allDatasets.length) {
+        selectedCategories.clear();
+    } else {
+        allDatasets.forEach(cat => selectedCategories.add(cat.category));
+    }
+    renderDatasets();
+    updateSummary();
+}
+
+function updateSummary() {
+    const total = allDatasets.reduce((s, c) => s + c.total, 0);
+    const downloaded = allDatasets.reduce((s, c) => s + c.downloaded, 0);
+    const selected = selectedCategories.size;
+    document.getElementById('statusSummary').textContent =
+        `${downloaded}/${total} datasets downloaded · ${selected} categories selected`;
+}
+
+// ── Download actions ───────────────────────────────────────────────
+async function downloadAll() {
+    const categories = allDatasets.map(c => c.category);
+    if (categories.length === 0) return;
+    await startDownload(categories, []);
+}
+
+async function downloadSelected() {
+    if (selectedCategories.size === 0) {
+        showToast('Select at least one category', 'error');
+        return;
+    }
+    await startDownload([...selectedCategories], []);
+}
+
+async function downloadSingle(category, handle, event) {
+    event.stopPropagation();
+    await startDownload([category], handle ? [handle] : []);
+}
+
+async function startDownload(categories, subDatasets) {
+    const outputArea = document.getElementById('outputArea');
+    const outputDot = document.getElementById('outputDot');
+    const outputRunInfo = document.getElementById('outputRunInfo');
+
+    outputArea.textContent = 'Starting download...\n';
+    outputDot.className = 'status-dot running';
+    outputRunInfo.textContent = '';
+
+    try {
+        const resp = await fetch('/api/datasets/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categories, sub_datasets: subDatasets })
+        });
+        const data = await resp.json();
+
+        if (data.error) {
+            outputArea.textContent += '❌ Error: ' + data.error + '\n';
+            outputDot.className = 'status-dot error';
+            return;
+        }
+
+        currentRunId = data.run_id;
+        outputRunInfo.textContent = `${data.total_commands} download(s)`;
+        pollOutput();
+    } catch (e) {
+        outputArea.textContent += '❌ Request failed: ' + e.message + '\n';
+        outputDot.className = 'status-dot error';
+    }
+}
+
+function pollOutput() {
+    if (outputPollTimer) clearInterval(outputPollTimer);
+    outputPollTimer = setInterval(async () => {
+        if (!currentRunId) {
+            clearInterval(outputPollTimer);
+            return;
+        }
+        try {
+            const resp = await fetch(`/api/output/${currentRunId}`);
+            const data = await resp.json();
+            const outputArea = document.getElementById('outputArea');
+
+            if (data.lines && data.lines.length > 0) {
+                data.lines.forEach(line => {
+                    const isErr = line.toLowerCase().includes('error') || line.toLowerCase().includes('fail');
+                    outputArea.textContent += line;
+                    if (isErr) {
+                        // Append error marker
+                    }
+                });
+                outputArea.scrollTop = outputArea.scrollHeight;
+            }
+
+            // Check if process ended
+            const text = outputArea.textContent;
+            if (text.includes('[Process exited with code')) {
+                clearInterval(outputPollTimer);
+                const outputDot = document.getElementById('outputDot');
+                if (text.includes('code 0]')) {
+                    outputDot.className = 'status-dot done';
+                } else {
+                    outputDot.className = 'status-dot error';
+                }
+                currentRunId = null;
+                // Refresh dataset status
+                setTimeout(() => loadDatasets(), 1000);
+            }
+        } catch (e) {
+            clearInterval(outputPollTimer);
+        }
+    }, 800);
+}
+
+// ── Toast ──────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+        padding: 10px 20px; border-radius: 6px; font-size: 13px;
+        color: #fff; transition: opacity 0.3s;
+        background: ${type === 'error' ? '#dc3545' : '#28a745'};
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+</script>
+{% endblock %}

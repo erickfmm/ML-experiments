@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Topic Modeling & Word Clouds - ML Experiments{% endblock %}
+{% block head %}
+<style>
+    .page-layout { display: flex; flex-direction: column; gap: 16px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+    .card { background: #2b2b2b; border: 1px solid #444; border-radius: 8px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #333; border-bottom: 1px solid #444; cursor: pointer; user-select: none; }
+    .card-header:hover { background: #3a3a3a; }
+    .card-header h3 { margin: 0; color: #e0e0e0; font-size: 16px; }
+    .card-header .toggle-icon { color: #888; font-size: 18px; transition: transform 0.2s; }
+    .card-header.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .card-body { padding: 16px; }
+    .card-body.collapsed { display: none; }
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #444; margin-bottom: 16px; }
+    .tab-btn { padding: 10px 20px; background: #2b2b2b; color: #aaa; border: none; cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab-btn.active { color: #fff; border-bottom-color: #1a6baa; background: #333; }
+    .tab-btn:hover { color: #e0e0e0; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .form-group label { display: block; color: #bbb; font-size: 13px; margin-bottom: 4px; font-weight: 600; }
+    .form-group input, .form-group select {
+        width: 100%; padding: 8px 10px; background: #1e1e1e; border: 1px solid #555;
+        border-radius: 4px; color: #e0e0e0; font-size: 14px; box-sizing: border-box;
+    }
+    .form-group input:focus { outline: none; border-color: #1a6baa; }
+    .btn { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-run { background: #28a745; color: #fff; }
+    .btn-run:hover { background: #218838; }
+    .btn-run:disabled { background: #555; cursor: not-allowed; }
+    .output-area {
+        background: #1a1a1a; color: #0f0; font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 13px; padding: 12px; min-height: 200px; max-height: 500px;
+        overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+    }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-dot.idle { background: #6c757d; } .status-dot.running { background: #ffc107; animation: pulse 1s infinite; }
+    .status-dot.done { background: #28a745; } .status-dot.error { background: #dc3545; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .desc { color: #999; font-size: 13px; margin-bottom: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('topic')">📋 Topic Modeling</button>
+        <button class="tab-btn" onclick="switchTab('wordcloud')">☁️ Word Clouds</button>
+    </div>
+
+    <!-- Topic Modeling Tab -->
+    <div class="tab-content active" id="tab-topic">
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 Topic Modeling (LDA)</h3>
+                <span>
+                    <span class="status-dot idle" id="topic-status-dot"></span>
+                    <span id="topic-status-text" style="color:#aaa">Idle</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="desc">Full topic modeling pipeline for Spanish text corpora. Multi-threaded NLP preprocessing (NER + lemmatization via spaCy), then fits an LDA model. Generates topic and entity word clouds.</p>
+                <div class="param-grid">
+                    <div class="form-group">
+                        <label>Dataset</label>
+                        <select id="topic-dataset">
+                            <option value="wikihow">Wikihow (Spanish)</option>
+                            <option value="news">Spanish News</option>
+                            <option value="evaluacion">Evaluación</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Topics</label>
+                        <input type="number" id="topic-n-topics" value="20" min="2" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Threads</label>
+                        <input type="number" id="topic-threads" value="16" min="1" max="64">
+                    </div>
+                </div>
+                <div style="margin-top: 14px; display: flex; gap: 10px;">
+                    <button class="btn btn-run" id="topic-run-btn" onclick="runTopicModeling()">▶ Run Topic Modeling</button>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('topic-output')">🗑️ Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Word Clouds Tab -->
+    <div class="tab-content" id="tab-wordcloud">
+        <div class="card">
+            <div class="card-header">
+                <h3>☁️ Word Clouds from NER Entities</h3>
+                <span>
+                    <span class="status-dot idle" id="wc-status-dot"></span>
+                    <span id="wc-status-text" style="color:#aaa">Idle</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="desc">Generate word clouds from NER entities extracted from pre-processed text files. Creates a global word cloud plus individual word clouds per document.</p>
+                <div class="param-grid">
+                    <div class="form-group">
+                        <label>Max Words</label>
+                        <input type="number" id="wc-max-words" value="100" min="10" max="500">
+                    </div>
+                    <div class="form-group">
+                        <label>Width</label>
+                        <input type="number" id="wc-width" value="2500" min="500" max="5000" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Height</label>
+                        <input type="number" id="wc-height" value="2500" min="500" max="5000" step="100">
+                    </div>
+                </div>
+                <div style="margin-top: 14px; display: flex; gap: 10px;">
+                    <button class="btn btn-run" id="wc-run-btn" onclick="runWordClouds()">☁️ Generate Word Clouds</button>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('wc-output')">🗑️ Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+        <div class="card-header"><h3>📟 Output</h3></div>
+        <div class="output-area" id="topic-output">Ready.</div>
+        <div class="output-area" id="wc-output" style="display:none">Ready.</div>
+    </div>
+</div>
+
+<script>
+let runs = {};
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const idx = tab === 'topic' ? 1 : 2;
+    document.querySelector(`.tab-btn:nth-child(${idx})`).classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById('topic-output').style.display = tab === 'topic' ? '' : 'none';
+    document.getElementById('wc-output').style.display = tab === 'wordcloud' ? '' : 'none';
+}
+
+function setStatus(prefix, s) {
+    const dot = document.getElementById(`${prefix}-status-dot`);
+    const txt = document.getElementById(`${prefix}-status-text`);
+    if(dot) dot.className = "status-dot " + s;
+    if(txt) txt.textContent = {idle:"Idle",running:"Running…",done:"Done",error:"Error"}[s]||s;
+    const btn = document.getElementById(`${prefix}-run-btn`);
+    if(btn) btn.disabled = s === "running";
+}
+
+function appendOutput(id, t) { const el = document.getElementById(id); el.textContent += t; el.scrollTop = el.scrollHeight; }
+function clearOutput(id) { document.getElementById(id).textContent = ""; }
+
+async function pollOutput(runId, outputId, prefix) {
+    if (!runId) return;
+    const res = await fetch(`/api/output/${runId}`);
+    const data = await res.json();
+    if (data.lines?.length) data.lines.forEach(l => appendOutput(outputId, l));
+    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(runs[runId]); setStatus(prefix,'done'); delete runs[runId]; }
+}
+
+async function runTopicModeling() {
+    clearOutput('topic-output'); setStatus('topic','running');
+    const params = {
+        dataset: document.getElementById('topic-dataset').value,
+        n_topics: parseInt(document.getElementById('topic-n-topics').value),
+        maxthreads: parseInt(document.getElementById('topic-threads').value),
+    };
+    const res = await fetch("/api/topic_modeling/run", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(params) });
+    const data = await res.json();
+    if (data.error) { appendOutput('topic-output', "Error: " + data.error + "\n"); setStatus('topic','error'); return; }
+    appendOutput('topic-output', `--- Topic Modeling (LDA, ${params.n_topics} topics, ${params.dataset}) ---\n`);
+    runs[data.run_id] = setInterval(() => pollOutput(data.run_id, 'topic-output', 'topic'), 400);
+}
+
+async function runWordClouds() {
+    clearOutput('wc-output'); setStatus('wc','running');
+    const params = {
+        max_words: parseInt(document.getElementById('wc-max-words').value),
+        width: parseInt(document.getElementById('wc-width').value),
+        height: parseInt(document.getElementById('wc-height').value),
+    };
+    const res = await fetch("/api/wordclouds/run", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(params) });
+    const data = await res.json();
+    if (data.error) { appendOutput('wc-output', "Error: " + data.error + "\n"); setStatus('wc','error'); return; }
+    appendOutput('wc-output', `--- Generating Word Clouds (${params.max_words} max words) ---\n`);
+    runs[data.run_id] = setInterval(() => pollOutput(data.run_id, 'wc-output', 'wc'), 400);
+}
+</script>
+{% endblock %}

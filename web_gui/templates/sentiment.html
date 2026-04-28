@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Sentiment Analysis - ML Experiments{% endblock %}
+{% block head %}
+<style>
+    .page-layout { display: flex; flex-direction: column; gap: 16px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+    .card { background: #2b2b2b; border: 1px solid #444; border-radius: 8px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #333; border-bottom: 1px solid #444; cursor: pointer; user-select: none; }
+    .card-header:hover { background: #3a3a3a; }
+    .card-header h3 { margin: 0; color: #e0e0e0; font-size: 16px; }
+    .card-header .toggle-icon { color: #888; font-size: 18px; transition: transform 0.2s; }
+    .card-header.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .card-body { padding: 16px; }
+    .card-body.collapsed { display: none; }
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #444; margin-bottom: 16px; }
+    .tab-btn { padding: 10px 20px; background: #2b2b2b; color: #aaa; border: none; cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+    .tab-btn.active { color: #fff; border-bottom-color: #1a6baa; background: #333; }
+    .tab-btn:hover { color: #e0e0e0; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .form-group label { display: block; color: #bbb; font-size: 13px; margin-bottom: 4px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 8px 10px; background: #1e1e1e; border: 1px solid #555;
+        border-radius: 4px; color: #e0e0e0; font-size: 14px; box-sizing: border-box;
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; font-family: monospace; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #1a6baa; }
+    .btn { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-run { background: #28a745; color: #fff; }
+    .btn-run:hover { background: #218838; }
+    .btn-run:disabled { background: #555; cursor: not-allowed; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-primary:hover { background: #0069d9; }
+    .output-area {
+        background: #1a1a1a; color: #0f0; font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 13px; padding: 12px; min-height: 200px; max-height: 500px;
+        overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+    }
+    .result-box { background: #1e1e1e; border: 1px solid #555; border-radius: 6px; padding: 16px; margin-top: 12px; }
+    .result-box .label { color: #aaa; font-size: 13px; margin-bottom: 4px; }
+    .result-box .value { color: #fff; font-size: 20px; font-weight: 700; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-dot.idle { background: #6c757d; } .status-dot.running { background: #ffc107; animation: pulse 1s infinite; }
+    .status-dot.done { background: #28a745; } .status-dot.error { background: #dc3545; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .desc { color: #999; font-size: 13px; margin-bottom: 12px; }
+    .dataset-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .dataset-chip { padding: 4px 12px; background: #1e1e1e; border: 1px solid #555; border-radius: 12px; color: #ccc; font-size: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('train')">🏋️ Train</button>
+        <button class="tab-btn" onclick="switchTab('evaluate')">💬 Evaluate</button>
+    </div>
+
+    <!-- Train Tab -->
+    <div class="tab-content active" id="tab-train">
+        <div class="card">
+            <div class="card-header" onclick="toggleCard(this)">
+                <h3>🏋️ Train Sentiment DCNN</h3>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span class="status-dot idle" id="train-status-dot"></span>
+                    <span id="train-status-text" style="color:#aaa">Idle</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="desc">Train a 1D CNN (DCNN) with bigram/trigram/fourgram filters on aggregated English sentiment datasets. The pipeline includes downsampling, one-hot encoding, text cleaning, tokenization, and padding.</p>
+                <div class="dataset-list">
+                    <span class="dataset-chip">1M Tweets</span>
+                    <span class="dataset-chip">IMDB Reviews</span>
+                    <span class="dataset-chip">Reddit</span>
+                    <span class="dataset-chip">Twitter</span>
+                    <span class="dataset-chip">Sentiment140</span>
+                    <span class="dataset-chip">Steam</span>
+                </div>
+                <div class="param-grid">
+                    <div class="form-group">
+                        <label>Embedding Dim</label>
+                        <input type="number" id="emb-dim" value="200" min="50" max="500">
+                    </div>
+                    <div class="form-group">
+                        <label>Filters</label>
+                        <input type="number" id="nb-filters" value="100" min="10" max="500">
+                    </div>
+                    <div class="form-group">
+                        <label>FFN Units</label>
+                        <input type="number" id="ffn-units" value="256" min="32" max="1024">
+                    </div>
+                    <div class="form-group">
+                        <label>Batch Size</label>
+                        <input type="number" id="batch-size" value="256" min="16" max="2048">
+                    </div>
+                    <div class="form-group">
+                        <label>Epochs</label>
+                        <input type="number" id="epochs" value="25" min="1" max="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Dropout Rate</label>
+                        <input type="number" id="dropout" value="0.2" min="0" max="0.9" step="0.05">
+                    </div>
+                    <div class="form-group">
+                        <label>Downsample Ratio</label>
+                        <input type="number" id="downsample" value="0.8" min="0.1" max="2.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Tokenizer</label>
+                        <select id="tokenizer">
+                            <option value="tfds">HuggingFace Tokenizers</option>
+                            <option value="gensim">Gensim + spaCy</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 14px; display: flex; gap: 10px;">
+                    <button class="btn btn-run" id="train-run-btn" onclick="startTraining()">▶ Train Model</button>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="clearOutput('train-output')">🗑️ Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluate Tab -->
+    <div class="tab-content" id="tab-evaluate">
+        <div class="card">
+            <div class="card-header" onclick="toggleCard(this)">
+                <h3>💬 Evaluate Sentiment</h3>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="card-body">
+                <p class="desc">Enter text to evaluate its sentiment using a trained DCNN model. The model must be trained first.</p>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Text to Evaluate</label>
+                    <textarea id="eval-text" placeholder="Enter text to analyze sentiment...">This movie was absolutely fantastic! I loved every minute of it.</textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" id="eval-btn" onclick="evaluateText()">🔍 Analyze Sentiment</button>
+                </div>
+                <div class="result-box" id="eval-result" style="display:none;">
+                    <div class="label">Predicted Sentiment</div>
+                    <div class="value" id="eval-value">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+        <div class="card-header"><h3>📟 Output</h3></div>
+        <div class="output-area" id="train-output">Ready. Configure parameters and click Train.</div>
+    </div>
+</div>
+
+<script>
+let currentRunId = null, pollTimer = null;
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.tab-btn:nth-child(${tab === 'train' ? 1 : 2})`).classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+function toggleCard(header) {
+    header.classList.toggle('collapsed');
+    header.nextElementSibling.classList.toggle('collapsed');
+}
+
+function setStatus(prefix, s) {
+    const dot = document.getElementById(`${prefix}-status-dot`);
+    const txt = document.getElementById(`${prefix}-status-text`);
+    if (dot) dot.className = "status-dot " + s;
+    if (txt) txt.textContent = {idle:"Idle",running:"Running…",done:"Done",error:"Error"}[s]||s;
+    const btn = document.getElementById(`${prefix}-run-btn`);
+    if (btn) btn.disabled = s === "running";
+}
+
+function appendOutput(id, t) { const el = document.getElementById(id); el.textContent += t; el.scrollTop = el.scrollHeight; }
+function clearOutput(id) { document.getElementById(id).textContent = ""; }
+
+async function poll() {
+    if (!currentRunId) return;
+    const res = await fetch(`/api/output/${currentRunId}`);
+    const data = await res.json();
+    if (data.lines?.length) data.lines.forEach(l => appendOutput('train-output', l));
+    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(pollTimer); setStatus('train','done'); currentRunId = null; }
+}
+
+async function startTraining() {
+    if (currentRunId) return;
+    clearOutput('train-output'); setStatus('train','running');
+    const params = {
+        emb_dim: parseInt(document.getElementById("emb-dim").value),
+        nb_filters: parseInt(document.getElementById("nb-filters").value),
+        ffn_units: parseInt(document.getElementById("ffn-units").value),
+        batch_size: parseInt(document.getElementById("batch-size").value),
+        epochs: parseInt(document.getElementById("epochs").value),
+        dropout: parseFloat(document.getElementById("dropout").value),
+        downsample: parseFloat(document.getElementById("downsample").value),
+        tokenizer: document.getElementById("tokenizer").value,
+    };
+    const res = await fetch("/api/sentiment/train", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(params) });
+    const data = await res.json();
+    if (data.error) { appendOutput('train-output', "Error: " + data.error + "\n"); setStatus('train','error'); return; }
+    currentRunId = data.run_id;
+    appendOutput('train-output', `--- Sentiment DCNN Training (${params.epochs} epochs) ---\n`);
+    pollTimer = setInterval(poll, 400);
+}
+
+async function evaluateText() {
+    const text = document.getElementById("eval-text").value;
+    if (!text.trim()) return;
+    const res = await fetch("/api/sentiment/evaluate", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({text}) });
+    const data = await res.json();
+    const box = document.getElementById("eval-result");
+    box.style.display = "";
+    if (data.error) { document.getElementById("eval-value").textContent = "Error: " + data.error; return; }
+    document.getElementById("eval-value").textContent = data.sentiment + (data.confidence ? ` (${(data.confidence*100).toFixed(1)}%)` : '');
+}
+</script>
+{% endblock %}

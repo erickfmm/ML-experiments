@@ -19,6 +19,7 @@ html, body {
     padding: 10px 20px;
     background: #2d2d2d;
     border-bottom: 1px solid #444;
+    flex-wrap: wrap;
 }
 .nav-brand {
     font-size: 18px;
@@ -26,7 +27,7 @@ html, body {
     color: #fff;
     white-space: nowrap;
 }
-.nav-links { display: flex; gap: 6px; }
+.nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
 .nav-links a {
     color: #bbb;
     text-decoration: none;

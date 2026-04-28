@@ -18,8 +18,17 @@
         <div class="nav-brand">🧪 ML Experiments</div>
         <div class="nav-links">
             <a href="/" class="{% if request.path == '/' %}active{% endif %}">📁 Test Files</a>
+            <a href="/autoencoder" class="{% if request.path == '/autoencoder' %}active{% endif %}">🧠 Autoencoder</a>
+            <a href="/clustering" class="{% if request.path == '/clustering' %}active{% endif %}">🔵 Clustering</a>
+            <a href="/confusion-matrices" class="{% if request.path == '/confusion-matrices' %}active{% endif %}">📊 Confusion</a>
+            <a href="/image-classifier" class="{% if request.path == '/image-classifier' %}active{% endif %}">🖼️ CNN</a>
+            <a href="/gan" class="{% if request.path == '/gan' %}active{% endif %}">🎨 GAN</a>
+            <a href="/sentiment" class="{% if request.path == '/sentiment' %}active{% endif %}">💬 Sentiment</a>
+            <a href="/tfidf" class="{% if request.path == '/tfidf' %}active{% endif %}">📈 TF-IDF</a>
+            <a href="/topic-modeling" class="{% if request.path == '/topic-modeling' %}active{% endif %}">📋 Topic Model</a>
             <a href="/psychoacoustic" class="{% if request.path == '/psychoacoustic' %}active{% endif %}">🎵 Psychoacoustic</a>
             <a href="/butterfly" class="{% if request.path == '/butterfly' %}active{% endif %}">🦋 Butterfly</a>
+            <a href="/datasets" class="{% if request.path == '/datasets' %}active{% endif %}">📦 Datasets</a>
             <a href="/settings" class="{% if request.path == '/settings' %}active{% endif %}">⚙️ Settings</a>
         </div>
     </nav>
