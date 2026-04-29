@@ -24,10 +24,49 @@ app = Flask(
 # ── Configuration ──────────────────────────────────────────────────────
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 TEST_DIR = os.path.join(BASE_DIR, "test")
+RESULT_DIRS = {
+    "tfidf": os.path.join(BASE_DIR, "data", "created_models", "tfidf_tests"),
+    "clustering": os.path.join(BASE_DIR, "data", "created_models", "clustering_benchmarks"),
+    "confusion": os.path.join(BASE_DIR, "data", "created_models", "confusion_matrices"),
+    "gan": os.path.join(BASE_DIR, "data", "created_models", "gan"),
+}
 
 # In-memory store for running processes
 _processes: dict[str, subprocess.Popen] = {}
 _outputs: dict[str, list[str]] = {}
+
+
+def _humanize_artifact_name(filename: str) -> str:
+    stem = os.path.splitext(filename)[0]
+    stem = stem.replace("_", " ").replace("-", " ").strip()
+    parts = [part for part in stem.split() if not part.isdigit()]
+    return " ".join(parts).title() if parts else filename
+
+
+def _list_result_images(group: str):
+    result_dir = RESULT_DIRS.get(group)
+    if not result_dir:
+        return None
+
+    if not os.path.isdir(result_dir):
+        return []
+
+    items = []
+    for name in os.listdir(result_dir):
+        if not name.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")):
+            continue
+        path = os.path.join(result_dir, name)
+        if not os.path.isfile(path):
+            continue
+        updated = int(os.path.getmtime(path))
+        items.append({
+            "name": name,
+            "title": _humanize_artifact_name(name),
+            "updated": updated,
+            "url": f"/api/visualizations/{group}/{name}?v={updated}",
+        })
+
+    return sorted(items, key=lambda item: (item["updated"], item["name"]), reverse=True)
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -229,6 +268,24 @@ def get_output(run_id):
     lines = _outputs.get(run_id, [])
     _outputs[run_id] = []
     return jsonify({"lines": lines})
+
+
+@app.route("/api/visualizations/<group>", methods=["GET"])
+def api_list_visualizations(group):
+    """List saved visualization images for a known result group."""
+    images = _list_result_images(group)
+    if images is None:
+        return jsonify({"error": f"Unknown visualization group: {group}"}), 404
+    return jsonify({"exists": bool(images), "images": images})
+
+
+@app.route("/api/visualizations/<group>/<path:filename>", methods=["GET"])
+def api_get_visualization(group, filename):
+    """Serve a saved visualization image for a known result group."""
+    result_dir = RESULT_DIRS.get(group)
+    if not result_dir:
+        return jsonify({"error": f"Unknown visualization group: {group}"}), 404
+    return send_from_directory(result_dir, filename)
 
 
 @app.route("/api/kill/<run_id>", methods=["POST"])

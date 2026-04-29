@@ -132,11 +132,26 @@
         <div class="output-area" id="bench-output">Ready.</div>
         <div class="output-area" id="mc-output" style="display:none">Ready.</div>
     </div>
+
+    <div class="card">
+        <div class="card-header"><h3>🧭 Benchmark Visuals</h3></div>
+        <div class="card-body">
+            <div class="viz-section">
+                <div class="viz-toolbar">
+                    <span class="viz-note">Enable “Plot Results” for benchmark runs to save cluster assignment plots here.</span>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="refreshBenchmarkVisuals()">🔄 Refresh Visuals</button>
+                </div>
+                <div class="viz-grid" id="bench-visuals"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script src="/static/js/results_gallery.js"></script>
 <script>
 let runs = {};
 let runPrefixMap = {};  // runId -> prefix
+let benchPlotEnabled = false;
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -166,6 +181,15 @@ function appendOutput(id, text) {
 
 function clearOutput(id) { document.getElementById(id).textContent = ""; }
 
+function refreshBenchmarkVisuals() {
+    ResultGallery.fetchAndRender('clustering', 'bench-visuals', {
+        loadingMessage: 'Loading benchmark visuals…',
+        emptyMessage: 'No saved clustering visuals yet — run the benchmarks with plotting enabled.',
+    });
+}
+
+refreshBenchmarkVisuals();
+
 async function stopRun(prefix) {
     // Find the runId associated with this prefix
     const runId = Object.keys(runPrefixMap).find(rid => runPrefixMap[rid] === prefix);
@@ -186,6 +210,10 @@ async function poll(runId, outputId, prefix) {
     if (data.lines && data.lines.some(l => l.includes("[Process exited"))) {
         clearInterval(runs[runId]);
         setStatus(prefix, "done");
+        if (prefix === 'bench') {
+            if (benchPlotEnabled) refreshBenchmarkVisuals();
+            else ResultGallery.setMessage('bench-visuals', 'Plotting was disabled for the last benchmark run. Turn on “Plot Results” to save visuals.', 'empty');
+        }
         delete runs[runId];
         delete runPrefixMap[runId];
     }
@@ -200,6 +228,12 @@ async function startBenchmark() {
         samples: parseInt(document.getElementById('bench-samples').value),
         plot: document.getElementById('bench-plot').value === 'true',
     };
+    benchPlotEnabled = params.plot;
+    if (benchPlotEnabled) {
+        ResultGallery.setLoading('bench-visuals', 'Rendering benchmark plots…');
+    } else {
+        ResultGallery.setMessage('bench-visuals', 'Plotting is disabled for this run. Enable “Plot Results” to save visuals.', 'empty');
+    }
     const res = await fetch("/api/clustering/benchmarks", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(params) });
     const data = await res.json();
     if (data.error) { appendOutput('bench-output', "Error: " + data.error + "\n"); setStatus('bench','error'); return; }

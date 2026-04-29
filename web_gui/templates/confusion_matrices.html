@@ -73,8 +73,22 @@
         <div class="card-header"><h3>📟 Output</h3></div>
         <div class="output-area" id="output">Ready. Configure parameters and click Generate.</div>
     </div>
+
+    <div class="card">
+        <div class="card-header"><h3>🖼️ Generated Matrices</h3></div>
+        <div class="card-body">
+            <div class="viz-section">
+                <div class="viz-toolbar">
+                    <span class="viz-note">Saved heatmaps for correlations, distances, coefficients, and confusion matrices appear here after each run.</span>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="refreshVisuals()">🔄 Refresh Visuals</button>
+                </div>
+                <div class="viz-grid" id="matrix-visuals"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script src="/static/js/results_gallery.js"></script>
 <script>
 let currentRunId = null, pollTimer = null;
 function setStatus(s) {
@@ -86,6 +100,15 @@ function setStatus(s) {
 }
 function appendOutput(t) { const el = document.getElementById("output"); el.textContent += t; el.scrollTop = el.scrollHeight; }
 function clearOutput() { document.getElementById("output").textContent = ""; }
+
+function refreshVisuals() {
+    ResultGallery.fetchAndRender('confusion', 'matrix-visuals', {
+        loadingMessage: 'Loading matrix visuals…',
+        emptyMessage: 'Run the confusion-matrix workflow to generate saved visualizations.',
+    });
+}
+
+refreshVisuals();
 
 async function stopRun() {
     if (!currentRunId) return;
@@ -101,12 +124,18 @@ async function poll() {
     const res = await fetch(`/api/output/${currentRunId}`);
     const data = await res.json();
     if (data.lines?.length) data.lines.forEach(l => appendOutput(l));
-    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(pollTimer); setStatus("done"); currentRunId = null; }
+    if (data.lines?.some(l => l.includes("[Process exited"))) {
+        clearInterval(pollTimer);
+        setStatus("done");
+        currentRunId = null;
+        refreshVisuals();
+    }
 }
 
 async function startRun() {
     if (currentRunId) return;
     clearOutput(); setStatus("running");
+    ResultGallery.setLoading('matrix-visuals', 'Generating fresh matrices…');
     const params = {
         instances: parseInt(document.getElementById("instances").value),
         dimensions: parseInt(document.getElementById("dimensions").value),

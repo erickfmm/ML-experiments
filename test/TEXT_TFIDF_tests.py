@@ -1,14 +1,47 @@
 import os
+import re
+import shutil
 import sys
 from os.path import dirname, join, abspath
+
 sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 ######################################################
 
+import matplotlib
 
-import mlexperiments.preprocessing.text.tf_idf.term_frequency as tf
+if not os.getenv("DISPLAY"):
+    matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
+
 import mlexperiments.preprocessing.text.tf_idf.inverse_document_frequency as idf
+import mlexperiments.preprocessing.text.tf_idf.term_frequency as tf
 import mlexperiments.preprocessing.text.tf_idf.tf_idf_document as tf_idf_doc_funcs
 import mlexperiments.preprocessing.text.tf_idf.tf_idf_query as tf_idf_query_funcs
+
+
+OUTPUT_DIR = os.path.join("data", "created_models", "tfidf_tests")
+
+
+def _get_env_bool(name, default=True):
+    value = os.getenv(name)
+    if value is None or value == "":
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _prepare_output_dir():
+    shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
+def _save_figure(fig, filename):
+    path = os.path.join(OUTPUT_DIR, filename)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved plot: {path}")
+
 
 # text taken from sanish newsparlament dataset from wmt11, first 10 lines
 ss = []
@@ -23,89 +56,79 @@ ss.append('General Musharraf appeared on the national scene on October 12, 1999,
 ss.append("Many Pakistanis, disillusioned with Pakistan's political class, remained mute, thinking that he might deliver.")
 ss.append("The September 11, 2001, terrorist attacks on America brought Musharraf into the international limelight as he agreed to ditch the Taliban and support the United States-led war on terror.")
 
-import re
 docs = []
 words = set()
-for s in ss:
+for sentence in ss:
     doc = []
-    for w in re.findall(r"\w+", s):
-        if len(w) > 1:
-            doc.append(w)
-            words.add(w)
+    for word in re.findall(r"\w+", sentence):
+        if len(word) > 1:
+            doc.append(word)
+            words.add(word)
     docs.append(doc)
-
-import matplotlib.pyplot as plt
 
 tf_points = {
     "bin": [],
     "raw": [],
     "rel": [],
     "log": [],
-    "double": []
+    "double": [],
 }
 idf_point = {
     "idf": [],
     "smooth": [],
     "max": [],
-    "prob": []
+    "prob": [],
 }
 tf_idf_doc = [[], [], []]
 tf_idf_query = [[], [], []]
 
-i = 0
-for doc in docs:
+for i, doc in enumerate(docs):
     tf_points["bin"].append([])
     tf_points["raw"].append([])
     tf_points["rel"].append([])
     tf_points["log"].append([])
-    tf_points["double"].append([]) 
+    tf_points["double"].append([])
     tf_idf_doc[0].append([])
     tf_idf_doc[1].append([])
     tf_idf_doc[2].append([])
     tf_idf_query[0].append([])
     tf_idf_query[1].append([])
     tf_idf_query[2].append([])
-    for w in doc:
-        tf_points["bin"][i].append(tf.tf_binary(w, doc))
-        tf_points["raw"][i].append(tf.tf_raw(w, doc))
-        tf_points["rel"][i].append(tf.tf_relative(w, doc))
-        tf_points["log"][i].append(tf.tf_lognorm(w, doc))
-        tf_points["double"][i].append(tf.tf_doublenormk(w, doc))
-        tf_idf_doc[0][i].append(tf_idf_doc_funcs.tf_idf_document1(w, doc, docs))
-        tf_idf_doc[1][i].append(tf_idf_doc_funcs.tf_idf_document2(w, doc, docs))
-        tf_idf_doc[2][i].append(tf_idf_doc_funcs.tf_idf_document3(w, doc, docs))
-        tf_idf_query[0][i].append(tf_idf_query_funcs.tf_idf_query1(w, doc, docs))
-        tf_idf_query[1][i].append(tf_idf_query_funcs.tf_idf_query2(w, doc, docs))
-        tf_idf_query[2][i].append(tf_idf_query_funcs.tf_idf_query3(w, doc, docs))
-    i += 1
+    for word in doc:
+        tf_points["bin"][i].append(tf.tf_binary(word, doc))
+        tf_points["raw"][i].append(tf.tf_raw(word, doc))
+        tf_points["rel"][i].append(tf.tf_relative(word, doc))
+        tf_points["log"][i].append(tf.tf_lognorm(word, doc))
+        tf_points["double"][i].append(tf.tf_doublenormk(word, doc))
+        tf_idf_doc[0][i].append(tf_idf_doc_funcs.tf_idf_document1(word, doc, docs))
+        tf_idf_doc[1][i].append(tf_idf_doc_funcs.tf_idf_document2(word, doc, docs))
+        tf_idf_doc[2][i].append(tf_idf_doc_funcs.tf_idf_document3(word, doc, docs))
+        tf_idf_query[0][i].append(tf_idf_query_funcs.tf_idf_query1(word, doc, docs))
+        tf_idf_query[1][i].append(tf_idf_query_funcs.tf_idf_query2(word, doc, docs))
+        tf_idf_query[2][i].append(tf_idf_query_funcs.tf_idf_query3(word, doc, docs))
 
+for word in words:
+    idf_point["idf"].append(idf.idf(word, docs))
+    idf_point["smooth"].append(idf.idf_smooth(word, docs))
+    idf_point["max"].append(idf.idf_max(word, docs))
+    idf_point["prob"].append(idf.idf_probabilistic(word, docs))
 
-for w in words:
-    idf_point["idf"].append(idf.idf(w, docs))
-    idf_point["smooth"].append(idf.idf_smooth(w, docs))
-    idf_point["max"].append(idf.idf_max(w, docs))
-    idf_point["prob"].append(idf.idf_probabilistic(w, docs))
+plot_tf = _get_env_bool("ML_PLOT_TF", True)
+plot_tf_idf_doc = _get_env_bool("ML_PLOT_TFIDF_DOC", True)
+plot_tf_idf_query = _get_env_bool("ML_PLOT_TFIDF_QUERY", True)
+plot_idf = _get_env_bool("ML_PLOT_IDF", True)
 
-# import pprint
-# pp = pprint.PrettyPrinter(indent=4)
-# pp.pprint(tf_points["bin"])
+running_from_web = any(
+    key in os.environ for key in ("ML_PLOT_TF", "ML_PLOT_IDF", "ML_PLOT_TFIDF_DOC", "ML_PLOT_TFIDF_QUERY")
+)
+show_plot = _get_env_bool("ML_SHOW_PLOT", default=(not running_from_web and bool(os.getenv("DISPLAY"))))
+mode_plot = "."
 
-
-plot_tf = True  # False
-plot_tf_idf_doc = True
-plot_tf_idf_query = True
-plot_idf = True  # True
-
-mode_plot = "."  # "-"
+_prepare_output_dir()
 
 if plot_tf:
     fig = plt.figure()
     plt.title("Term Frequency")
-    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
-
-    # ax = fig.add_subplot(2, 2, 1)
-    # for i in range(len(docs)):
-    #    ax.plot(tf_points["bin"][i])
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("raw")
@@ -121,18 +144,17 @@ if plot_tf:
     ax.title.set_text("log norm")
     for i in range(len(docs)):
         ax.plot(tf_points["log"][i], mode_plot)
-    # plt.show()
 
     ax = fig.add_subplot(2, 2, 4)
     ax.title.set_text("double norm")
     for i in range(len(docs)):
         ax.plot(tf_points["double"][i], mode_plot)
-    plt.show()
+
+    _save_figure(fig, "01_term_frequency.png")
 
 if plot_idf:
     fig = plt.figure()
     plt.title("Inverse Document Frequency")
-    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("idf")
@@ -145,16 +167,15 @@ if plot_idf:
     ax = fig.add_subplot(2, 2, 3)
     ax.title.set_text("max")
     ax.plot(idf_point["max"], mode_plot)
-    
+
     ax = fig.add_subplot(2, 2, 4)
     ax.title.set_text("prob")
     ax.plot(idf_point["prob"], mode_plot)
-    plt.show()
 
+    _save_figure(fig, "02_inverse_document_frequency.png")
 
 if plot_tf_idf_doc:
     fig = plt.figure()
-    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("1")
@@ -170,11 +191,11 @@ if plot_tf_idf_doc:
     ax.title.set_text("3")
     for i in range(len(docs)):
         ax.plot(tf_idf_doc[2][i], mode_plot)
-    plt.show()
+
+    _save_figure(fig, "03_tfidf_document.png")
 
 if plot_tf_idf_query:
     fig = plt.figure()
-    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax = fig.add_subplot(2, 2, 1)
     ax.title.set_text("1")
@@ -190,4 +211,10 @@ if plot_tf_idf_query:
     ax.title.set_text("3")
     for i in range(len(docs)):
         ax.plot(tf_idf_query[2][i], mode_plot)
+
+    _save_figure(fig, "04_tfidf_query.png")
+
+if show_plot:
     plt.show()
+else:
+    plt.close("all")

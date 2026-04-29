@@ -17,6 +17,9 @@ import torch.nn as nn
 import torch.optim as optim
 
 
+OUTPUT_DIR = os.path.join("data", "created_models", "gan")
+
+
 def _get_env_int(name, default):
     value = os.getenv(name)
     if value is None or value == "":
@@ -33,6 +36,10 @@ def _get_env_bool(name, default=False):
     if value is None or value == "":
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _prepare_output_dir():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 class Generator(nn.Module):
@@ -91,7 +98,8 @@ def plot_generated_images(epoch, generator, random_dim, random_gen, examples=100
         plt.imshow(generated_images[i], interpolation='nearest', cmap='gray_r')
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig('gan_generated_image_epoch_%d.png' % epoch)
+    _prepare_output_dir()
+    plt.savefig(os.path.join(OUTPUT_DIR, 'gan_generated_image_epoch_%d.png' % epoch))
 
 
 def train(random_dim, random_gen, x_train, epochs=1, batch_size=128):
@@ -271,6 +279,10 @@ def plot_figures(figures, nrows = 1, ncols=1):
         axeslist.ravel()[ind].set_title(title)
         axeslist.ravel()[ind].set_axis_off()
     plt.tight_layout() # optional
+    _prepare_output_dir()
+    preview_path = os.path.join(OUTPUT_DIR, "latest_preview.png")
+    plt.savefig(preview_path, dpi=160, bbox_inches='tight')
+    print(f"Saved plot: {preview_path}")
 if __name__ == "__main__":
     seed = _get_env_int("ML_SEED", 3335)
     random_dim = _get_env_int("ML_RANDOM_DIM", 100)

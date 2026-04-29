@@ -114,8 +114,22 @@
         <div class="output-area" id="tests-output">Ready.</div>
         <div class="output-area" id="bigtext-output" style="display:none">Ready.</div>
     </div>
+
+    <div class="card">
+        <div class="card-header"><h3>🧮 Saved Charts</h3></div>
+        <div class="card-body">
+            <div class="viz-section">
+                <div class="viz-toolbar">
+                    <span class="viz-note">Formula-comparison runs save the requested TF, IDF, and TF-IDF charts here.</span>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="refreshTfidfVisuals()">🔄 Refresh Visuals</button>
+                </div>
+                <div class="viz-grid" id="tfidf-visuals"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script src="/static/js/results_gallery.js"></script>
 <script>
 let runs = {};
 let runPrefixMap = {};  // runId -> prefix
@@ -144,6 +158,15 @@ function setStatus(prefix, s) {
 function appendOutput(id, t) { const el = document.getElementById(id); el.textContent += t; el.scrollTop = el.scrollHeight; }
 function clearOutput(id) { document.getElementById(id).textContent = ""; }
 
+function refreshTfidfVisuals() {
+    ResultGallery.fetchAndRender('tfidf', 'tfidf-visuals', {
+        loadingMessage: 'Loading TF-IDF charts…',
+        emptyMessage: 'Run the formula comparison to generate saved charts.',
+    });
+}
+
+refreshTfidfVisuals();
+
 async function stopRun(prefix) {
     const runId = Object.keys(runPrefixMap).find(rid => runPrefixMap[rid] === prefix);
     if (!runId) return;
@@ -160,11 +183,18 @@ async function pollOutput(runId, outputId, prefix) {
     const res = await fetch(`/api/output/${runId}`);
     const data = await res.json();
     if (data.lines?.length) data.lines.forEach(l => appendOutput(outputId, l));
-    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(runs[runId]); setStatus(prefix, 'done'); delete runs[runId]; delete runPrefixMap[runId]; }
+    if (data.lines?.some(l => l.includes("[Process exited"))) {
+        clearInterval(runs[runId]);
+        setStatus(prefix, 'done');
+        if (prefix === 'tests') refreshTfidfVisuals();
+        delete runs[runId];
+        delete runPrefixMap[runId];
+    }
 }
 
 async function runTests() {
     clearOutput('tests-output'); setStatus('tests', 'running');
+    ResultGallery.setLoading('tfidf-visuals', 'Generating TF-IDF charts…');
     const params = {
         plot_tf: document.getElementById('plot-tf').value === 'true',
         plot_idf: document.getElementById('plot-idf').value === 'true',

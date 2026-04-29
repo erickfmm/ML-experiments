@@ -99,6 +99,19 @@
         </div>
     </div>
 
+    <div class="card">
+        <div class="card-header"><h3>✨ Saved Training Preview</h3></div>
+        <div class="card-body">
+            <div class="viz-section">
+                <div class="viz-toolbar">
+                    <span class="viz-note">A preview grid from the most recent training run shows up here automatically.</span>
+                    <button class="btn" style="background:#6c757d;color:#fff" onclick="refreshTrainingPreview()">🔄 Refresh Preview</button>
+                </div>
+                <div class="viz-grid" id="training-preview-grid"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Output -->
     <div class="card">
         <div class="card-header"><h3>📟 Output</h3></div>
@@ -106,6 +119,7 @@
     </div>
 </div>
 
+<script src="/static/js/results_gallery.js"></script>
 <script>
 let currentRunId = null, pollTimer = null;
 
@@ -119,6 +133,13 @@ function setStatus(s) {
 function appendOutput(t) { const el = document.getElementById("output"); el.textContent += t; el.scrollTop = el.scrollHeight; }
 function clearOutput() { document.getElementById("output").textContent = ""; }
 
+function refreshTrainingPreview() {
+    ResultGallery.fetchAndRender('gan', 'training-preview-grid', {
+        loadingMessage: 'Loading the latest GAN preview…',
+        emptyMessage: 'No saved preview yet — train the GAN to capture a sample grid.',
+    });
+}
+
 // Check model status
 (async () => {
     try {
@@ -129,6 +150,7 @@ function clearOutput() { document.getElementById("output").textContent = ""; }
         if (data.exists) { dot.className = "dot exists"; label.textContent = "Trained GAN model found"; }
         else { dot.className = "dot missing"; label.textContent = "No trained model found — train first"; }
     } catch(e) { document.getElementById("model-label").textContent = "Status unavailable"; }
+    refreshTrainingPreview();
 })();
 
 async function stopRun() {
@@ -145,7 +167,13 @@ async function poll() {
     const res = await fetch(`/api/output/${currentRunId}`);
     const data = await res.json();
     if (data.lines?.length) data.lines.forEach(l => appendOutput(l));
-    if (data.lines?.some(l => l.includes("[Process exited"))) { clearInterval(pollTimer); setStatus("done"); currentRunId = null; }
+    if (data.lines?.some(l => l.includes("[Process exited"))) {
+        clearInterval(pollTimer);
+        setStatus("done");
+        currentRunId = null;
+        refreshTrainingPreview();
+        generateImages();
+    }
 }
 
 async function startTraining() {
