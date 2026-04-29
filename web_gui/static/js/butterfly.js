@@ -4,6 +4,7 @@
 
 let pollTimer = null;
 let currentRunId = null;
+let selectedButterflyFile = null;
 
 // ── Init ────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -219,8 +220,9 @@ async function trainClassifier() {
 
 // ── 5. Predict Image ────────────────────────────────────────────
 async function predictImage(event) {
-    const file = event.target.files[0];
+    const file = event?.target?.files?.[0] || selectedButterflyFile;
     if (!file) return;
+    selectedButterflyFile = file;
 
     appendLog("\n🔍 Predicting segmentation...\n");
 
@@ -247,6 +249,72 @@ async function predictImage(event) {
     } catch (err) {
         appendLog("Error: " + err.message + "\n");
     }
+}
+
+async function classifyImage() {
+    if (!selectedButterflyFile) {
+        appendLog("\n⚠️ Select an image first to classify it.\n");
+        return;
+    }
+
+    appendLog("\n🏷️ Classifying butterfly image...\n");
+
+    const formData = new FormData();
+    formData.append("image", selectedButterflyFile);
+
+    try {
+        const res = await fetch("/api/butterfly/classify", {
+            method: "POST",
+            body: formData,
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            appendLog("Error: " + data.error + "\n");
+            return;
+        }
+
+        renderClassificationResult(data);
+        appendLog(`✅ Classified as ${data.label} (${(data.confidence * 100).toFixed(1)}%)\n`);
+    } catch (err) {
+        appendLog("Error: " + err.message + "\n");
+    }
+}
+
+function renderClassificationResult(data) {
+    const panel = document.getElementById("classification-panel");
+    const labelEl = document.getElementById("classification-label");
+    const confidenceEl = document.getElementById("classification-confidence");
+    const listEl = document.getElementById("classification-top-list");
+
+    if (!panel || !labelEl || !confidenceEl || !listEl) return;
+
+    panel.style.display = "block";
+    labelEl.textContent = data.label || "Unknown";
+    confidenceEl.textContent = `Confidence: ${((data.confidence || 0) * 100).toFixed(1)}%`;
+
+    listEl.innerHTML = "";
+    (data.top_predictions || []).forEach((item, index) => {
+        const row = document.createElement("li");
+        row.className = "classification-item";
+
+        const rank = document.createElement("span");
+        rank.className = "classification-rank";
+        rank.textContent = `#${index + 1}`;
+
+        const label = document.createElement("span");
+        label.className = "classification-item-label";
+        label.textContent = item.label || `Class ${item.class_index}`;
+
+        const confidence = document.createElement("span");
+        confidence.className = "classification-item-confidence";
+        confidence.textContent = `${((item.confidence || 0) * 100).toFixed(1)}%`;
+
+        row.appendChild(rank);
+        row.appendChild(label);
+        row.appendChild(confidence);
+        listEl.appendChild(row);
+    });
 }
 
 // ── Drag & Drop ─────────────────────────────────────────────────

@@ -1,5 +1,8 @@
 import json
+import importlib.util
+import numbers
 import os
+import pickle
 import subprocess
 import sys
 import threading
@@ -24,6 +27,9 @@ app = Flask(
 # ── Configuration ──────────────────────────────────────────────────────
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 TEST_DIR = os.path.join(BASE_DIR, "test")
+BUTTERFLY_TEST_FILE = os.path.join(TEST_DIR, "IMAGE_segmentation_clasification_butterfly.py")
+BUTTERFLY_MODEL_DIR = os.path.join(BASE_DIR, "data", "created_models")
+BUTTERFLY_INPUT_SIZE = (100, 100)
 RESULT_DIRS = {
     "tfidf": os.path.join(BASE_DIR, "data", "created_models", "tfidf_tests"),
     "clustering": os.path.join(BASE_DIR, "data", "created_models", "clustering_benchmarks"),
@@ -67,6 +73,97 @@ def _list_result_images(group: str):
         })
 
     return sorted(items, key=lambda item: (item["updated"], item["name"]), reverse=True)
+
+
+def _load_symbol_from_file(file_path: str, module_name: str, symbol_name: str):
+    """Load a symbol from a Python file without requiring package imports."""
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load module spec for {file_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    try:
+        return getattr(module, symbol_name)
+    except AttributeError as exc:
+        raise ImportError(f"{symbol_name} not found in {file_path}") from exc
+
+
+def _load_butterfly_test_symbol(symbol_name: str):
+    """Load a symbol from the butterfly test script."""
+    return _load_symbol_from_file(
+        BUTTERFLY_TEST_FILE,
+        f"butterfly_{symbol_name.lower()}_module",
+        symbol_name,
+    )
+
+
+def _prepare_butterfly_image(image_stream):
+    """Load an uploaded butterfly image as a normalized RGB array."""
+    import numpy as np
+    from PIL import Image
+
+    image = Image.open(image_stream).convert("RGB")
+    image = image.resize(BUTTERFLY_INPUT_SIZE)
+    return np.asarray(image, dtype=np.float32) / 255.0
+
+
+def _image_array_to_base64(image_array):
+    """Encode a normalized image array to a PNG base64 string."""
+    import base64
+    import io
+    import numpy as np
+    from PIL import Image
+
+    safe_array = np.clip(image_array, 0, 1)
+    pil_img = Image.fromarray((safe_array * 255).astype(np.uint8))
+    buffer = io.BytesIO()
+    pil_img.save(buffer, format="PNG")
+    return base64.b64encode(buffer.getvalue()).decode()
+
+
+def _format_butterfly_class_label(label):
+    """Convert raw classifier labels into a user-friendly string."""
+    if isinstance(label, numbers.Real) and float(label).is_integer():
+        return f"Class {int(label)}"
+    return str(label).replace("_", " ").strip().title()
+
+
+def _load_butterfly_class_names(default_count: int = 10):
+    """Load butterfly classifier labels in the same order used during training."""
+    labels_path = os.path.join(BUTTERFLY_MODEL_DIR, "butterfly_classifier_labels.json")
+    if os.path.isfile(labels_path):
+        try:
+            with open(labels_path, "r", encoding="utf-8") as fh:
+                payload = json.load(fh)
+            labels = [
+                _format_butterfly_class_label(label)
+                for label in payload.get("labels", [])
+                if str(label).strip()
+            ]
+            if labels:
+                return labels
+        except Exception:
+            pass
+
+    pickle_path = os.path.join(BUTTERFLY_MODEL_DIR, "butterfly.pkl")
+    if os.path.isfile(pickle_path):
+        try:
+            with open(pickle_path, "rb") as fh:
+                payload = pickle.load(fh)
+            raw_labels = list(dict.fromkeys(payload.get("y", [])))
+            if raw_labels and all(isinstance(label, numbers.Real) for label in raw_labels):
+                raw_labels = sorted(raw_labels, key=float)
+            else:
+                raw_labels = sorted(raw_labels, key=lambda value: str(value))
+            labels = [_format_butterfly_class_label(label) for label in raw_labels]
+            if labels:
+                return labels
+        except Exception:
+            pass
+
+    return [f"Class {idx}" for idx in range(default_count)]
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -537,14 +634,12 @@ def butterfly_predict():
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
 
-    model_path = os.path.join(BASE_DIR, "data", "created_models", "butterfly_segmentation.pt")
+    model_path = os.path.join(BUTTERFLY_MODEL_DIR, "butterfly_segmentation.pt")
     if not os.path.isfile(model_path):
         return jsonify({"error": "Model not found. Train first."}), 404
 
     try:
         import torch
-        from PIL import Image
-        import io, base64
 
         # Load model
         # Import model class from test file
@@ -552,7 +647,7 @@ def butterfly_predict():
         if src_path not in sys.path:
             sys.path.insert(0, src_path)
 
-        from test.IMAGE_segmentation_clasification_butterfly import SimpleSegmentation
+        SimpleSegmentation = _load_butterfly_test_symbol("SimpleSegmentation")
 
         model = SimpleSegmentation()
         model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
@@ -560,9 +655,7 @@ def butterfly_predict():
 
         # Process image
         img_file = request.files["image"]
-        image = Image.open(img_file.stream).convert("RGB")
-        image = image.resize((100, 100))
-        img_array = np.array(image) / 255.0
+        img_array = _prepare_butterfly_image(img_file.stream)
         img_tensor = torch.tensor(
             np.expand_dims(img_array, axis=0), dtype=torch.float32
         ).permute(0, 3, 1, 2)
@@ -576,17 +669,66 @@ def butterfly_predict():
         # Create cropped image
         cropped = img_array * prediction
 
-        # Encode results as base64
-        def _to_b64(arr):
-            pil_img = Image.fromarray((arr * 255).astype(np.uint8))
-            buf = io.BytesIO()
-            pil_img.save(buf, format="PNG")
-            return base64.b64encode(buf.getvalue()).decode()
-
         return jsonify({
-            "predicted": _to_b64(prediction),
-            "original": _to_b64(img_array),
-            "cropped": _to_b64(cropped),
+            "predicted": _image_array_to_base64(prediction),
+            "original": _image_array_to_base64(img_array),
+            "cropped": _image_array_to_base64(cropped),
+        })
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/butterfly/classify", methods=["POST"])
+def butterfly_classify():
+    """Run butterfly species classification inline and return the predicted label."""
+    import numpy as np
+
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    model_path = os.path.join(BUTTERFLY_MODEL_DIR, "butterfly_classifier.pt")
+    if not os.path.isfile(model_path):
+        return jsonify({"error": "Classifier model not found. Train it first."}), 404
+
+    try:
+        import torch
+
+        src_path = os.path.join(BASE_DIR, "src")
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
+
+        SimpleClassifier = _load_butterfly_test_symbol("SimpleClassifier")
+        model = SimpleClassifier()
+        model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
+        model.eval()
+
+        img_array = _prepare_butterfly_image(request.files["image"].stream)
+        img_tensor = torch.tensor(
+            np.expand_dims(img_array, axis=0), dtype=torch.float32
+        ).permute(0, 3, 1, 2)
+
+        with torch.no_grad():
+            logits = model(img_tensor)
+            probabilities = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+
+        class_names = _load_butterfly_class_names(default_count=len(probabilities))
+        top_indices = np.argsort(probabilities)[::-1][:3]
+        top_predictions = []
+        for idx in top_indices:
+            index = int(idx)
+            label = class_names[index] if index < len(class_names) else f"Class {index}"
+            top_predictions.append({
+                "class_index": index,
+                "label": label,
+                "confidence": float(probabilities[index]),
+            })
+
+        best = top_predictions[0]
+        return jsonify({
+            "label": best["label"],
+            "class_index": best["class_index"],
+            "confidence": best["confidence"],
+            "top_predictions": top_predictions,
         })
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500

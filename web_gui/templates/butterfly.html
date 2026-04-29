@@ -240,6 +240,69 @@
         font-size: 13px;
     }
 
+    .classification-panel {
+        margin-top: 16px;
+        background: #1f1f1f;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .classification-panel h4 {
+        margin: 0 0 6px 0;
+        color: #e0e0e0;
+        font-size: 16px;
+    }
+    .classification-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .classification-label {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 700;
+    }
+    .classification-confidence {
+        color: #28a745;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .classification-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .classification-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #2b2b2b;
+        border: 1px solid #3d3d3d;
+        border-radius: 6px;
+        color: #ddd;
+    }
+    .classification-rank {
+        color: #888;
+        min-width: 48px;
+        font-size: 13px;
+    }
+    .classification-item-label {
+        flex: 1;
+        font-weight: 600;
+    }
+    .classification-item-confidence {
+        color: #17a2b8;
+        font-variant-numeric: tabular-nums;
+    }
+
     /* ── Responsive ──────────────────────────────────── */
     @media (max-width: 768px) {
         .image-grid { grid-template-columns: 1fr; }
@@ -378,10 +441,22 @@
             <span class="toggle-icon">▼</span>
         </div>
         <div class="card-body">
-            <p class="section-subtitle">Upload an image to generate a segmentation mask using the trained model.</p>
+            <p class="section-subtitle">Upload an image to generate a segmentation mask or classify the butterfly species using the trained models.</p>
             <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
                 <p>📷 Click or drag an image here to predict segmentation</p>
                 <input type="file" id="file-input" accept="image/*" onchange="predictImage(event)">
+            </div>
+            <div class="actions-bar" style="margin-top:16px;">
+                <button class="btn btn-warning" id="btn-classify-image" onclick="classifyImage()">🏷️ Classify Image</button>
+            </div>
+
+            <div class="classification-panel" id="classification-panel" style="display:none;">
+                <h4>🏷️ Classification Result</h4>
+                <div class="classification-summary">
+                    <div class="classification-label" id="classification-label">—</div>
+                    <div class="classification-confidence" id="classification-confidence">Confidence: —</div>
+                </div>
+                <ul class="classification-list" id="classification-top-list"></ul>
             </div>
 
             <!-- Prediction Results -->
